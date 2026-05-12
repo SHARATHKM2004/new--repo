@@ -1,12 +1,17 @@
 import { mockPages } from "@/lib/cms/mock-content";
 import type {
+  ContactPage,
   InsightFilters,
   InsightPage,
+  IndustryPage,
   Locale,
   NavigationItem,
   LinkField,
   Page,
+  PublishStatus,
   Block,
+  ResourceCenterPage,
+  ServicePage,
   SiteFooterContent,
   SiteHeaderContent,
 } from "@/lib/cms/types";
@@ -26,6 +31,16 @@ type OptimizelyCmsPageItem = {
     title?: string;
     shortDescription?: string;
     keywords?: string;
+    eyebrow?: string;
+    pageType?: string;
+    outcomes?: string[];
+    audience?: string[];
+    featuredTopics?: string[];
+    offices?: Array<{
+      city?: string;
+      phone?: string;
+      focus?: string;
+    }>;
     _metadata?: {
       key?: string;
       locale?: string;
@@ -487,6 +502,42 @@ function normalizeKeywords(value?: string | null) {
     .filter(Boolean);
 }
 
+function normalizeStringArray(values?: string[] | null) {
+  return (values ?? []).map((value) => value.trim()).filter(Boolean);
+}
+
+function inferCmsPageType(slug: string[], pageType?: string | null) {
+  const normalizedPageType = pageType?.trim().toLowerCase();
+
+  switch (normalizedPageType) {
+    case "service":
+    case "industry":
+    case "resourcecenter":
+    case "resource-center":
+    case "contact":
+      return normalizedPageType === "resourcecenter" ? "resourceCenter" : normalizedPageType;
+    default:
+      break;
+  }
+
+  if (!slug.length) {
+    return "standard" as const;
+  }
+
+  switch (slug[0]) {
+    case "services":
+      return "service" as const;
+    case "industries":
+      return "industry" as const;
+    case "resource-center":
+      return "resourceCenter" as const;
+    case "contact":
+      return "contact" as const;
+    default:
+      return "standard" as const;
+  }
+}
+
 function normalizeOptimizelySlug(pathname?: string) {
   if (!pathname) {
     return [];
@@ -501,8 +552,8 @@ function normalizeOptimizelySlug(pathname?: string) {
 function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
   const jsonMetadata = item._json?._metadata;
   const metadata = item._metadata;
-  const locale = (jsonMetadata?.locale ?? metadata?.locale) === "es" ? "es" : "en";
-  const status = jsonMetadata?.status === "Published" ? "published" : "draft";
+  const locale: Locale = (jsonMetadata?.locale ?? metadata?.locale) === "es" ? "es" : "en";
+  const status: PublishStatus = jsonMetadata?.status === "Published" ? "published" : "draft";
   const title = item.title ?? item._json?.title ?? jsonMetadata?.displayName ?? metadata?.displayName ?? "Untitled page";
   const summary = item.shortDescription ?? item._json?.shortDescription ?? "Published from Optimizely SaaS CMS.";
   const slug = normalizeOptimizelySlug(
@@ -510,16 +561,16 @@ function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
   );
   const translationKey = jsonMetadata?.key ?? metadata?.key ?? slugKey(slug) ?? "optimizely-cms-page";
   const sections = mapOptimizelyBlocks(item._json?.blocks, title);
-
-  return {
+  const pageType = inferCmsPageType(slug, item._json?.pageType);
+  const eyebrow = item._json?.eyebrow?.trim() || "Optimizely CMS";
+  const basePage = {
     id: jsonMetadata?.key ?? metadata?.key ?? translationKey,
     translationKey,
-    type: "standard",
     locale,
     status,
     slug,
     title,
-    eyebrow: "Optimizely CMS",
+    eyebrow,
     summary,
     seo: {
       title,
@@ -532,7 +583,7 @@ function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
         ? sections
         : [
             {
-              type: "richText",
+              type: "richText" as const,
               body: [
                 "This page is being loaded from the live Optimizely SaaS CMS Graph endpoint.",
                 `Display name: ${jsonMetadata?.displayName ?? metadata?.displayName ?? title}`,
@@ -542,6 +593,47 @@ function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
             },
           ],
   };
+
+  switch (pageType) {
+    case "service":
+      return {
+        ...basePage,
+        type: "service",
+        outcomes: normalizeStringArray(item._json?.outcomes),
+      } satisfies ServicePage;
+    case "industry":
+      return {
+        ...basePage,
+        type: "industry",
+        audience: normalizeStringArray(item._json?.audience),
+      } satisfies IndustryPage;
+    case "resourceCenter":
+      return {
+        ...basePage,
+        type: "resourceCenter",
+        featuredTopics: normalizeStringArray(item._json?.featuredTopics),
+      } satisfies ResourceCenterPage;
+    case "contact":
+      return {
+        ...basePage,
+        type: "contact",
+        offices: (item._json?.offices ?? [])
+          .map((office) => ({
+            city: office.city?.trim(),
+            phone: office.phone?.trim(),
+            focus: office.focus?.trim(),
+          }))
+          .filter(
+            (office): office is ContactPage["offices"][number] =>
+              Boolean(office.city && office.phone && office.focus),
+          ),
+      } satisfies ContactPage;
+    default:
+      return {
+        ...basePage,
+        type: "standard",
+      };
+  }
 }
 
 function mapOptimizelyStartPage(item: OptimizelyStartPageItem): Page | null {
