@@ -140,6 +140,16 @@ type OptimizelyJsonBlock = {
     imageUrl?: string;
     link?: string;
   }>;
+  imageUrl?: string;
+  image?: {
+    url?: string;
+    alt?: string;
+  };
+  altText?: string;
+  caption?: string;
+  videoUrl?: string;
+  embedUrl?: string;
+  posterImageUrl?: string;
   paragraph_text?: {
     html?: string;
     json?: unknown;
@@ -369,6 +379,22 @@ function normalizeLinkItems(items: Array<LinkField | null | undefined>) {
   return items.filter((item): item is LinkField => Boolean(item));
 }
 
+function getImageSource(block: OptimizelyJsonBlock) {
+  return block.imageUrl?.trim() || block.image?.url?.trim() || "";
+}
+
+function getImageAlt(block: OptimizelyJsonBlock, fallbackTitle?: string) {
+  return block.altText?.trim() || block.image?.alt?.trim() || fallbackTitle || "CMS image";
+}
+
+function getVideoSource(block: OptimizelyJsonBlock) {
+  return block.embedUrl?.trim() || block.videoUrl?.trim() || "";
+}
+
+function inferVideoMode(source: string): "embed" | "file" {
+  return /\.(mp4|webm|ogg)(\?.*)?$/i.test(source) ? "file" : "embed";
+}
+
 function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string): Block | null {
   switch (block.__typename) {
     case "HeroBlock":
@@ -497,7 +523,65 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
         html,
       };
     }
+    case "ImageBlock":
+    case "MediaImageBlock":
+    case "ImageSectionBlock": {
+      const src = getImageSource(block);
+
+      if (!src) {
+        return null;
+      }
+
+      return {
+        type: "image",
+        src,
+        alt: getImageAlt(block, block.title?.trim() || fallbackTitle),
+        caption: block.caption?.trim() || block.description?.trim() || undefined,
+      };
+    }
+    case "VideoBlock":
+    case "VideoEmbedBlock":
+    case "MediaVideoBlock": {
+      const src = getVideoSource(block);
+
+      if (!src) {
+        return null;
+      }
+
+      return {
+        type: "video",
+        src,
+        title: block.title?.trim() || fallbackTitle || "Video",
+        caption: block.caption?.trim() || block.description?.trim() || undefined,
+        poster: block.posterImageUrl?.trim() || undefined,
+        mode: inferVideoMode(src),
+      };
+    }
     default: {
+      const imageSrc = getImageSource(block);
+
+      if (imageSrc) {
+        return {
+          type: "image",
+          src: imageSrc,
+          alt: getImageAlt(block, block.title?.trim() || fallbackTitle),
+          caption: block.caption?.trim() || block.description?.trim() || undefined,
+        };
+      }
+
+      const videoSrc = getVideoSource(block);
+
+      if (videoSrc) {
+        return {
+          type: "video",
+          src: videoSrc,
+          title: block.title?.trim() || fallbackTitle || "Video",
+          caption: block.caption?.trim() || block.description?.trim() || undefined,
+          poster: block.posterImageUrl?.trim() || undefined,
+          mode: inferVideoMode(videoSrc),
+        };
+      }
+
       const html = block.html?.trim();
 
       if (html) {

@@ -49,6 +49,22 @@ export type HtmlBlock = {
   html: string;
 };
 
+export type ImageBlock = {
+  type: "image";
+  src: string;
+  alt: string;
+  caption?: string;
+};
+
+export type VideoBlock = {
+  type: "video";
+  src: string;
+  title: string;
+  caption?: string;
+  poster?: string;
+  mode: "embed" | "file";
+};
+
 export type StatsBlock = {
   type: "stats";
   title: string;
@@ -101,6 +117,8 @@ export type Block =
   | HeroBlock
   | RichTextBlock
   | HtmlBlock
+  | ImageBlock
+  | VideoBlock
   | StatsBlock
   | QuoteBlock
   | CardGridBlock

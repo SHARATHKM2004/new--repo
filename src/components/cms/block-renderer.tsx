@@ -87,6 +87,39 @@ export async function BlockRenderer({
           <div dangerouslySetInnerHTML={{ __html: block.html }} />
         </section>
       );
+    case "image":
+      return (
+        <section className="panel overflow-hidden rounded-[2rem] p-4 lg:p-6">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={block.src} alt={block.alt} className="w-full rounded-[1.5rem] object-cover" />
+          {block.caption ? <p className="mt-4 text-sm leading-7 text-muted">{block.caption}</p> : null}
+        </section>
+      );
+    case "video":
+      return (
+        <section className="panel overflow-hidden rounded-[2rem] p-4 lg:p-6">
+          <div className="overflow-hidden rounded-[1.5rem] bg-foreground/5">
+            {block.mode === "embed" ? (
+              <iframe
+                src={block.src}
+                title={block.title}
+                className="aspect-video w-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                controls
+                className="aspect-video w-full"
+                src={block.src}
+                poster={block.poster}
+                preload="metadata"
+              />
+            )}
+          </div>
+          {block.caption ? <p className="mt-4 text-sm leading-7 text-muted">{block.caption}</p> : null}
+        </section>
+      );
     case "stats":
       return (
         <section className="panel rounded-[2rem] p-8">
