@@ -26,9 +26,7 @@ The advanced goal became:
 5. Keep the frontend developer-controlled in code while keeping editorial content CMS-controlled.
 6. Deploy the same application publicly and verify the real workflow end to end.
 
-## 3. Final outcome in one paragraph
 
-The result is a working Next.js 16 App Router website with localized routing, typed CMS models, reusable page and block rendering, local lead capture, live Optimizely Graph integration, draft preview support, revalidation endpoints, webhook handling, and a deployed Vercel site. Local development and deployed production now both read the same live Optimizely content when configured correctly.
 
 ## 4. Technical stack
 
@@ -284,28 +282,8 @@ The webhook route invalidates shared tags and revalidates key site paths.
 7. Open the deployed site and show the same content there.
 8. Open the health route and show that live CMS connectivity is working.
 
-### Suggested talking points
 
-Use this exact explanation:
 
-"The frontend layout is developer-owned in code, while page content is editor-owned in Optimizely. The application normalizes CMS data into internal typed models, renders those through shared React components, supports unpublished preview through admin Graph credentials, and updates the deployed site through revalidation after publish."
-
-## 15. Mentor-ready 2 minute explanation
-
-This project started as a practice build for a corporate website workflow. The goal was to prove that developers can control UI locally in VS Code while editors control page content in Optimizely CMS. The app was built in Next.js with a typed CMS abstraction, localized routing, reusable page and block rendering, preview mode, webhook-based revalidation, and deployment to Vercel. Localhost and production now both read live Optimizely content. The remaining work is mainly content completion and removing the last fallback surfaces where mock content is still used when live CMS items do not exist yet.
-
-## 16. Completion status
-
-### Estimated completion percentages
-
-- Local frontend editing workflow: 100%
-- Localhost CMS-backed rendering: 95%
-- Production CMS-backed rendering: 95%
-- Draft preview implementation: 85%
-- Publish and revalidation infrastructure: 90%
-- Full live replacement of mock content: 60%
-- Real authored CMS content population: 40%
-- Overall project completion: 85%
 
 ## 17. What is fully completed
 
@@ -340,21 +318,6 @@ This project started as a practice build for a corporate website workflow. The g
 4. Complete a final end-to-end preview test using unpublished authored changes.
 5. Optionally refine design polish for a more production-like visual finish.
 
-## 20. What someone else would need to rebuild the same solution
-
-If another engineer or mentor wanted to rebuild the same implementation, they would need:
-
-1. A Next.js App Router project
-2. A typed CMS abstraction layer
-3. Normalized page and block models
-4. A mock fallback provider for safe local development
-5. Optimizely Graph integration for published content
-6. Admin Graph auth for draft preview
-7. Route-level draft mode handling
-8. Revalidation and webhook endpoints
-9. A production deployment target with matching CMS environment variables
-
-That is exactly what this repository now contains.
 
 ## 21. Final summary
 
