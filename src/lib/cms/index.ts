@@ -204,6 +204,28 @@ function slugKey(slug: string[]) {
   return slug.join("/");
 }
 
+function toSlugSegment(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getPlaceholderCardHref(title: string, icon?: string) {
+  const segment = toSlugSegment(title);
+  const normalizedIcon = icon?.trim().toLowerCase() ?? "";
+
+  if (normalizedIcon.startsWith("case")) {
+    return `/case-studies/${segment}`;
+  }
+
+  if (normalizedIcon.startsWith("insight")) {
+    return `/insights/${segment}`;
+  }
+
+  return `/services/${segment}`;
+}
+
 function isOptimizelyProviderEnabled() {
   return process.env.CMS_PROVIDER === "optimizely";
 }
@@ -380,16 +402,17 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
         .map((item) => {
           const title = item.title?.trim();
           const body = item.description?.trim();
+          const icon = item.icon?.trim();
 
           if (!title || !body) {
             return null;
           }
 
           return {
-            eyebrow: item.icon?.trim(),
+            eyebrow: icon,
             title,
             body,
-            href: item.href?.trim() || "/en",
+            href: item.href?.trim() || getPlaceholderCardHref(title, icon),
           };
         })
         .filter((item): item is NonNullable<typeof item> => Boolean(item));

@@ -3,6 +3,22 @@ import { LeadForm } from "@/components/forms/lead-form";
 import { getFeaturedContent } from "@/lib/cms";
 import type { Block, Locale, Page } from "@/lib/cms/types";
 
+function resolveCardHref(href: string, locale: Locale) {
+  if (/^https?:\/\//.test(href)) {
+    return href;
+  }
+
+  if (href.startsWith("/en/") || href.startsWith("/es/")) {
+    return href;
+  }
+
+  if (href.startsWith("/")) {
+    return `/${locale}${href}`;
+  }
+
+  return `/${locale}/${href}`;
+}
+
 function ContentCard({ page }: { page: Page }) {
   return (
     <article className="rounded-[1.75rem] border border-border bg-surface-strong p-6 shadow-[0_16px_40px_rgba(21,49,58,0.08)]">
@@ -110,7 +126,7 @@ export async function BlockRenderer({
                 {card.eyebrow ? <p className="eyebrow text-[11px] font-semibold">{card.eyebrow}</p> : null}
                 <h3 className="mt-3 text-2xl font-semibold tracking-tight">{card.title}</h3>
                 <p className="mt-3 text-sm leading-7 text-muted">{card.body}</p>
-                <Link href={card.href} className="mt-5 inline-flex text-sm font-semibold text-accent">
+                <Link href={resolveCardHref(card.href, locale)} className="mt-5 inline-flex text-sm font-semibold text-accent">
                   Explore
                 </Link>
               </article>
