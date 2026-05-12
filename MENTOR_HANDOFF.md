@@ -1,6 +1,6 @@
 # Summit Advisory Group Practice Build: Mentor Handoff
 
-## 1. Project purpose
+## 1.purpose
 
 This project was built as a practical full-stack website implementation to prove a real editorial workflow using local development plus Optimizely SaaS CMS.
 
@@ -11,9 +11,9 @@ The core requirement was:
 3. Those content changes should appear in localhost, preview mode, and the deployed app.
 4. The same application should run locally and in production.
 
-This is not just a mock site. It is a Next.js application connected to live Optimizely Graph with preview, revalidation, deployment, and fallback behavior already implemented.
 
-## 2. What the advanced goal became
+
+## 2. goal
 
 After the basic app was working, the scope expanded into a more realistic implementation.
 
@@ -79,7 +79,7 @@ The flow is:
 
 This architecture makes the site easier to maintain because the app rendering layer is stable even if CMS content models evolve.
 
-## 7. What was built from start to finish
+## 7. What was built
 
 ### Phase 1: Local app foundation
 
@@ -269,23 +269,11 @@ Optimizely Graph webhooks call:
 
 The webhook route invalidates shared tags and revalidates key site paths.
 
-## 14. How to demonstrate the project clearly
-
-### Demo flow for a mentor
-
-1. Show the local app in VS Code and explain the architecture.
-2. Show the site running on localhost.
-3. Open Optimizely and edit the homepage block content.
-4. Save or publish the change.
-5. Refresh localhost and show the content update.
-6. Open preview mode and show unpublished or draft changes.
-7. Open the deployed site and show the same content there.
-8. Open the health route and show that live CMS connectivity is working.
 
 
 
 
-## 17. What is fully completed
+## 17. completed
 
 1. Next.js project scaffold and structure
 2. Localized page routing
@@ -303,14 +291,14 @@ The webhook route invalidates shared tags and revalidates key site paths.
 14. CMS health endpoint
 15. Live-first page helper behavior with fallback support
 
-## 18. What is partially completed
+## 18. partially completed
 
 1. Branch preview environment parity in Vercel
 2. Full unpublished preview testing for every content type
 3. Full live replacement for all listing and related-content surfaces
 4. CMS-driven shared header and footer content, depending on authored items existing in Optimizely
 
-## 19. What is still left
+## 19.left
 
 1. Create real Optimizely `Header` and `Footer` items if fully CMS-driven chrome is required.
 2. Create more live authored content such as insights, authors, case studies, and resource listings.
@@ -330,4 +318,3 @@ This project successfully demonstrates a realistic developer and editor workflow
 - production reflects published CMS content
 - deployment and CMS connectivity are verified
 
-The main unfinished work is no longer the platform plumbing. The remaining work is content completion, final preview verification, and removal of the last fallback-only surfaces.
