@@ -185,13 +185,20 @@ export async function PageRenderer({
     page.type === "author"
       ? await getInsightsByAuthor({ locale, authorId: page.translationKey, draft })
       : [];
+  const hasCmsRelatedContentBlock =
+    page.type === "service" &&
+    page.sections.some(
+      (block) => block.type === "featuredContent" || block.type === "cardGrid",
+    );
   const relatedPages =
     page.type === "service"
-      ? await getRelatedPages({
-          locale,
-          ids: ["case-study-healthcare", "insight-preview", "insight-taxonomy"],
-          draft,
-        })
+      ? hasCmsRelatedContentBlock
+        ? []
+        : await getRelatedPages({
+            locale,
+            ids: ["case-study-healthcare", "insight-preview", "insight-taxonomy"],
+            draft,
+          })
       : page.type === "caseStudy"
         ? await getRelatedPages({ locale, ids: page.relatedServiceIds, draft })
         : [];
