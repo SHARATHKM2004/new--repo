@@ -197,6 +197,7 @@ export type NavigationItem = {
 export type SiteHeaderContent = {
   title: string;
   tagline?: string;
+  switchLabel?: string;
   ctaLabel: string;
   ctaHref: string;
 };
@@ -207,6 +208,7 @@ export type SiteFooterColumn = {
 };
 
 export type SiteFooterContent = {
+  eyebrow?: string;
   title?: string;
   body?: string;
   columns: SiteFooterColumn[];

@@ -46,7 +46,7 @@ export function SiteHeader({
             href={`/${otherLocale}`}
             className="rounded-full border border-border px-4 py-2 text-sm font-semibold transition hover:border-accent hover:text-accent"
           >
-            {labels[locale].switchLabel}
+            {content.switchLabel ?? labels[locale].switchLabel}
           </Link>
           <Link
             href={content.ctaHref}

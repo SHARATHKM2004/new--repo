@@ -79,6 +79,7 @@ The `src/lib/cms` layer now supports both mock content and an Optimizely-backed 
 - preview/draft content uses `OPTIMIZELY_GRAPH_APP_KEY` + `OPTIMIZELY_GRAPH_SECRET`
 - shared listings and related-content helpers now prefer live Optimizely pages first and only fall back to mock pages for content that has not been authored yet
 - shared site chrome can be driven by Optimizely `Header` and `Footer` types when those items exist
+- header text, locale switch label, footer eyebrow, footer title/body, footer columns, and footer social links can now be sourced from `Header._json` and `Footer._json`
 - reusable Optimizely blocks such as `HeroBlock`, `ContactBlock`, `StoryBlock`, `ServicesBlock`, `TestimonialsBlock`, `PortfolioGridBlock`, and `ParagraphTextElement` are mapped into the local renderer model
 
 If `Header` or `Footer` items do not exist in Optimizely yet, the app falls back to local defaults for those sections.

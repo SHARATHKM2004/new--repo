@@ -150,7 +150,11 @@ type OptimizelyHeaderItem = {
   ctaText: string | null;
   ctaHref: string | null;
   _json?: {
+    title?: string;
     logo?: string;
+    tagline?: string;
+    switchLabel?: string;
+    localeSwitcherLabel?: string;
     ctaText?: string;
     ctaHref?: string;
     navItems?: Array<{
@@ -163,6 +167,9 @@ type OptimizelyHeaderItem = {
 type OptimizelyFooterItem = {
   copyrightText: string | null;
   _json?: {
+    eyebrow?: string;
+    title?: string;
+    body?: string;
     copyrightText?: string;
     columns?: Array<{
       title?: string;
@@ -926,12 +933,14 @@ export async function getSiteHeaderContent(
     en: {
       title: "Summit Advisory Group",
       tagline: "CMS practice build",
+      switchLabel: "ES",
       ctaLabel: "Talk to us",
       ctaHref: `/${locale}/contact`,
     },
     es: {
       title: "Summit Advisory Group",
       tagline: "Proyecto de practica CMS",
+      switchLabel: "EN",
       ctaLabel: "Contactar",
       ctaHref: `/${locale}/contact`,
     },
@@ -944,8 +953,16 @@ export async function getSiteHeaderContent(
   const header = await getOptimizelyHeader(locale, draft);
 
   return {
-    title: header?.logo?.trim() || header?._json?.logo?.trim() || dictionary[locale].title,
-    tagline: dictionary[locale].tagline,
+    title:
+      header?._json?.title?.trim() ||
+      header?.logo?.trim() ||
+      header?._json?.logo?.trim() ||
+      dictionary[locale].title,
+    tagline: header?._json?.tagline?.trim() || dictionary[locale].tagline,
+    switchLabel:
+      header?._json?.switchLabel?.trim() ||
+      header?._json?.localeSwitcherLabel?.trim() ||
+      dictionary[locale].switchLabel,
     ctaLabel: header?.ctaText?.trim() || header?._json?.ctaText?.trim() || dictionary[locale].ctaLabel,
     ctaHref: header?.ctaHref?.trim() || header?._json?.ctaHref?.trim() || dictionary[locale].ctaHref,
   };
@@ -956,6 +973,7 @@ export async function getSiteFooterContent(
   draft = false,
 ): Promise<SiteFooterContent> {
   const fallback: SiteFooterContent = {
+    eyebrow: locale === "en" ? "Practice project" : "Proyecto de practica",
     title:
       locale === "en"
         ? "Build the architecture you actually want to inherit."
@@ -1032,8 +1050,9 @@ export async function getSiteFooterContent(
     .filter((link): link is { label: string; href: string } => Boolean(link));
 
   return {
-    title: fallback.title,
-    body: fallback.body,
+    eyebrow: footer._json?.eyebrow?.trim() || fallback.eyebrow,
+    title: footer._json?.title?.trim() || fallback.title,
+    body: footer._json?.body?.trim() || fallback.body,
     columns: columns.length ? columns : fallback.columns,
     socialLinks,
     copyrightText:
