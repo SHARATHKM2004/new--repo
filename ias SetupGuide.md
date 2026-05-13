@@ -1,26 +1,13 @@
-# IAS Setup Guide
+Setup Guide
 
 ## Purpose
 
 This document explains the complete end-to-end setup, implementation flow, and verification process for the CMS-driven website built in this project.
 
-This guide is written for beginners to Optimizely CMS.
 
-The intended readers are:
 
-1. Gijo, as mentor
-2. Vaishali, as teammate
-3. Any new developer or content author joining the project later
 
-The goal of this guide is simple:
 
-1. Explain what we started with
-2. Explain what we built
-3. Explain why each part was needed
-4. Explain how to recreate the same setup from scratch
-5. Explain how to verify each step without confusion
-
-If someone follows this guide carefully, they should be able to reproduce the same working setup without needing extra clarification.
 
 ---
 
@@ -130,13 +117,7 @@ This is important because:
 6. `src/app/api/optimizely/webhook/route.ts`
 7. `src/app/api/optimizely/health/route.ts`
 
-### Other important files
 
-1. `README.md`
-2. `MENTOR_HANDOFF.md`
-3. `MENTOR_MEETING_SCRIPT.md`
-4. `.env.local`
-5. `data/leads.json`
 
 ---
 
@@ -814,40 +795,6 @@ Editors should change:
 This separation was one of the core goals of the project.
 
 ---
-
-## 18. What Is Complete Today
-
-The following platform work is already complete:
-
-1. Next.js application foundation
-2. locale-aware routing
-3. typed CMS abstraction
-4. mock content provider
-5. live Optimizely Graph integration
-6. preview infrastructure
-7. revalidation infrastructure
-8. Optimizely webhook support
-9. Vercel deployment
-10. production health diagnostics
-11. CMS-driven header and footer support
-12. CMS-driven service page support
-13. CMS-driven industry page support
-14. separate detail-page routing from service cards
-15. CMS-driven text and image support for article/detail pages
-16. frontend support for CMS-driven video blocks
-
----
-
-## 19. What Still Remains
-
-The remaining work is mostly content completion, not platform foundation.
-
-Remaining work includes:
-
-1. finish `Video Block` creation in Optimizely if not already completed
-2. add a real video to the case-study page
-3. convert the other two placeholder detail pages into real CMS pages
-4. continue moving more insight and contact content fully into CMS where needed
 
 ---
 
