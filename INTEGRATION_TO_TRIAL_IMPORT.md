@@ -122,6 +122,70 @@ Result:
 
 The language mismatch blocker was removed.
 
+Additional migration issues Possible:
+
+
+Issue 1: Export contained only content types, not content items
+Observed behavior:
+
+export succeeded
+import succeeded
+import summary showed content types were imported
+but Number of content items was 0
+What this meant:
+
+the package did not contain actual pages or authored content
+only schema/model definitions were moved
+
+so
+always check import summary after every import
+do not assume a successful import means content also came in
+validate Number of content items separately from Number of content types
+
+Issue 2: Exporting a branch did not include the expected full content tree
+Observed behavior:
+
+a branch such as Services or a high-level option such as For All Applications was selected
+export still showed only a very small number of content items
+What this meant:
+
+the selected root did not contain the full content tree in the way expected
+or the UI allowed only one root selection at a time
+or the package being tested was still too narrow
+
+So
+verify the selected structure carefully
+if the UI only supports one root selection, export one branch at a time if necessary
+always use Include sub items
+
+Issue 3: One root item could be selected at a time
+Observed behavior:
+
+the export structure selector did not allow selecting multiple top-level nodes together
+What this meant:
+
+exports might need to be done branch by branch
+for example: Header Footer Services Industries Case Studies
+
+So
+if the source tree is split into separate top-level branches, one full-site export may not always be practical through the UI
+in that case, use multiple exports or use the broadest valid common root available
+
+Issue 4: Destination mismatch during content import
+Observed error:
+
+The import destination is under root 'Assets' but export was created from 'Root page' which is not a compatible structure
+
+What this meant:
+
+a page/content export was being imported into an incompatible destination
+Optimizely considered the selected import destination to be under an asset-side structure rather than the expected page/content structure
+
+So
+page exports must be imported into a page/content root
+asset exports must be imported into an asset-compatible destination
+the visible label in the picker may not always make the internal structure obvious, so the error message must be trusted
+
 
 
 ## Recommended process for future migrations
