@@ -122,20 +122,7 @@ Result:
 
 The language mismatch blocker was removed.
 
-## Important observations
 
-1. A successful content type import does not mean content items were imported
-2. Always check the import summary carefully
-3. `Number of content types` and `Number of content items` should be read separately
-4. Content type import and content item import are two different stages
-
-## Practical lessons learned
-
-1. Import content types before content items
-2. Resolve conflicting content types in the target environment before retrying import
-3. Make sure all required language branches exist in the target environment before importing content
-4. Use `Test Run with Error Log` before final export whenever possible
-5. Read the import summary after every import instead of assuming the whole package came in correctly
 
 ## Recommended process for future migrations
 
@@ -148,11 +135,3 @@ When repeating this process in future:
 5. Import content items second
 6. Verify imported content types and content tree after each stage
 
-## Final summary
-
-The Integration to Trial migration was achieved using Optimizely export/import, but it required resolving two main blockers:
-
-1. conflicting content types in Trial1, especially `Footer`
-2. missing language branch `ar` in Trial1
-
-Once those were handled, the path to move the Integration setup into Trial1 became clear and repeatable.
