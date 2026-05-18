@@ -243,13 +243,13 @@ export async function PageRenderer({
   );
 
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-6 py-10 lg:px-10 lg:py-14">
+    <main className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-12 px-6 py-10 lg:px-10 lg:py-14">
       {showPageHeader ? (
-        <section className="panel rounded-[2.5rem] px-6 py-8 lg:px-10 lg:py-12">
+        <section className="panel px-7 py-10 lg:px-12 lg:py-14">
           <div className="max-w-4xl space-y-5">
             {page.eyebrow ? <p className="eyebrow text-xs font-semibold">{page.eyebrow}</p> : null}
             {page.title ? (
-              <h1 className="serif text-5xl font-semibold tracking-tight text-balance lg:text-6xl">
+              <h1 className="serif text-5xl font-semibold tracking-tight text-balance lg:text-7xl">
                 {page.title}
               </h1>
             ) : null}
@@ -282,9 +282,9 @@ export async function PageRenderer({
         <section className="grid gap-5 lg:grid-cols-3">
           {resourceItems.length ? (
             resourceItems.map((item) => (
-              <article key={item.id} className="panel rounded-[1.75rem] p-6">
+              <article key={item.id} className="panel p-6 lg:p-7">
                 <p className="eyebrow text-[11px] font-semibold">{item.topics.join(" • ")}</p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight">{item.title}</h2>
+                <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">{item.title}</h2>
                 <p className="mt-3 text-sm leading-7 text-muted">{item.summary}</p>
                 <div className="mt-4 flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-muted">
                   <span>{item.readTime}</span>
@@ -293,14 +293,15 @@ export async function PageRenderer({
                 </div>
                 <Link
                   href={`/${locale}/${item.slug.join("/")}`}
-                  className="mt-5 inline-flex text-sm font-semibold text-accent"
+                  className="wipfli-link mt-6"
                 >
                   {locale === "en" ? "Read insight" : "Leer articulo"}
+                  <span>→</span>
                 </Link>
               </article>
             ))
           ) : (
-            <div className="panel rounded-[1.75rem] p-6 lg:col-span-3">
+            <div className="panel p-6 lg:col-span-3">
               <h2 className="text-2xl font-semibold tracking-tight">
                 {locale === "en" ? "No results matched your filters." : "No hay resultados para esos filtros."}
               </h2>
@@ -327,16 +328,17 @@ export async function PageRenderer({
 
       {page.type === "author" && authorInsights.length ? (
         <section className="space-y-5">
-          <h2 className="serif text-3xl font-semibold tracking-tight">
+          <h2 className="wipfli-section-title">
             {locale === "en" ? "Recent insights" : "Articulos recientes"}
           </h2>
           <div className="grid gap-5 lg:grid-cols-2">
             {authorInsights.map((item) => (
-              <article key={item.id} className="panel rounded-[1.75rem] p-6">
-                <h3 className="text-2xl font-semibold tracking-tight">{item.title}</h3>
+              <article key={item.id} className="panel p-6 lg:p-7">
+                <h3 className="text-3xl font-semibold tracking-tight text-foreground">{item.title}</h3>
                 <p className="mt-3 text-sm leading-7 text-muted">{item.summary}</p>
-                <Link href={`/${locale}/${item.slug.join("/")}`} className="mt-4 inline-flex text-sm font-semibold text-accent">
+                <Link href={`/${locale}/${item.slug.join("/")}`} className="wipfli-link mt-6">
                   {locale === "en" ? "Open insight" : "Abrir articulo"}
+                  <span>→</span>
                 </Link>
               </article>
             ))}
@@ -346,17 +348,18 @@ export async function PageRenderer({
 
       {relatedPages.length ? (
         <section className="space-y-5">
-          <h2 className="serif text-3xl font-semibold tracking-tight">
+          <h2 className="wipfli-section-title">
             {locale === "en" ? "Related content" : "Contenido relacionado"}
           </h2>
           <div className="grid gap-5 lg:grid-cols-3">
             {relatedPages.map((item) => (
-              <article key={item.id} className="panel rounded-[1.75rem] p-6">
+              <article key={item.id} className="panel p-6 lg:p-7">
                 <p className="eyebrow text-[11px] font-semibold">{item.eyebrow ?? item.type}</p>
-                <h3 className="mt-3 text-2xl font-semibold tracking-tight">{item.title}</h3>
+                <h3 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">{item.title}</h3>
                 <p className="mt-3 text-sm leading-7 text-muted">{item.summary}</p>
-                <Link href={`/${locale}/${item.slug.join("/")}`} className="mt-4 inline-flex text-sm font-semibold text-accent">
+                <Link href={`/${locale}/${item.slug.join("/")}`} className="wipfli-link mt-6">
                   {locale === "en" ? "Open page" : "Abrir pagina"}
+                  <span>→</span>
                 </Link>
               </article>
             ))}

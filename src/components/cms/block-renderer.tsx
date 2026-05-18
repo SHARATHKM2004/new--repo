@@ -21,15 +21,16 @@ function resolveCardHref(href: string, locale: Locale) {
 
 function ContentCard({ page }: { page: Page }) {
   return (
-    <article className="rounded-[1.75rem] border border-border bg-surface-strong p-6 shadow-[0_16px_40px_rgba(21,49,58,0.08)]">
+    <article className="border border-border bg-surface-strong p-7 shadow-[0_14px_40px_rgba(3,43,73,0.08)]">
       <p className="eyebrow text-[11px] font-semibold">{page.eyebrow ?? page.type}</p>
-      <h3 className="mt-3 text-xl font-semibold tracking-tight">{page.title}</h3>
-      <p className="mt-3 text-sm leading-7 text-muted">{page.summary}</p>
+      <h3 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">{page.title}</h3>
+      <p className="mt-4 text-base leading-7 text-muted">{page.summary}</p>
       <Link
         href={`/${page.locale}/${page.slug.join("/")}`}
-        className="mt-5 inline-flex text-sm font-semibold text-accent transition hover:text-accent-strong"
+        className="wipfli-link mt-6"
       >
         Explore
+        <span>→</span>
       </Link>
     </article>
   );
@@ -54,44 +55,41 @@ function ArticleCard({
   const authorName = author?.title ?? page.authorName ?? "Editorial team";
 
   return (
-    <article className="flex h-full flex-col overflow-hidden bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+    <article className="flex h-full flex-col overflow-hidden border border-border bg-white shadow-[0_14px_40px_rgba(3,43,73,0.08)]">
       <Link href={href} className="block overflow-hidden bg-slate-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={page.cardImage?.src ?? "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1200&q=80"}
           alt={page.cardImage?.alt ?? page.title}
-          className="h-64 w-full object-cover transition duration-300 hover:scale-[1.02]"
+          className="h-[13.5rem] w-full object-cover transition duration-300 hover:scale-[1.02]"
         />
       </Link>
-      <div className="flex min-h-[24rem] flex-1 flex-col gap-5 p-5 lg:p-6">
-        <div className="flex flex-wrap items-center gap-3 text-[13px] text-slate-700">
+      <div className="flex min-h-[24rem] flex-1 flex-col gap-5 p-4 lg:p-5">
+        <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted">
           {author?.avatarSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={author.avatarSrc}
               alt={author.title}
-              className="h-8 w-8 rounded-full object-cover"
+              className="h-7 w-7 rounded-full object-cover"
             />
           ) : null}
           <div className="flex flex-wrap items-center gap-2">
             <span>{authorName}</span>
-            <span className="h-4 w-px bg-[#1247ff]" />
+            <span className="h-3 w-px bg-[#1247ff]" />
             <span>{formatArticleDate(page.publishedAt)}</span>
-            <span className="h-4 w-px bg-[#1247ff]" />
+            <span className="h-3 w-px bg-[#1247ff]" />
             <span>{page.readTime}</span>
           </div>
         </div>
 
-        <Link href={href} className="text-[1.75rem] font-semibold leading-tight text-[#1247ff] transition hover:text-[#0d36c2]">
+        <Link href={href} className="text-[2rem] font-semibold leading-[1.15] text-[#135cff] transition hover:text-[#0d46c7]">
           {page.title}
         </Link>
 
         <div className="flex flex-wrap gap-2">
           {page.topics.map((topic) => (
-            <span
-              key={topic}
-              className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
-            >
+            <span key={topic} className="wipfli-chip">
               {topic}
             </span>
           ))}
@@ -99,7 +97,7 @@ function ArticleCard({
 
         <Link
           href={href}
-          className="mt-auto inline-flex items-center gap-2 pt-4 text-lg font-semibold text-[#0a2463] transition hover:text-[#1247ff]"
+          className="mt-auto inline-flex items-center gap-2 pt-4 text-base font-semibold text-[#0a2463] transition hover:text-[#1247ff]"
         >
           Read full story
           <span className="text-[#1247ff]">→</span>
@@ -121,17 +119,17 @@ export async function BlockRenderer({
   switch (block.type) {
     case "hero":
       return (
-        <section className="panel rounded-[2.25rem] px-6 py-10 lg:px-10 lg:py-14">
+        <section className="panel px-7 py-12 lg:px-12 lg:py-16">
           <p className="eyebrow text-xs font-semibold">{block.eyebrow}</p>
-          <h1 className="serif mt-4 max-w-4xl text-5xl font-semibold tracking-tight text-balance lg:text-7xl">
+          <h1 className="serif mt-4 max-w-5xl text-5xl font-semibold tracking-tight text-balance lg:text-7xl">
             {block.title}
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">{block.intro}</p>
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-muted">{block.intro}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             {block.primaryCta ? (
               <Link
                 href={block.primaryCta.href}
-                className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-strong"
+                className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-strong"
               >
                 {block.primaryCta.label}
               </Link>
@@ -139,7 +137,7 @@ export async function BlockRenderer({
             {block.secondaryCta ? (
               <Link
                 href={block.secondaryCta.href}
-                className="rounded-full border border-border px-5 py-3 text-sm font-semibold transition hover:border-accent hover:text-accent"
+                className="rounded-full border border-border bg-white px-6 py-3 text-sm font-semibold transition hover:border-accent hover:text-accent"
               >
                 {block.secondaryCta.label}
               </Link>
@@ -149,7 +147,7 @@ export async function BlockRenderer({
       );
     case "richText":
       return (
-        <section className="panel prose-copy rounded-[2rem] p-8">
+        <section className="panel prose-copy p-8 lg:p-10">
           {block.body.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
@@ -157,22 +155,22 @@ export async function BlockRenderer({
       );
     case "html":
       return (
-        <section className="panel prose-copy rounded-[2rem] p-8">
+        <section className="panel prose-copy p-8 lg:p-10">
           <div dangerouslySetInnerHTML={{ __html: block.html }} />
         </section>
       );
     case "image":
       return (
-        <section className="panel overflow-hidden rounded-[2rem] p-4 lg:p-6">
+        <section className="panel overflow-hidden p-4 lg:p-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={block.src} alt={block.alt} className="w-full rounded-[1.5rem] object-cover" />
+          <img src={block.src} alt={block.alt} className="w-full object-cover" />
           {block.caption ? <p className="mt-4 text-sm leading-7 text-muted">{block.caption}</p> : null}
         </section>
       );
     case "video":
       return (
-        <section className="panel overflow-hidden rounded-[2rem] p-4 lg:p-6">
-          <div className="overflow-hidden rounded-[1.5rem] bg-foreground/5">
+        <section className="panel overflow-hidden p-4 lg:p-6">
+          <div className="overflow-hidden bg-foreground/5">
             {block.mode === "embed" ? (
               <iframe
                 src={block.src}
@@ -196,12 +194,12 @@ export async function BlockRenderer({
       );
     case "stats":
       return (
-        <section className="panel rounded-[2rem] p-8">
-          <h2 className="serif text-3xl font-semibold tracking-tight">{block.title}</h2>
+        <section className="panel p-8 lg:p-10">
+          <h2 className="wipfli-section-title">{block.title}</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {block.items.map((item) => (
-              <div key={item.label} className="rounded-[1.5rem] bg-white/70 p-5">
-                <div className="text-4xl font-semibold tracking-tight text-accent-warm">
+              <div key={item.label} className="border border-border bg-[#f8f8f8] p-6">
+                <div className="text-5xl font-semibold tracking-tight text-accent-warm">
                   {item.value}
                 </div>
                 <div className="mt-2 text-sm leading-6 text-muted">{item.label}</div>
@@ -212,7 +210,7 @@ export async function BlockRenderer({
       );
     case "quote":
       return (
-        <section className="panel rounded-[2rem] p-8">
+        <section className="panel p-8 lg:p-10">
           <blockquote className="serif max-w-4xl text-3xl font-semibold leading-tight tracking-tight">
             “{block.quote}”
           </blockquote>
@@ -224,17 +222,18 @@ export async function BlockRenderer({
       return (
         <section className="space-y-6">
           <div>
-            <h2 className="serif text-3xl font-semibold tracking-tight">{block.title}</h2>
+            <h2 className="wipfli-section-title">{block.title}</h2>
             {block.intro ? <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">{block.intro}</p> : null}
           </div>
           <div className="grid gap-5 lg:grid-cols-3">
             {block.cards.map((card) => (
-              <article key={card.title} className="panel rounded-[1.75rem] p-6">
+              <article key={card.title} className="panel p-6 lg:p-7">
                 {card.eyebrow ? <p className="eyebrow text-[11px] font-semibold">{card.eyebrow}</p> : null}
-                <h3 className="mt-3 text-2xl font-semibold tracking-tight">{card.title}</h3>
+                <h3 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">{card.title}</h3>
                 <p className="mt-3 text-sm leading-7 text-muted">{card.body}</p>
-                <Link href={resolveCardHref(card.href, locale)} className="mt-5 inline-flex text-sm font-semibold text-accent">
+                <Link href={resolveCardHref(card.href, locale)} className="wipfli-link mt-6">
                   Explore
+                  <span>→</span>
                 </Link>
               </article>
             ))}
@@ -244,15 +243,15 @@ export async function BlockRenderer({
     case "cta":
       return (
         <section
-          className={`rounded-[2rem] px-8 py-8 text-white ${
-            block.tone === "accent" ? "bg-accent" : "bg-foreground"
+          className={`px-8 py-9 text-white lg:px-10 ${
+            block.tone === "accent" ? "bg-accent" : "bg-footer"
           }`}
         >
-          <h2 className="serif text-3xl font-semibold tracking-tight">{block.title}</h2>
+          <h2 className="wipfli-section-title text-white">{block.title}</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-white/78">{block.body}</p>
           <Link
             href={block.action.href}
-            className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-foreground"
+            className="mt-6 inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-foreground"
           >
             {block.action.label}
           </Link>
@@ -273,7 +272,7 @@ export async function BlockRenderer({
       return (
         <section className="space-y-6">
           <div>
-            <h2 className="serif text-3xl font-semibold tracking-tight">{block.title}</h2>
+            <h2 className="wipfli-section-title">{block.title}</h2>
             {block.intro ? <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">{block.intro}</p> : null}
           </div>
           <div className="grid gap-5 lg:grid-cols-3">
@@ -303,13 +302,13 @@ export async function BlockRenderer({
       return (
         <section className="space-y-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-4xl font-black uppercase tracking-tight text-foreground">
+            <h2 className="wipfli-section-title uppercase">
               {block.title}
             </h2>
             {block.viewAllHref && block.viewAllLabel ? (
               <Link
                 href={block.viewAllHref}
-                className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-[#1247ff] transition hover:text-[#0d36c2]"
+                className="wipfli-link"
               >
                 {block.viewAllLabel}
                 <span>→</span>

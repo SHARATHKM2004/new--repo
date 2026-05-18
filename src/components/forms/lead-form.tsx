@@ -24,12 +24,12 @@ export function LeadForm({
   const [isPending, startTransition] = useTransition();
 
   return (
-    <section className="panel rounded-[2rem] p-8">
+    <section className="panel p-8 lg:p-10">
       <div className="max-w-2xl space-y-3">
         <p className="eyebrow text-xs font-semibold">
           {locale === "en" ? "Lead generation" : "Captura de leads"}
         </p>
-        <h2 className="serif text-3xl font-semibold tracking-tight">{title}</h2>
+        <h2 className="wipfli-section-title">{title}</h2>
         <p className="text-sm leading-7 text-muted">{intro}</p>
       </div>
       <form
@@ -82,7 +82,7 @@ export function LeadForm({
           <input
             name="name"
             required
-            className="rounded-2xl border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
+            className="border border-border bg-white px-4 py-3 outline-none transition focus:border-accent"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
@@ -91,7 +91,7 @@ export function LeadForm({
             name="email"
             type="email"
             required
-            className="rounded-2xl border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
+            className="border border-border bg-white px-4 py-3 outline-none transition focus:border-accent"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
@@ -99,7 +99,7 @@ export function LeadForm({
           <input
             name="company"
             required
-            className="rounded-2xl border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
+            className="border border-border bg-white px-4 py-3 outline-none transition focus:border-accent"
           />
         </label>
         <div className="hidden md:block" />
@@ -109,14 +109,14 @@ export function LeadForm({
             name="message"
             required
             rows={5}
-            className="rounded-[1.5rem] border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
+            className="border border-border bg-white px-4 py-3 outline-none transition focus:border-accent"
           />
         </label>
         <div className="md:col-span-2 flex items-center justify-between gap-4 pt-2">
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-wait disabled:opacity-70"
+            className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-wait disabled:opacity-70"
           >
             {isPending
               ? locale === "en"
