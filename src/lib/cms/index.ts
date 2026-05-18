@@ -1000,7 +1000,7 @@ async function getOptimizelyCmsPages(locale: Locale, draft = false) {
     };
   }>(
     `query {
-      CMSPage(limit: 20, locale: ${locale}) {
+      CMSPage(limit: 100, locale: ${locale}) {
         items {
           title
           shortDescription
