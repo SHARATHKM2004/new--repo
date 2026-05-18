@@ -592,13 +592,8 @@ http://localhost:3000/api/optimizely/health
 10. Production uses the same CMS connection as local development.
 11. Fallback content is only used where live authored content does not yet exist.
 
-## 17. What to say in a mentor handoff
 
-Use this summary:
-
-"I started from an empty Next.js workspace and built a CMS-driven site with a stable app-owned rendering model. I first created the frontend shell, routing, and reusable renderers. Then I defined internal CMS types and built a mock content provider so the frontend could move ahead independently. After that I connected the app to Optimizely Graph, mapped published and draft content into normalized models, added preview mode, added revalidation and webhook support, deployed to Vercel, and verified production with a dedicated health endpoint."
-
-## 18. Core lesson from this build
+## 17. Core lesson from this build
 
 The correct order is not to connect the CMS first.
 
