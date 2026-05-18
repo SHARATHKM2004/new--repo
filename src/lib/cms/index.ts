@@ -23,6 +23,11 @@ type OptimizelyGraphResponse<T> = {
   }>;
 };
 
+type OptimizelyRichTextField = {
+  html?: string;
+  json?: unknown;
+};
+
 type OptimizelyCmsPageItem = {
   title: string | null;
   shortDescription: string | null;
@@ -194,7 +199,7 @@ type OptimizelyFooterItem = {
   _json?: {
     eyebrow?: string;
     title?: string;
-    body?: string;
+    body?: string | OptimizelyRichTextField;
     copyrightText?: string;
     columns?: Array<{
       title?: string;
@@ -377,6 +382,27 @@ async function fetchOptimizelyGraph<T>(
 
 function normalizeLinkItems(items: Array<LinkField | null | undefined>) {
   return items.filter((item): item is LinkField => Boolean(item));
+}
+
+function toArray<T>(value: T[] | null | undefined) {
+  return Array.isArray(value) ? value : [];
+}
+
+function stripHtmlTags(value: string) {
+  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function getRichTextValue(value: string | OptimizelyRichTextField | null | undefined) {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  if (!value || typeof value !== "object") {
+    return "";
+  }
+
+  const html = value.html?.trim();
+  return html ? stripHtmlTags(html) : "";
 }
 
 function getImageSource(block: OptimizelyJsonBlock) {
@@ -1086,7 +1112,7 @@ export async function getNavigation(locale: Locale, draft = false): Promise<Navi
 
   if (isOptimizelyProviderEnabled()) {
     const header = await getOptimizelyHeader(locale, draft);
-    const liveItems = (header?._json?.navItems ?? [])
+    const liveItems = toArray(header?._json?.navItems)
       .map((item) => {
         const label = item.label?.trim();
         const href = item.href?.trim();
@@ -1211,10 +1237,10 @@ export async function getSiteFooterContent(
     return fallback;
   }
 
-  const columns = (footer._json?.columns ?? [])
+  const columns = toArray(footer._json?.columns)
     .map((column) => {
       const title = column.title?.trim();
-      const links = (column.links ?? [])
+      const links = toArray(column.links)
         .map((link) => {
           const label = link.label?.trim();
           const href = link.href?.trim();
@@ -1235,7 +1261,7 @@ export async function getSiteFooterContent(
     })
     .filter((column): column is SiteFooterContent["columns"][number] => Boolean(column));
 
-  const socialLinks = (footer._json?.socialLinks ?? [])
+  const socialLinks = toArray(footer._json?.socialLinks)
     .map((link) => {
       const label = link.platform?.trim();
       const href = link.href?.trim();
@@ -1251,7 +1277,7 @@ export async function getSiteFooterContent(
   return {
     eyebrow: footer._json?.eyebrow?.trim() || fallback.eyebrow,
     title: footer._json?.title?.trim() || fallback.title,
-    body: footer._json?.body?.trim() || fallback.body,
+    body: getRichTextValue(footer._json?.body) || fallback.body,
     columns: columns.length ? columns : fallback.columns,
     socialLinks,
     copyrightText:
