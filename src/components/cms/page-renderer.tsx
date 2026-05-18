@@ -213,32 +213,43 @@ export async function PageRenderer({
           industry: filters.industry,
         })
       : [];
+  const shouldShowPageKicker = ["service", "industry", "insight", "caseStudy", "author", "contact"].includes(
+    page.type,
+  );
+  const pageKicker = shouldShowPageKicker ? <PageKicker page={page} /> : null;
+  const showPageHeader = Boolean(
+    page.eyebrow || page.title || page.summary || fallbackNotice || author || pageKicker,
+  );
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-6 py-10 lg:px-10 lg:py-14">
-      <section className="panel rounded-[2.5rem] px-6 py-8 lg:px-10 lg:py-12">
-        <div className="max-w-4xl space-y-5">
-          <p className="eyebrow text-xs font-semibold">{page.eyebrow ?? page.type}</p>
-          <h1 className="serif text-5xl font-semibold tracking-tight text-balance lg:text-6xl">
-            {page.title}
-          </h1>
-          <p className="max-w-3xl text-lg leading-8 text-muted">{page.summary}</p>
-          {fallbackNotice ? (
-            <p className="inline-flex rounded-full border border-accent/30 bg-accent/10 px-4 py-2 text-sm text-accent-strong">
-              {fallbackNotice}
-            </p>
-          ) : null}
-          {author ? (
-            <p className="text-sm text-muted">
-              By{" "}
-              <Link href={`/${locale}/${author.slug.join("/")}`} className="font-semibold text-foreground">
-                {author.title}
-              </Link>
-            </p>
-          ) : null}
-          <PageKicker page={page} />
-        </div>
-      </section>
+      {showPageHeader ? (
+        <section className="panel rounded-[2.5rem] px-6 py-8 lg:px-10 lg:py-12">
+          <div className="max-w-4xl space-y-5">
+            {page.eyebrow ? <p className="eyebrow text-xs font-semibold">{page.eyebrow}</p> : null}
+            {page.title ? (
+              <h1 className="serif text-5xl font-semibold tracking-tight text-balance lg:text-6xl">
+                {page.title}
+              </h1>
+            ) : null}
+            {page.summary ? <p className="max-w-3xl text-lg leading-8 text-muted">{page.summary}</p> : null}
+            {fallbackNotice ? (
+              <p className="inline-flex rounded-full border border-accent/30 bg-accent/10 px-4 py-2 text-sm text-accent-strong">
+                {fallbackNotice}
+              </p>
+            ) : null}
+            {author ? (
+              <p className="text-sm text-muted">
+                By{" "}
+                <Link href={`/${locale}/${author.slug.join("/")}`} className="font-semibold text-foreground">
+                  {author.title}
+                </Link>
+              </p>
+            ) : null}
+            {pageKicker}
+          </div>
+        </section>
+      ) : null}
 
       {page.type === "resourceCenter" ? <ResourceCenterToolbar locale={locale} /> : null}
 

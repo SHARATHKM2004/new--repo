@@ -1100,12 +1100,14 @@ export async function getNavigation(locale: Locale, draft = false): Promise<Navi
       services: "Services",
       industries: "Industries",
       insights: "Insights",
+      article: "Article",
       contact: "Contact",
     },
     es: {
       services: "Servicios",
       industries: "Industrias",
       insights: "Recursos",
+      article: "Articulo",
       contact: "Contacto",
     },
   } as const;
@@ -1142,6 +1144,10 @@ export async function getNavigation(locale: Locale, draft = false): Promise<Navi
     {
       label: dictionary[locale].insights,
       href: `/${locale}/resource-center`,
+    },
+    {
+      label: dictionary[locale].article,
+      href: `/${locale}/article`,
     },
     {
       label: dictionary[locale].contact,
