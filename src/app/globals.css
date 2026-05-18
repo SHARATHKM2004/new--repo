@@ -1,17 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f3ea;
-  --foreground: #032b49;
-  --surface: #ffffff;
-  --surface-strong: #ffffff;
-  --muted: #617483;
-  --accent: #135cff;
-  --accent-strong: #0f46bf;
-  --accent-warm: #0f8c81;
-  --border: rgba(3, 43, 73, 0.12);
-  --shadow: 0 14px 40px rgba(3, 43, 73, 0.08);
-  --footer: #072b47;
+  --background: #f6f1e8;
+  --foreground: #15313a;
+  --surface: rgba(255, 251, 244, 0.82);
+  --surface-strong: #fffdf8;
+  --muted: #6a7b80;
+  --accent: #0f766e;
+  --accent-strong: #0d5a55;
+  --accent-warm: #b86a33;
+  --border: rgba(21, 49, 58, 0.14);
+  --shadow: 0 24px 64px rgba(21, 49, 58, 0.12);
 }
 
 @theme inline {
@@ -24,7 +23,6 @@
   --color-accent-strong: var(--accent-strong);
   --color-accent-warm: var(--accent-warm);
   --color-border: var(--border);
-  --color-footer: var(--footer);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
 }
@@ -41,7 +39,10 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
-  background-image: linear-gradient(180deg, #fffdfa 0%, #f7f3ea 52%, #f4efe4 100%);
+  background-image:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.14), transparent 28%),
+    radial-gradient(circle at top right, rgba(184, 106, 51, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(246, 241, 232, 0.92));
 }
 
 a {
@@ -65,34 +66,33 @@ textarea {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(circle at top left, rgba(19, 92, 255, 0.07), transparent 24%),
-    radial-gradient(circle at top right, rgba(15, 140, 129, 0.08), transparent 24%);
+  background-image: linear-gradient(rgba(21, 49, 58, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(21, 49, 58, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.32), transparent 78%);
 }
 
 .eyebrow {
-  color: var(--foreground);
-  letter-spacing: 0.14em;
+  color: var(--accent);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .serif {
   font-family: var(--font-serif), serif;
-  font-weight: 700;
-  letter-spacing: 0.01em;
 }
 
 .panel {
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
 }
 
 .prose-copy p {
   margin-top: 1rem;
   color: var(--muted);
-  line-height: 1.75;
-  font-size: 1.0625rem;
+  line-height: 1.8;
 }
 
 .prose-copy p:first-child {
@@ -109,38 +109,4 @@ textarea {
   color: var(--muted);
   line-height: 1.8;
   list-style: disc;
-}
-
-.prose-copy a {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.wipfli-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--accent);
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.wipfli-chip {
-  border-radius: 999px;
-  background: #f1f3f5;
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 500;
-  line-height: 1;
-  padding: 0.45rem 0.7rem;
-}
-
-.wipfli-section-title {
-  font-family: var(--font-serif), serif;
-  font-size: clamp(2.35rem, 4vw, 3.3rem);
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  text-transform: none;
 }

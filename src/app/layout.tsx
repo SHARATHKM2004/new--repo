@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, Inter } from "next/font/google";
+import { DM_Sans, Fraunces } from "next/font/google";
 import "./globals.css";
 
-const sans = Inter({
+const sans = DM_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const serif = Barlow_Condensed({
+const serif = Fraunces({
   variable: "--font-serif",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
