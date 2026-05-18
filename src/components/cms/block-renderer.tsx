@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { LeadForm } from "@/components/forms/lead-form";
-import { getFeaturedContent } from "@/lib/cms";
+import { getAuthorForInsight, getFeaturedContent, getInsights } from "@/lib/cms";
 import type { Block, Locale, Page } from "@/lib/cms/types";
 
 function resolveCardHref(href: string, locale: Locale) {
@@ -31,6 +31,79 @@ function ContentCard({ page }: { page: Page }) {
       >
         Explore
       </Link>
+    </article>
+  );
+}
+
+function formatArticleDate(publishedAt: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(`${publishedAt}T00:00:00`));
+}
+
+function ArticleCard({
+  page,
+  author,
+}: {
+  page: Extract<Page, { type: "insight" }>;
+  author: Extract<Page, { type: "author" }> | null;
+}) {
+  const href = `/${page.locale}/${page.slug.join("/")}`;
+
+  return (
+    <article className="overflow-hidden bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+      <Link href={href} className="block overflow-hidden bg-slate-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={page.cardImage?.src ?? "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1200&q=80"}
+          alt={page.cardImage?.alt ?? page.title}
+          className="h-64 w-full object-cover transition duration-300 hover:scale-[1.02]"
+        />
+      </Link>
+      <div className="flex h-full flex-col gap-6 p-5 lg:p-6">
+        <div className="flex flex-wrap items-center gap-3 text-[13px] text-slate-700">
+          {author?.avatarSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={author.avatarSrc}
+              alt={author.title}
+              className="h-8 w-8 rounded-full object-cover"
+            />
+          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{author?.title ?? "Editorial team"}</span>
+            <span className="h-4 w-px bg-[#1247ff]" />
+            <span>{formatArticleDate(page.publishedAt)}</span>
+            <span className="h-4 w-px bg-[#1247ff]" />
+            <span>{page.readTime}</span>
+          </div>
+        </div>
+
+        <Link href={href} className="text-[1.75rem] font-semibold leading-tight text-[#1247ff] transition hover:text-[#0d36c2]">
+          {page.title}
+        </Link>
+
+        <div className="flex flex-wrap gap-2">
+          {page.topics.map((topic) => (
+            <span
+              key={topic}
+              className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
+            >
+              {topic}
+            </span>
+          ))}
+        </div>
+
+        <Link
+          href={href}
+          className="mt-auto inline-flex items-center gap-2 text-lg font-semibold text-[#0a2463] transition hover:text-[#1247ff]"
+        >
+          Read full story
+          <span className="text-[#1247ff]">→</span>
+        </Link>
+      </div>
     </article>
   );
 }
@@ -205,6 +278,42 @@ export async function BlockRenderer({
           <div className="grid gap-5 lg:grid-cols-3">
             {items.map((item) => (
               <ContentCard key={item.id} page={item} />
+            ))}
+          </div>
+        </section>
+      );
+    }
+    case "articleList": {
+      const allInsights = await getInsights({ locale, draft });
+      const orderedInsights = block.ids
+        .map((id) => allInsights.find((item) => item.translationKey === id) ?? null)
+        .filter((item): item is Extract<Page, { type: "insight" }> => Boolean(item))
+        .slice(0, block.limit);
+      const authors = await Promise.all(
+        orderedInsights.map((item) =>
+          getAuthorForInsight({ locale: item.locale, authorId: item.authorId, draft }),
+        ),
+      );
+
+      return (
+        <section className="space-y-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-4xl font-black uppercase tracking-tight text-foreground">
+              {block.title}
+            </h2>
+            {block.viewAllHref && block.viewAllLabel ? (
+              <Link
+                href={block.viewAllHref}
+                className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-[#1247ff] transition hover:text-[#0d36c2]"
+              >
+                {block.viewAllLabel}
+                <span>→</span>
+              </Link>
+            ) : null}
+          </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {orderedInsights.map((item, index) => (
+              <ArticleCard key={item.id} page={item} author={authors[index]} />
             ))}
           </div>
         </section>

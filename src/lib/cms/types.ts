@@ -105,6 +105,15 @@ export type FeaturedContentBlock = {
   ids?: string[];
 };
 
+export type ArticleListBlock = {
+  type: "articleList";
+  title: string;
+  ids: string[];
+  limit: number;
+  viewAllLabel?: string;
+  viewAllHref?: string;
+};
+
 export type FormBlock = {
   type: "form";
   title: string;
@@ -124,6 +133,7 @@ export type Block =
   | CardGridBlock
   | CtaBlock
   | FeaturedContentBlock
+  | ArticleListBlock
   | FormBlock;
 
 export type BasePage = {
@@ -165,12 +175,17 @@ export type InsightPage = BasePage & {
   topics: string[];
   relatedServiceIds: string[];
   relatedIndustryIds: string[];
+  cardImage?: {
+    src: string;
+    alt: string;
+  };
 };
 
 export type AuthorPage = BasePage & {
   type: "author";
   role: string;
   expertise: string[];
+  avatarSrc?: string;
 };
 
 export type CaseStudyPage = BasePage & {
