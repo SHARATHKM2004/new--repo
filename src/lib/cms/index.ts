@@ -1,5 +1,6 @@
 import { mockPages } from "@/lib/cms/mock-content";
 import type {
+  AuthorPage,
   ContactPage,
   InsightFilters,
   InsightPage,
@@ -41,6 +42,17 @@ type OptimizelyCmsPageItem = {
     outcomes?: string[];
     audience?: string[];
     featuredTopics?: string[];
+    authorId?: string;
+    publishedAt?: string;
+    readTime?: string;
+    topics?: string[];
+    relatedServiceIds?: string[];
+    relatedIndustryIds?: string[];
+    cardImageUrl?: string;
+    cardImageAlt?: string;
+    role?: string;
+    expertise?: string[];
+    avatarSrc?: string;
     offices?: Array<{
       city?: string;
       phone?: string;
@@ -645,6 +657,8 @@ function inferCmsPageType(slug: string[], pageType?: string | null) {
   switch (normalizedPageType) {
     case "service":
     case "industry":
+    case "insight":
+    case "author":
     case "resourcecenter":
     case "resource-center":
     case "contact":
@@ -701,6 +715,7 @@ function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
     translationKey,
     locale,
     status,
+    contentSource: "optimizely" as const,
     slug,
     title,
     eyebrow,
@@ -746,6 +761,31 @@ function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
         type: "resourceCenter",
         featuredTopics: normalizeStringArray(item._json?.featuredTopics),
       } satisfies ResourceCenterPage;
+    case "insight":
+      return {
+        ...basePage,
+        type: "insight",
+        authorId: item._json?.authorId?.trim() || "",
+        publishedAt: item._json?.publishedAt?.trim() || "1970-01-01",
+        readTime: item._json?.readTime?.trim() || "5 min read",
+        topics: normalizeStringArray(item._json?.topics),
+        relatedServiceIds: normalizeStringArray(item._json?.relatedServiceIds),
+        relatedIndustryIds: normalizeStringArray(item._json?.relatedIndustryIds),
+        cardImage: item._json?.cardImageUrl?.trim()
+          ? {
+              src: item._json.cardImageUrl.trim(),
+              alt: item._json.cardImageAlt?.trim() || title,
+            }
+          : undefined,
+      } satisfies InsightPage;
+    case "author":
+      return {
+        ...basePage,
+        type: "author",
+        role: item._json?.role?.trim() || "Author",
+        expertise: normalizeStringArray(item._json?.expertise),
+        avatarSrc: item._json?.avatarSrc?.trim() || undefined,
+      } satisfies AuthorPage;
     case "contact":
       return {
         ...basePage,

@@ -108,7 +108,7 @@ export type FeaturedContentBlock = {
 export type ArticleListBlock = {
   type: "articleList";
   title: string;
-  ids: string[];
+  ids?: string[];
   limit: number;
   viewAllLabel?: string;
   viewAllHref?: string;
@@ -141,6 +141,7 @@ export type BasePage = {
   translationKey: string;
   locale: Locale;
   status: PublishStatus;
+  contentSource?: "optimizely";
   slug: string[];
   title: string;
   eyebrow?: string;

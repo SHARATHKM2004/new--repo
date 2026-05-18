@@ -6,7 +6,7 @@ import {
   getInsightsByAuthor,
   getRelatedPages,
 } from "@/lib/cms";
-import type { Locale, Page } from "@/lib/cms/types";
+import type { Block, Locale, Page } from "@/lib/cms/types";
 
 function PageKicker({ page }: { page: Page }) {
   switch (page.type) {
@@ -213,6 +213,24 @@ export async function PageRenderer({
           industry: filters.industry,
         })
       : [];
+  const isArticleLandingPage =
+    page.type === "standard" &&
+    page.slug[0] === "article" &&
+    (page.slug.length === 1 || page.slug[1] === "all");
+  const articleListFallbackBlock: Block | null = isArticleLandingPage
+    ? {
+        type: "articleList",
+        title: "Articles",
+        limit: page.slug[1] === "all" ? 15 : 3,
+        viewAllLabel: page.slug[1] === "all" ? undefined : "View all articles",
+        viewAllHref: page.slug[1] === "all" ? undefined : `/${locale}/article/all`,
+      }
+    : null;
+  const hasArticleListBlock = page.sections.some((block) => block.type === "articleList");
+  const renderedSections =
+    articleListFallbackBlock && !hasArticleListBlock
+      ? [...page.sections, articleListFallbackBlock]
+      : page.sections;
   const shouldShowPageKicker = ["service", "industry", "insight", "caseStudy", "author", "contact"].includes(
     page.type,
   );
@@ -290,7 +308,7 @@ export async function PageRenderer({
       ) : null}
 
       <div className="flex flex-col gap-8">
-        {page.sections.map((block, index) => (
+        {renderedSections.map((block, index) => (
           <BlockRenderer
             key={`${page.id}-${block.type}-${index}`}
             block={block}
