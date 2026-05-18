@@ -179,8 +179,11 @@ export async function PageRenderer({
 
   const author =
     page.type === "insight"
-      ? await getAuthorForInsight({ locale, authorId: page.authorId, draft })
+      ? page.authorId
+        ? await getAuthorForInsight({ locale, authorId: page.authorId, draft })
+        : null
       : null;
+  const insightAuthorName = page.type === "insight" ? author?.title ?? page.authorName ?? null : null;
   const authorInsights =
     page.type === "author"
       ? await getInsightsByAuthor({ locale, authorId: page.translationKey, draft })
@@ -256,12 +259,16 @@ export async function PageRenderer({
                 {fallbackNotice}
               </p>
             ) : null}
-            {author ? (
+            {insightAuthorName ? (
               <p className="text-sm text-muted">
                 By{" "}
-                <Link href={`/${locale}/${author.slug.join("/")}`} className="font-semibold text-foreground">
-                  {author.title}
-                </Link>
+                {author ? (
+                  <Link href={`/${locale}/${author.slug.join("/")}`} className="font-semibold text-foreground">
+                    {author.title}
+                  </Link>
+                ) : (
+                  <span className="font-semibold text-foreground">{insightAuthorName}</span>
+                )}
               </p>
             ) : null}
             {pageKicker}

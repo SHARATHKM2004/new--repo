@@ -51,6 +51,7 @@ function ArticleCard({
   author: Extract<Page, { type: "author" }> | null;
 }) {
   const href = `/${page.locale}/${page.slug.join("/")}`;
+  const authorName = author?.title ?? page.authorName ?? "Editorial team";
 
   return (
     <article className="overflow-hidden bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
@@ -73,7 +74,7 @@ function ArticleCard({
             />
           ) : null}
           <div className="flex flex-wrap items-center gap-2">
-            <span>{author?.title ?? "Editorial team"}</span>
+            <span>{authorName}</span>
             <span className="h-4 w-px bg-[#1247ff]" />
             <span>{formatArticleDate(page.publishedAt)}</span>
             <span className="h-4 w-px bg-[#1247ff]" />

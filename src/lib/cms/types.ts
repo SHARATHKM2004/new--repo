@@ -171,6 +171,7 @@ export type IndustryPage = BasePage & {
 export type InsightPage = BasePage & {
   type: "insight";
   authorId: string;
+  authorName?: string;
   publishedAt: string;
   readTime: string;
   topics: string[];

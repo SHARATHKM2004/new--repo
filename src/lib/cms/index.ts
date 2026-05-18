@@ -651,6 +651,77 @@ function normalizeStringArray(values?: string[] | null) {
   return (values ?? []).map((value) => value.trim()).filter(Boolean);
 }
 
+function parseCmsKeywordMetadata(value?: string | null) {
+  const entries = (value ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  const topics: string[] = [];
+  const services: string[] = [];
+  const industries: string[] = [];
+  let authorName: string | undefined;
+  let authorId: string | undefined;
+  let publishedAt: string | undefined;
+  let readTime: string | undefined;
+
+  for (const entry of entries) {
+    const separatorIndex = entry.indexOf(":");
+
+    if (separatorIndex === -1) {
+      topics.push(entry);
+      continue;
+    }
+
+    const key = entry.slice(0, separatorIndex).trim().toLowerCase();
+    const fieldValue = entry.slice(separatorIndex + 1).trim();
+
+    if (!fieldValue) {
+      continue;
+    }
+
+    switch (key) {
+      case "author":
+        authorName = fieldValue;
+        break;
+      case "authorid":
+        authorId = fieldValue;
+        break;
+      case "date":
+      case "publisheddate":
+        publishedAt = fieldValue;
+        break;
+      case "time":
+      case "readtime":
+        readTime = fieldValue;
+        break;
+      case "topic":
+      case "tag":
+        topics.push(fieldValue);
+        break;
+      case "service":
+        services.push(fieldValue);
+        break;
+      case "industry":
+        industries.push(fieldValue);
+        break;
+      default:
+        topics.push(fieldValue);
+        break;
+    }
+  }
+
+  return {
+    authorName,
+    authorId,
+    publishedAt,
+    readTime,
+    topics,
+    relatedServiceIds: services,
+    relatedIndustryIds: industries,
+  };
+}
+
 function inferCmsPageType(slug: string[], pageType?: string | null) {
   const normalizedPageType = pageType?.trim().toLowerCase();
 
@@ -712,6 +783,7 @@ function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
   const sections = mapOptimizelyBlocks(item._json?.blocks, title);
   const pageType = inferCmsPageType(slug, item._json?.pageType);
   const eyebrow = item._json?.eyebrow?.trim() || "Optimizely CMS";
+  const keywordMetadata = parseCmsKeywordMetadata(item.keywords ?? item._json?.keywords);
   const basePage = {
     id: jsonMetadata?.key ?? metadata?.key ?? translationKey,
     translationKey,
@@ -769,12 +841,19 @@ function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
       return {
         ...basePage,
         type: "insight",
-        authorId: item._json?.authorId?.trim() || "",
-        publishedAt: item._json?.publishedAt?.trim() || "1970-01-01",
-        readTime: item._json?.readTime?.trim() || "5 min read",
-        topics: normalizeStringArray(item._json?.topics),
-        relatedServiceIds: normalizeStringArray(item._json?.relatedServiceIds),
-        relatedIndustryIds: normalizeStringArray(item._json?.relatedIndustryIds),
+        authorId: item._json?.authorId?.trim() || keywordMetadata.authorId || "",
+        authorName: keywordMetadata.authorName,
+        publishedAt: item._json?.publishedAt?.trim() || keywordMetadata.publishedAt || "1970-01-01",
+        readTime: item._json?.readTime?.trim() || keywordMetadata.readTime || "5 min read",
+        topics: normalizeStringArray(item._json?.topics).length
+          ? normalizeStringArray(item._json?.topics)
+          : keywordMetadata.topics,
+        relatedServiceIds: normalizeStringArray(item._json?.relatedServiceIds).length
+          ? normalizeStringArray(item._json?.relatedServiceIds)
+          : keywordMetadata.relatedServiceIds,
+        relatedIndustryIds: normalizeStringArray(item._json?.relatedIndustryIds).length
+          ? normalizeStringArray(item._json?.relatedIndustryIds)
+          : keywordMetadata.relatedIndustryIds,
         cardImage: item._json?.cardImageUrl?.trim()
           ? {
               src: item._json.cardImageUrl.trim(),
