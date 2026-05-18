@@ -54,7 +54,7 @@ function ArticleCard({
   const authorName = author?.title ?? page.authorName ?? "Editorial team";
 
   return (
-    <article className="overflow-hidden bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+    <article className="flex h-full flex-col overflow-hidden bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
       <Link href={href} className="block overflow-hidden bg-slate-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -63,7 +63,7 @@ function ArticleCard({
           className="h-64 w-full object-cover transition duration-300 hover:scale-[1.02]"
         />
       </Link>
-      <div className="flex h-full flex-col gap-6 p-5 lg:p-6">
+      <div className="flex min-h-[24rem] flex-1 flex-col gap-5 p-5 lg:p-6">
         <div className="flex flex-wrap items-center gap-3 text-[13px] text-slate-700">
           {author?.avatarSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -99,7 +99,7 @@ function ArticleCard({
 
         <Link
           href={href}
-          className="mt-auto inline-flex items-center gap-2 text-lg font-semibold text-[#0a2463] transition hover:text-[#1247ff]"
+          className="mt-auto inline-flex items-center gap-2 pt-4 text-lg font-semibold text-[#0a2463] transition hover:text-[#1247ff]"
         >
           Read full story
           <span className="text-[#1247ff]">→</span>
