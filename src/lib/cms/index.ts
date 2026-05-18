@@ -672,6 +672,8 @@ function inferCmsPageType(slug: string[], pageType?: string | null) {
   }
 
   switch (slug[0]) {
+    case "article":
+      return slug.length > 1 && slug[1] !== "all" ? ("insight" as const) : ("standard" as const);
     case "services":
       return "service" as const;
     case "industries":
@@ -729,17 +731,19 @@ function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
     sections:
       sections.length > 0
         ? sections
-        : [
-            {
-              type: "richText" as const,
-              body: [
-                "This page is being loaded from the live Optimizely SaaS CMS Graph endpoint.",
-                `Display name: ${jsonMetadata?.displayName ?? metadata?.displayName ?? title}`,
-                `Content key: ${jsonMetadata?.key ?? metadata?.key ?? "Unavailable"}`,
-                `Keywords: ${item.keywords ?? item._json?.keywords ?? "None"}`,
-              ],
-            },
-          ],
+        : slug[0] === "article"
+          ? []
+          : [
+              {
+                type: "richText" as const,
+                body: [
+                  "This page is being loaded from the live Optimizely SaaS CMS Graph endpoint.",
+                  `Display name: ${jsonMetadata?.displayName ?? metadata?.displayName ?? title}`,
+                  `Content key: ${jsonMetadata?.key ?? metadata?.key ?? "Unavailable"}`,
+                  `Keywords: ${item.keywords ?? item._json?.keywords ?? "None"}`,
+                ],
+              },
+            ],
   };
 
   switch (pageType) {
