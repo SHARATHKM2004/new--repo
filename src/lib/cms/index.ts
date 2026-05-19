@@ -88,7 +88,9 @@ type OptimizelyStartPageItem = {
     shortDescription?: string;
     keywords?: string;
     headerVideoUrl?: string;
+    HeaderVideoUrl?: string;
     headerVideoPoster?: string;
+    HeaderVideoPoster?: string;
     blocks?: OptimizelyJsonBlock[];
     _metadata?: {
       key?: string;
@@ -990,8 +992,8 @@ function mapOptimizelyStartPage(item: OptimizelyStartPageItem): Page | null {
     id: jsonMetadata?.key ?? metadata?.key ?? "optimizely-start-page",
     translationKey: jsonMetadata?.key ?? metadata?.key ?? slugKey(slug) ?? "optimizely-start-page",
     type: "home",
-    headerVideoUrl: item._json?.headerVideoUrl?.trim() || undefined,
-    headerVideoPoster: item._json?.headerVideoPoster?.trim() || undefined,
+    headerVideoUrl: (item._json?.headerVideoUrl ?? item._json?.HeaderVideoUrl)?.trim() || undefined,
+    headerVideoPoster: (item._json?.headerVideoPoster ?? item._json?.HeaderVideoPoster)?.trim() || undefined,
     locale,
     status: jsonMetadata?.status === "Published" ? "published" : "draft",
     slug,
