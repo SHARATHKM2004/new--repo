@@ -54,7 +54,7 @@ function ArticleCard({
   const authorName = author?.title ?? page.authorName ?? "Editorial team";
 
   return (
-    <article className="flex h-full flex-col overflow-hidden bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+    <article className="flex h-full flex-col overflow-hidden bg-[#ececec]">
       <Link href={href} className="block overflow-hidden bg-slate-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -63,21 +63,21 @@ function ArticleCard({
           className="h-64 w-full object-cover transition duration-300 hover:scale-[1.02]"
         />
       </Link>
-      <div className="flex min-h-[24rem] flex-1 flex-col gap-5 p-5 lg:p-6">
-        <div className="flex flex-wrap items-center gap-3 text-[13px] text-slate-700">
+      <div className="flex min-h-[21rem] flex-1 flex-col gap-5 p-5 lg:p-6">
+        <div className="flex flex-wrap items-center gap-2 text-[12px] text-[#0f172a]">
           {author?.avatarSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={author.avatarSrc}
               alt={author.title}
-              className="h-8 w-8 rounded-full object-cover"
+              className="h-7 w-7 rounded-full object-cover"
             />
           ) : null}
           <div className="flex flex-wrap items-center gap-2">
             <span>{authorName}</span>
-            <span className="h-4 w-px bg-[#1247ff]" />
+            <span>|</span>
             <span>{formatArticleDate(page.publishedAt)}</span>
-            <span className="h-4 w-px bg-[#1247ff]" />
+            <span>|</span>
             <span>{page.readTime}</span>
           </div>
         </div>
@@ -90,7 +90,7 @@ function ArticleCard({
           {page.topics.map((topic) => (
             <span
               key={topic}
-              className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
+              className="rounded-full bg-white px-3 py-1 text-xs font-medium text-[#4b5563]"
             >
               {topic}
             </span>
@@ -99,7 +99,7 @@ function ArticleCard({
 
         <Link
           href={href}
-          className="mt-auto inline-flex items-center gap-2 pt-4 text-lg font-semibold text-[#0a2463] transition hover:text-[#1247ff]"
+          className="mt-auto inline-flex items-center gap-2 pt-4 text-base font-semibold text-[#0a2463] transition hover:text-[#1247ff]"
         >
           Read full story
           <span className="text-[#1247ff]">→</span>
@@ -299,25 +299,32 @@ export async function BlockRenderer({
       );
 
       return (
-        <section className="space-y-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-4xl font-black uppercase tracking-tight text-foreground">
-              {block.title}
-            </h2>
-            {block.viewAllHref && block.viewAllLabel ? (
-              <Link
-                href={block.viewAllHref}
-                className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-[#1247ff] transition hover:text-[#0d36c2]"
-              >
-                {block.viewAllLabel}
-                <span>→</span>
-              </Link>
-            ) : null}
+        <section className="article-listing-view relative left-1/2 right-1/2 w-screen -translate-x-1/2 bg-white">
+          <div className="bg-[#1554ff] text-white">
+            <div className="mx-auto max-w-[1040px] px-6 py-12 lg:px-8 lg:py-14">
+              <h2 className="text-5xl font-black uppercase tracking-tight lg:text-6xl">
+                {block.title}
+              </h2>
+            </div>
           </div>
-          <div className="grid gap-6 lg:grid-cols-3">
-            {orderedInsights.map((item, index) => (
-              <ArticleCard key={item.id} page={item} author={authors[index]} />
-            ))}
+
+          <div className="mx-auto max-w-[1040px] px-6 py-10 lg:px-8 lg:py-14">
+            <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
+              {block.viewAllHref && block.viewAllLabel ? (
+                <Link
+                  href={block.viewAllHref}
+                  className="inline-flex items-center justify-center border border-[#1554ff] px-6 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-[#1554ff] transition hover:bg-[#1554ff] hover:text-white"
+                >
+                  {block.viewAllLabel}
+                </Link>
+              ) : null}
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-3">
+              {orderedInsights.map((item, index) => (
+                <ArticleCard key={item.id} page={item} author={authors[index]} />
+              ))}
+            </div>
           </div>
         </section>
       );
