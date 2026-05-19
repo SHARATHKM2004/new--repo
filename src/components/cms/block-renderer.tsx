@@ -250,11 +250,11 @@ export async function BlockRenderer({
               <article key={card.title} className="border-t border-[#d1d5db] pt-5">
                 <Link
                   href={resolveCardHref(card.href, locale)}
-                  className="text-xl font-semibold leading-snug text-[#1247ff] hover:underline"
+                  className="text-xl font-bold leading-snug text-[#1247ff] hover:underline"
                 >
                   {card.title}
                 </Link>
-                <p className="mt-3 text-sm leading-7 text-[#1247ff]">{card.body}</p>
+                <p className="mt-3 text-sm font-bold leading-7 text-[#1247ff]">{card.body}</p>
                 <Link
                   href={resolveCardHref(card.href, locale)}
                   className="mt-5 inline-flex text-sm font-semibold text-[#0b1220] hover:underline"
