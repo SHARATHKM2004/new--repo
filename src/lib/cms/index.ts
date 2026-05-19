@@ -3,6 +3,7 @@ import type {
   AuthorPage,
   ContactPage,
   InsightFilters,
+  InsightFilterOptions,
   InsightPage,
   IndustryPage,
   Locale,
@@ -249,6 +250,12 @@ function preferCmsPagesBySlug<T extends Page>(pages: T[]) {
   }
 
   return Array.from(merged.values());
+}
+
+function sortFilterOptions(options: Map<string, string>) {
+  return Array.from(options.entries())
+    .map(([value, label]) => ({ value, label }))
+    .sort((left, right) => left.label.localeCompare(right.label));
 }
 
 function toSlugSegment(value: string) {
@@ -1532,7 +1539,67 @@ export async function getInsights(filters: InsightFilters) {
 
       return page.relatedIndustryIds.includes(filters.industry);
     })
+    .filter((page) => {
+      if (!filters.author) {
+        return true;
+      }
+
+      return page.authorId === filters.author;
+    })
     .sort((left, right) => right.publishedAt.localeCompare(left.publishedAt));
+}
+
+export async function getInsightFilterOptions(options: {
+  locale: Locale;
+  draft?: boolean;
+}): Promise<InsightFilterOptions> {
+  const pages = preferCmsPagesBySlug(await getPagesForLocale(options.locale, options.draft));
+  const insights = pages.filter((page): page is InsightPage => page.type === "insight");
+  const serviceMap = new Map(
+    pages
+      .filter((page): page is Extract<Page, { type: "service" }> => page.type === "service")
+      .map((page) => [page.translationKey, page.title] as const),
+  );
+  const industryMap = new Map(
+    pages
+      .filter((page): page is Extract<Page, { type: "industry" }> => page.type === "industry")
+      .map((page) => [page.translationKey, page.title] as const),
+  );
+  const authorMap = new Map(
+    pages
+      .filter((page): page is Extract<Page, { type: "author" }> => page.type === "author")
+      .map((page) => [page.translationKey, page.title] as const),
+  );
+
+  const topics = new Map<string, string>();
+  const services = new Map<string, string>();
+  const industries = new Map<string, string>();
+  const authors = new Map<string, string>();
+
+  for (const insight of insights) {
+    for (const topic of insight.topics) {
+      topics.set(topic, topic);
+    }
+
+    for (const serviceId of insight.relatedServiceIds) {
+      services.set(serviceId, serviceMap.get(serviceId) ?? serviceId);
+    }
+
+    for (const industryId of insight.relatedIndustryIds) {
+      industries.set(industryId, industryMap.get(industryId) ?? industryId);
+    }
+
+    if (insight.authorId) {
+      authors.set(insight.authorId, authorMap.get(insight.authorId) ?? insight.authorName ?? insight.authorId);
+    }
+  }
+
+  return {
+    topics: sortFilterOptions(topics),
+    services: sortFilterOptions(services),
+    industries: sortFilterOptions(industries),
+    authors: sortFilterOptions(authors),
+  };
 }
 
 export async function getRelatedPages(options: {

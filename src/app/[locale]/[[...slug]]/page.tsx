@@ -15,6 +15,7 @@ type SearchParams = {
   topic?: string;
   service?: string;
   industry?: string;
+  author?: string;
 };
 
 async function loadPage(routeParams: RouteParams) {
