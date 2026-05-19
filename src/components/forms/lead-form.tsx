@@ -36,44 +36,57 @@ export function LeadForm({
         className="mt-8 grid gap-4 md:grid-cols-2"
         onSubmit={(event) => {
           event.preventDefault();
-          const form = new FormData(event.currentTarget);
+          const formEl = event.currentTarget;
+          const form = new FormData(formEl);
 
           startTransition(async () => {
-            const response = await fetch("/api/leads", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                name: form.get("name"),
-                email: form.get("email"),
-                company: form.get("company"),
-                message: form.get("message"),
-              }),
-            });
+            try {
+              const response = await fetch("/api/leads", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  name: form.get("name"),
+                  email: form.get("email"),
+                  company: form.get("company"),
+                  message: form.get("message"),
+                }),
+              });
 
-            const payload = (await response.json()) as { message?: string };
+              const payload = (await response
+                .json()
+                .catch(() => ({}))) as { message?: string };
 
-            if (!response.ok) {
+              if (!response.ok) {
+                setState({
+                  type: "error",
+                  message:
+                    payload.message ??
+                    (locale === "en"
+                      ? "Unable to submit the form."
+                      : "No fue posible enviar el formulario."),
+                });
+                return;
+              }
+
+              formEl.reset();
+              setState({
+                type: "success",
+                message:
+                  locale === "en"
+                    ? "Thanks! We will reach out shortly."
+                    : "Gracias. Nos pondremos en contacto pronto.",
+              });
+            } catch {
               setState({
                 type: "error",
                 message:
-                  payload.message ??
-                  (locale === "en"
-                    ? "Unable to submit the form."
-                    : "No fue posible enviar el formulario."),
+                  locale === "en"
+                    ? "Network error. Please try again."
+                    : "Error de red. Intente de nuevo.",
               });
-              return;
             }
-
-            event.currentTarget.reset();
-            setState({
-              type: "success",
-              message:
-                locale === "en"
-                  ? "Lead captured locally. Check data/leads.json to inspect the submission."
-                  : "Lead guardado localmente. Revise data/leads.json para ver el envio.",
-            });
           });
         }}
       >
