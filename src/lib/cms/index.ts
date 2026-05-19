@@ -1541,3 +1541,60 @@ export async function getInsightsByAuthor(options: {
       page.type === "insight" && page.authorId === options.authorId,
   );
 }
+
+function countMatches(left: string[], right: string[]) {
+  if (!left.length || !right.length) {
+    return 0;
+  }
+
+  const rightSet = new Set(right);
+  return left.filter((item) => rightSet.has(item)).length;
+}
+
+export async function getRelatedInsights(options: {
+  locale: Locale;
+  page: InsightPage;
+  draft?: boolean;
+  limit: number;
+}) {
+  const pages = await getPagesForLocale(options.locale, options.draft);
+  const allInsights = pages.filter(
+    (page): page is InsightPage =>
+      page.type === "insight" && page.translationKey !== options.page.translationKey,
+  );
+  const cmsInsights = allInsights.filter((page) => page.contentSource === "optimizely");
+  const sourceInsights = cmsInsights.length ? cmsInsights : allInsights;
+
+  const ranked = sourceInsights
+    .map((page) => {
+      const topicMatches = countMatches(page.topics, options.page.topics);
+      const serviceMatches = countMatches(page.relatedServiceIds, options.page.relatedServiceIds);
+      const industryMatches = countMatches(page.relatedIndustryIds, options.page.relatedIndustryIds);
+      const authorMatch = page.authorId && page.authorId === options.page.authorId ? 1 : 0;
+
+      return {
+        page,
+        score: topicMatches * 4 + serviceMatches * 3 + industryMatches * 3 + authorMatch * 2,
+      };
+    })
+    .sort((left, right) => {
+      if (right.score !== left.score) {
+        return right.score - left.score;
+      }
+
+      return right.page.publishedAt.localeCompare(left.page.publishedAt);
+    });
+
+  const related = ranked.filter((item) => item.score > 0).map((item) => item.page);
+
+  if (related.length >= options.limit) {
+    return related.slice(0, options.limit);
+  }
+
+  const seen = new Set(related.map((page) => page.translationKey));
+  const fallback = ranked
+    .map((item) => item.page)
+    .filter((page) => !seen.has(page.translationKey));
+
+  return [...related, ...fallback].slice(0, options.limit);
+}

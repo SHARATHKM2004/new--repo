@@ -4,9 +4,60 @@ import {
   getAuthorForInsight,
   getInsights,
   getInsightsByAuthor,
+  getRelatedInsights,
   getRelatedPages,
 } from "@/lib/cms";
 import type { Block, Locale, Page } from "@/lib/cms/types";
+
+function isArticleBodyBlock(block: Block) {
+  return block.type === "richText" || block.type === "html" || block.type === "image";
+}
+
+function renderInlineArticleBlock(block: Block, key: string) {
+  if (block.type === "richText") {
+    return (
+      <div key={key}>
+        {block.body.map((paragraph) => {
+          const trimmed = paragraph.trim();
+
+          if (trimmed.startsWith("- ")) {
+            return (
+              <ul key={`${key}-${paragraph}`}>
+                <li>{trimmed.slice(2)}</li>
+              </ul>
+            );
+          }
+
+          return <p key={`${key}-${paragraph}`}>{paragraph}</p>;
+        })}
+      </div>
+    );
+  }
+
+  if (block.type === "html") {
+    return <div key={key} dangerouslySetInnerHTML={{ __html: block.html }} />;
+  }
+
+  if (block.type === "image") {
+    return (
+      <figure key={key} className="my-8 space-y-3">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={block.src} alt={block.alt} className="w-full object-cover" />
+        {block.caption ? <figcaption className="text-sm text-muted">{block.caption}</figcaption> : null}
+      </figure>
+    );
+  }
+
+  return null;
+}
+
+function formatInsightDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(`${value}T00:00:00`));
+}
 
 function PageKicker({ page }: { page: Page }) {
   switch (page.type) {
@@ -183,6 +234,23 @@ export async function PageRenderer({
         ? await getAuthorForInsight({ locale, authorId: page.authorId, draft })
         : null
       : null;
+  const insightRecommendations =
+    page.type === "insight"
+      ? await getRelatedInsights({
+          locale,
+          page,
+          draft,
+          limit: 6,
+        })
+      : [];
+  const insightRecommendationAuthors =
+    page.type === "insight"
+      ? await Promise.all(
+          insightRecommendations.map((item) =>
+            item.authorId ? getAuthorForInsight({ locale: item.locale, authorId: item.authorId, draft }) : null,
+          ),
+        )
+      : [];
   const insightAuthorName = page.type === "insight" ? author?.title ?? page.authorName ?? null : null;
   const authorInsights =
     page.type === "author"
@@ -241,6 +309,186 @@ export async function PageRenderer({
   const showPageHeader = Boolean(
     page.eyebrow || page.title || page.summary || fallbackNotice || author || pageKicker,
   );
+
+  if (page.type === "insight") {
+    const backToArticlesHref = `/${locale}/article`;
+    const topPicks = insightRecommendations.slice(0, 3);
+    const readMore = insightRecommendations.slice(3, 6);
+    const renderedArticleSections = page.sections.length
+      ? page.sections
+      : [
+          {
+            type: "richText" as const,
+            body: [page.summary],
+          },
+        ];
+    const leadBlock = renderedArticleSections[0] ?? null;
+    const bodyBlocks = renderedArticleSections.slice(1).filter(isArticleBodyBlock);
+    const supplementalBlocks = renderedArticleSections.slice(1).filter((block) => !isArticleBodyBlock(block));
+
+    return (
+      <main className="article-detail mx-auto flex w-full max-w-[1260px] flex-1 flex-col gap-8 px-6 py-8 lg:px-10 lg:py-10">
+        <div>
+          <Link href={backToArticlesHref} className="text-sm font-semibold text-[#2563eb] transition hover:text-[#1d4ed8]">
+            ← {locale === "en" ? "Back to Articles" : "Volver a articulos"}
+          </Link>
+        </div>
+
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+          <article className="min-w-0 space-y-8">
+            <header className="space-y-6">
+              <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-balance text-black lg:text-[3.35rem] lg:leading-[1.08]">
+                {page.title}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-3 text-sm text-[#4b5563]">
+                {author?.avatarSrc ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={author.avatarSrc} alt={author.title} className="h-8 w-8 rounded-full object-cover" />
+                ) : null}
+                {insightAuthorName ? (
+                  author ? (
+                    <Link href={`/${locale}/${author.slug.join("/")}`} className="font-semibold text-black">
+                      {author.title}
+                    </Link>
+                  ) : (
+                    <span className="font-semibold text-black">{insightAuthorName}</span>
+                  )
+                ) : null}
+                <span>|</span>
+                <span>{formatInsightDate(page.publishedAt)}</span>
+                <span>|</span>
+                <span>{page.readTime}</span>
+              </div>
+
+              {page.topics.length ? (
+                <div className="flex flex-wrap gap-3">
+                  {page.topics.map((topic) => (
+                    <span key={topic} className="rounded-full bg-[#f3f4f6] px-3 py-1 text-sm text-black">
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </header>
+
+            {leadBlock?.type === "richText" ? (
+              <section className="max-w-[740px] bg-[#f3f4f6] px-6 py-6">
+                <h2 className="mb-4 text-[1.65rem] font-semibold tracking-tight text-[#374151]">Key takeaways</h2>
+                <div className="article-copy">
+                  {leadBlock.body.map((paragraph) => {
+                    const trimmed = paragraph.trim();
+
+                    if (trimmed.startsWith("- ")) {
+                      return (
+                        <ul key={paragraph}>
+                          <li>{trimmed.slice(2)}</li>
+                        </ul>
+                      );
+                    }
+
+                    return <p key={paragraph}>{paragraph}</p>;
+                  })}
+                </div>
+              </section>
+            ) : null}
+
+            <section className="article-copy max-w-[760px]">
+              {bodyBlocks.map((block, index) => renderInlineArticleBlock(block, `${page.id}-article-${index}`))}
+            </section>
+
+            {supplementalBlocks.map((block, index) => (
+              <BlockRenderer
+                key={`${page.id}-${block.type}-supplemental-${index}`}
+                block={block}
+                locale={locale}
+                draft={draft}
+              />
+            ))}
+
+            {readMore.length ? (
+              <section className="max-w-[760px] space-y-4 pt-8">
+                <h2 className="text-[2rem] font-medium tracking-tight text-[#2563eb]">Read more</h2>
+                <ul className="space-y-3 text-lg text-[#2563eb]">
+                  {readMore.map((item) => (
+                    <li key={item.translationKey}>
+                      <Link href={`/${locale}/${item.slug.join("/")}`} className="transition hover:text-[#1d4ed8]">
+                        {item.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {author ? (
+              <section className="max-w-[760px] space-y-5 pt-8">
+                <h2 className="text-[2.25rem] font-black tracking-tight text-black">Author(s)</h2>
+                <div className="flex items-center gap-4">
+                  {author.avatarSrc ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={author.avatarSrc} alt={author.title} className="h-16 w-16 rounded-full object-cover" />
+                  ) : null}
+                  <div>
+                    <div className="text-xl font-semibold text-black">{author.title}</div>
+                    <p className="text-sm text-[#4b5563]">{author.role}</p>
+                    <Link href={`/${locale}/${author.slug.join("/")}`} className="mt-1 inline-flex text-sm font-semibold text-[#2563eb]">
+                      {locale === "en" ? "View Profile →" : "Ver perfil →"}
+                    </Link>
+                  </div>
+                </div>
+              </section>
+            ) : null}
+          </article>
+
+          <aside className="space-y-8 lg:sticky lg:top-24">
+            <section>
+              <h2 className="text-xl font-semibold uppercase tracking-tight text-[#2563eb]">{locale === "en" ? "Top picks" : "Destacados"}</h2>
+              <div className="mt-5 space-y-5">
+                {topPicks.length ? (
+                  topPicks.map((item, index) => {
+                    const recommendationAuthor = insightRecommendationAuthors[index];
+                    const recommendationAuthorName =
+                      recommendationAuthor?.title ?? item.authorName ?? (locale === "en" ? "Editorial team" : "Equipo editorial");
+
+                    return (
+                      <article key={item.translationKey} className="border-t border-[#d1d5db] pt-5 first:border-t first:pt-5">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-[#4b5563]">
+                          {recommendationAuthor?.avatarSrc ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={recommendationAuthor.avatarSrc}
+                              alt={recommendationAuthor.title}
+                              className="h-8 w-8 rounded-full object-cover"
+                            />
+                          ) : null}
+                          <span className="font-semibold text-black">{recommendationAuthorName}</span>
+                          <span>|</span>
+                          <span>{formatInsightDate(item.publishedAt)}</span>
+                        </div>
+                        <Link href={`/${locale}/${item.slug.join("/")}`} className="mt-3 block text-base font-medium leading-7 text-black transition hover:text-[#2563eb]">
+                          {item.title}
+                        </Link>
+                        <Link href={`/${locale}/${item.slug.join("/")}`} className="mt-3 inline-flex text-sm font-semibold text-[#2563eb]">
+                          {locale === "en" ? "Read full story →" : "Leer articulo →"}
+                        </Link>
+                      </article>
+                    );
+                  })
+                ) : (
+                  <p className="text-sm leading-7 text-[#4b5563]">
+                    {locale === "en"
+                      ? "Add more related articles in CMS to populate this sidebar."
+                      : "Agregue mas articulos relacionados en el CMS para completar esta barra lateral."}
+                  </p>
+                )}
+              </div>
+            </section>
+          </aside>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-6 py-10 lg:px-10 lg:py-14">

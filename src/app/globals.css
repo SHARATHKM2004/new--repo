@@ -110,3 +110,63 @@ textarea {
   line-height: 1.8;
   list-style: disc;
 }
+
+.article-copy {
+  color: var(--foreground);
+}
+
+.article-detail {
+  background: #ffffff;
+}
+
+.article-copy h2,
+.article-copy h3,
+.article-copy h4 {
+  margin-top: 2.5rem;
+  color: #2563eb;
+  font-family: var(--font-sans), sans-serif;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.article-copy h2 {
+  font-size: 2.1rem;
+}
+
+.article-copy h3 {
+  font-size: 1.65rem;
+}
+
+.article-copy p {
+  margin-top: 1.15rem;
+  color: #1f2937;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.article-copy p:first-child,
+.article-copy h2:first-child,
+.article-copy h3:first-child {
+  margin-top: 0;
+}
+
+.article-copy ul,
+.article-copy ol {
+  margin-top: 1rem;
+  padding-left: 1.5rem;
+  color: #1f2937;
+  line-height: 1.8;
+}
+
+.article-copy li + li {
+  margin-top: 0.75rem;
+}
+
+.article-copy a {
+  color: #2563eb;
+}
+
+.article-copy strong {
+  color: var(--foreground);
+  font-weight: 600;
+}
