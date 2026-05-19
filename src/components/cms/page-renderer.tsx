@@ -584,7 +584,7 @@ export async function PageRenderer({
       ) : null}
 
       {page.type === "home" && trendingInsights.length ? (
-        <section className="-mx-6 bg-[#1247ff] px-6 py-16 lg:-mx-10 lg:px-10 lg:py-20">
+        <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-[#1247ff] px-6 py-16 lg:px-10 lg:py-20">
           <div className="mx-auto max-w-[1240px]">
             <h2 className="text-4xl font-extrabold uppercase leading-tight tracking-tight text-white lg:text-5xl">
               {locale === "en" ? "Trending Insights" : "Tendencias destacadas"}
