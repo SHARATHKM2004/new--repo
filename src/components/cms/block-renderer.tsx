@@ -238,20 +238,26 @@ export async function BlockRenderer({
       );
     case "cardGrid":
       return (
-        <section className="space-y-6">
-          <div>
-            <h2 className="serif text-3xl font-semibold tracking-tight">{block.title}</h2>
-            {block.intro ? <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">{block.intro}</p> : null}
-          </div>
-          <div className="grid gap-5 lg:grid-cols-3">
+        <section>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1247ff]">
+            Services
+          </p>
+          <h2 className="mt-3 text-4xl font-extrabold uppercase leading-tight tracking-tight text-[#0b1220] lg:text-6xl">
+            {block.title}
+          </h2>
+          {block.intro ? (
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-[#4b5563]">{block.intro}</p>
+          ) : null}
+          <div className="mt-10 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
             {block.cards.map((card) => (
-              <article key={card.title} className="panel rounded-[1.75rem] p-6">
-                {card.eyebrow ? <p className="eyebrow text-[11px] font-semibold">{card.eyebrow}</p> : null}
-                <h3 className="mt-3 text-2xl font-semibold tracking-tight">{card.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-muted">{card.body}</p>
-                <Link href={resolveCardHref(card.href, locale)} className="mt-5 inline-flex text-sm font-semibold text-accent">
-                  Explore
+              <article key={card.title} className="border-t border-[#d1d5db] pt-5">
+                <Link
+                  href={resolveCardHref(card.href, locale)}
+                  className="text-xl font-semibold leading-snug text-[#1247ff] hover:underline"
+                >
+                  {card.title}
                 </Link>
+                <p className="mt-3 text-sm leading-7 text-[#4b5563]">{card.body}</p>
               </article>
             ))}
           </div>
