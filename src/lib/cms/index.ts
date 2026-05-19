@@ -231,6 +231,26 @@ function slugKey(slug: string[]) {
   return slug.join("/");
 }
 
+function preferCmsPagesBySlug<T extends Page>(pages: T[]) {
+  const merged = new Map<string, T>();
+
+  for (const page of pages) {
+    const key = slugKey(page.slug);
+    const existing = merged.get(key);
+
+    if (!existing) {
+      merged.set(key, page);
+      continue;
+    }
+
+    if (page.contentSource === "optimizely" && existing.contentSource !== "optimizely") {
+      merged.set(key, page);
+    }
+  }
+
+  return Array.from(merged.values());
+}
+
 function toSlugSegment(value: string) {
   return value
     .toLowerCase()
@@ -457,6 +477,7 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
       return body.length
         ? {
             type: "richText",
+            title: block._metadata?.displayName?.trim() || undefined,
             body,
           }
         : null;
@@ -660,10 +681,19 @@ function parseCmsKeywordMetadata(value?: string | null) {
   const topics: string[] = [];
   const services: string[] = [];
   const industries: string[] = [];
+  const topPickIds: string[] = [];
+  const readMoreIds: string[] = [];
   let authorName: string | undefined;
   let authorId: string | undefined;
   let publishedAt: string | undefined;
   let readTime: string | undefined;
+  let backToArticlesLabel: string | undefined;
+  let keyTakeawaysLabel: string | undefined;
+  let topPicksLabel: string | undefined;
+  let readMoreLabel: string | undefined;
+  let authorsLabel: string | undefined;
+  let viewProfileLabel: string | undefined;
+  let readFullStoryLabel: string | undefined;
 
   for (const entry of entries) {
     const separatorIndex = entry.indexOf(":");
@@ -705,6 +735,36 @@ function parseCmsKeywordMetadata(value?: string | null) {
       case "industry":
         industries.push(fieldValue);
         break;
+      case "toppickid":
+      case "toppicksid":
+        topPickIds.push(fieldValue);
+        break;
+      case "readmoreid":
+        readMoreIds.push(fieldValue);
+        break;
+      case "backlabel":
+      case "backtoarticleslabel":
+        backToArticlesLabel = fieldValue;
+        break;
+      case "keytakeawayslabel":
+      case "takeawayslabel":
+        keyTakeawaysLabel = fieldValue;
+        break;
+      case "toppickslabel":
+        topPicksLabel = fieldValue;
+        break;
+      case "readmorelabel":
+        readMoreLabel = fieldValue;
+        break;
+      case "authorslabel":
+        authorsLabel = fieldValue;
+        break;
+      case "viewprofilelabel":
+        viewProfileLabel = fieldValue;
+        break;
+      case "readfullstorylabel":
+        readFullStoryLabel = fieldValue;
+        break;
       default:
         topics.push(fieldValue);
         break;
@@ -719,6 +779,19 @@ function parseCmsKeywordMetadata(value?: string | null) {
     topics,
     relatedServiceIds: services,
     relatedIndustryIds: industries,
+    relatedInsightIds: {
+      topPicks: topPickIds,
+      readMore: readMoreIds,
+    },
+    uiLabels: {
+      backToArticles: backToArticlesLabel,
+      keyTakeaways: keyTakeawaysLabel,
+      topPicks: topPicksLabel,
+      readMore: readMoreLabel,
+      authors: authorsLabel,
+      viewProfile: viewProfileLabel,
+      readFullStory: readFullStoryLabel,
+    },
   };
 }
 
@@ -838,6 +911,9 @@ function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
         featuredTopics: normalizeStringArray(item._json?.featuredTopics),
       } satisfies ResourceCenterPage;
     case "insight":
+      const uiLabels = keywordMetadata.uiLabels;
+      const relatedInsightIds = keywordMetadata.relatedInsightIds;
+
       return {
         ...basePage,
         type: "insight",
@@ -854,6 +930,11 @@ function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
         relatedIndustryIds: normalizeStringArray(item._json?.relatedIndustryIds).length
           ? normalizeStringArray(item._json?.relatedIndustryIds)
           : keywordMetadata.relatedIndustryIds,
+        relatedInsightIds:
+          relatedInsightIds.topPicks.length || relatedInsightIds.readMore.length
+            ? relatedInsightIds
+            : undefined,
+        uiLabels: Object.values(uiLabels).some(Boolean) ? uiLabels : undefined,
         cardImage: item._json?.cardImageUrl?.trim()
           ? {
               src: item._json.cardImageUrl.trim(),
@@ -1415,7 +1496,7 @@ export async function getSiteFooterContent(
 }
 
 export async function getInsights(filters: InsightFilters) {
-  const pages = await getPagesForLocale(filters.locale, filters.draft);
+  const pages = preferCmsPagesBySlug(await getPagesForLocale(filters.locale, filters.draft));
 
   return pages
     .filter((page): page is InsightPage => page.type === "insight")
@@ -1459,7 +1540,7 @@ export async function getRelatedPages(options: {
   ids: string[];
   draft?: boolean;
 }) {
-  const pages = await getPagesForLocale(options.locale, options.draft);
+  const pages = preferCmsPagesBySlug(await getPagesForLocale(options.locale, options.draft));
   return options.ids
     .map((id) => pages.find((page) => page.translationKey === id) ?? null)
     .filter((page): page is Page => Boolean(page));
@@ -1475,7 +1556,7 @@ export async function getFeaturedContent(options: {
   limit: number;
   draft?: boolean;
 }) {
-  const pages = (await getPagesForLocale(options.locale, options.draft)).filter((page) =>
+  const pages = preferCmsPagesBySlug(await getPagesForLocale(options.locale, options.draft)).filter((page) =>
     options.contentTypes.includes(page.type as "insight" | "caseStudy"),
   );
 
@@ -1522,7 +1603,7 @@ export async function getAuthorForInsight(options: {
   authorId: string;
   draft?: boolean;
 }) {
-  const pages = await getPagesForLocale(options.locale, options.draft);
+  const pages = preferCmsPagesBySlug(await getPagesForLocale(options.locale, options.draft));
   const author = pages.find(
     (page) => page.type === "author" && page.translationKey === options.authorId,
   );
@@ -1535,7 +1616,7 @@ export async function getInsightsByAuthor(options: {
   authorId: string;
   draft?: boolean;
 }) {
-  const pages = await getPagesForLocale(options.locale, options.draft);
+  const pages = preferCmsPagesBySlug(await getPagesForLocale(options.locale, options.draft));
   return pages.filter(
     (page): page is InsightPage =>
       page.type === "insight" && page.authorId === options.authorId,
@@ -1557,15 +1638,13 @@ export async function getRelatedInsights(options: {
   draft?: boolean;
   limit: number;
 }) {
-  const pages = await getPagesForLocale(options.locale, options.draft);
+  const pages = preferCmsPagesBySlug(await getPagesForLocale(options.locale, options.draft));
   const allInsights = pages.filter(
     (page): page is InsightPage =>
       page.type === "insight" && page.translationKey !== options.page.translationKey,
   );
-  const cmsInsights = allInsights.filter((page) => page.contentSource === "optimizely");
-  const sourceInsights = cmsInsights.length ? cmsInsights : allInsights;
 
-  const ranked = sourceInsights
+  const ranked = allInsights
     .map((page) => {
       const topicMatches = countMatches(page.topics, options.page.topics);
       const serviceMatches = countMatches(page.relatedServiceIds, options.page.relatedServiceIds);

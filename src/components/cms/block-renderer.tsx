@@ -286,14 +286,12 @@ export async function BlockRenderer({
     }
     case "articleList": {
       const allInsights = await getInsights({ locale, draft });
-      const cmsInsights = allInsights.filter((item) => item.contentSource === "optimizely");
-      const sourceInsights = cmsInsights.length ? cmsInsights : allInsights;
       const orderedInsights = block.ids?.length
         ? block.ids
-            .map((id) => sourceInsights.find((item) => item.translationKey === id) ?? null)
+            .map((id) => allInsights.find((item) => item.translationKey === id) ?? null)
             .filter((item): item is Extract<Page, { type: "insight" }> => Boolean(item))
             .slice(0, block.limit)
-        : sourceInsights.slice(0, block.limit);
+        : allInsights.slice(0, block.limit);
       const authors = await Promise.all(
         orderedInsights.map((item) =>
           getAuthorForInsight({ locale: item.locale, authorId: item.authorId, draft }),
