@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getInsights } from "@/lib/cms";
+import { searchAllPages } from "@/lib/cms";
 import type { Locale } from "@/lib/cms/types";
 
 export const dynamic = "force-dynamic";
@@ -14,14 +14,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ count: 0, results: [] });
   }
 
-  const insights = await getInsights({ locale, query: q });
+  const matches = await searchAllPages({ locale, query: q });
 
-  const results = insights.slice(0, 10).map((page) => ({
-    id: page.id,
-    title: page.title,
-    summary: page.summary,
-    href: `/${locale}/${page.slug.join("/")}`,
-  }));
-
-  return NextResponse.json({ count: insights.length, results });
+  return NextResponse.json({
+    count: matches.length,
+    results: matches.slice(0, 10),
+  });
 }

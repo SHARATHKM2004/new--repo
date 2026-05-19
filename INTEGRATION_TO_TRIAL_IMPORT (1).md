@@ -122,10 +122,10 @@ Result:
 
 The language mismatch blocker was removed.
 
-Additional migration issues Possible:
+### Additional migration issues Possible:
 
 
-Issue 1: Export contained only content types, not content items
+#### Issue 1: Export contained only content types, not content items
 Observed behavior:
 
 export succeeded
@@ -142,7 +142,7 @@ always check import summary after every import
 do not assume a successful import means content also came in
 validate Number of content items separately from Number of content types
 
-Issue 2: Exporting a branch did not include the expected full content tree
+### Issue 2: Exporting a branch did not include the expected full content tree
 Observed behavior:
 
 a branch such as Services or a high-level option such as For All Applications was selected
@@ -158,7 +158,7 @@ verify the selected structure carefully
 if the UI only supports one root selection, export one branch at a time if necessary
 always use Include sub items
 
-Issue 3: One root item could be selected at a time
+#### Issue 3: One root item could be selected at a time
 Observed behavior:
 
 the export structure selector did not allow selecting multiple top-level nodes together
@@ -171,7 +171,7 @@ So
 if the source tree is split into separate top-level branches, one full-site export may not always be practical through the UI
 in that case, use multiple exports or use the broadest valid common root available
 
-Issue 4: Destination mismatch during content import
+### Issue 4: Destination mismatch during content import
 Observed error:
 
 The import destination is under root 'Assets' but export was created from 'Root page' which is not a compatible structure
