@@ -127,9 +127,9 @@ function PageKicker({ page }: { page: Page }) {
         <div className="grid gap-4 md:grid-cols-2">
           {page.offices.map((office) => (
             <div key={office.city} className="rounded-[1.5rem] border border-border bg-white/75 p-5 text-sm">
-              <div className="font-semibold text-[#1247ff]">{office.city}</div>
-              <div className="mt-2 text-[#1247ff]">{office.phone}</div>
-              <div className="mt-2 text-[#1247ff]">{office.focus}</div>
+              <div className="font-semibold text-foreground">{office.city}</div>
+              <div className="mt-2 text-muted">{office.phone}</div>
+              <div className="mt-2 text-muted">{office.focus}</div>
             </div>
           ))}
         </div>
