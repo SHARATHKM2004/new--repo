@@ -122,20 +122,13 @@ export async function BlockRenderer({
     case "hero":
       return (
         <section className="relative overflow-hidden rounded-[2.25rem]">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=70"
+            alt=""
+            aria-hidden
             className="absolute inset-0 h-full w-full object-cover"
-            poster="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=60"
-          >
-            <source
-              src="https://assets.mixkit.co/videos/preview/mixkit-business-team-meeting-in-a-modern-office-43066-large.mp4"
-              type="video/mp4"
-            />
-          </video>
+          />
           <div className="absolute inset-0 bg-black/40" aria-hidden />
           <div className="relative px-6 py-16 lg:px-10 lg:py-24">
             <div className="max-w-2xl bg-[#1247ff] px-8 py-10 lg:px-12 lg:py-12">

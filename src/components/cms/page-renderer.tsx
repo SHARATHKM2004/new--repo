@@ -523,11 +523,19 @@ export async function PageRenderer({
             loop
             playsInline
             preload="auto"
-            className="absolute inset-0 h-full w-full object-cover"
             poster="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=60"
+            className="absolute inset-0 h-full w-full object-cover"
           >
             <source
+              src="https://cdn.pixabay.com/video/2024/03/15/204306-924035851_large.mp4"
+              type="video/mp4"
+            />
+            <source
               src="https://assets.mixkit.co/videos/preview/mixkit-business-team-meeting-in-a-modern-office-43066-large.mp4"
+              type="video/mp4"
+            />
+            <source
+              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
               type="video/mp4"
             />
           </video>
