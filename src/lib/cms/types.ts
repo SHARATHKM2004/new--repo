@@ -153,6 +153,8 @@ export type BasePage = {
 
 export type HomePage = BasePage & {
   type: "home";
+  headerVideoUrl?: string;
+  headerVideoPoster?: string;
 };
 
 export type StandardPage = BasePage & {

@@ -526,11 +526,17 @@ export async function PageRenderer({
               loop
               playsInline
               preload="auto"
-              poster="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=60"
+              poster={
+                page.headerVideoPoster ??
+                "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=60"
+              }
               className="absolute inset-0 h-full w-full object-cover"
             >
               <source
-                src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+                src={
+                  page.headerVideoUrl ??
+                  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+                }
                 type="video/mp4"
               />
               <source
