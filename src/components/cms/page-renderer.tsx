@@ -543,7 +543,7 @@ export async function PageRenderer({
               />
             </video>
             <div className="absolute inset-0 bg-black/40" aria-hidden />
-            <div className="relative px-6 py-16 lg:px-10 lg:py-24">
+            <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-24">
               <div className="max-w-2xl bg-[#1247ff] px-8 py-10 lg:px-12 lg:py-12">
                 {page.eyebrow ? (
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/85">
