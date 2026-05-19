@@ -239,11 +239,11 @@ export async function BlockRenderer({
     case "cardGrid":
       return (
         <section>
-          <h2 className="text-4xl font-extrabold uppercase leading-tight tracking-tight text-[#0b1220] lg:text-6xl">
+          <h2 className="text-4xl font-extrabold uppercase leading-tight tracking-tight text-[#1247ff] lg:text-6xl">
             {block.title}
           </h2>
           {block.intro ? (
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-[#4b5563]">{block.intro}</p>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-[#1247ff]">{block.intro}</p>
           ) : null}
           <div className="mt-10 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {block.cards.map((card) => (
@@ -254,10 +254,10 @@ export async function BlockRenderer({
                 >
                   {card.title}
                 </Link>
-                <p className="mt-3 text-sm leading-7 text-[#4b5563]">{card.body}</p>
+                <p className="mt-3 text-sm leading-7 text-[#1247ff]">{card.body}</p>
                 <Link
                   href={resolveCardHref(card.href, locale)}
-                  className="mt-5 inline-flex text-sm font-semibold text-[#1247ff] hover:underline"
+                  className="mt-5 inline-flex text-sm font-semibold text-[#0b1220] hover:underline"
                 >
                   Explore &rarr;
                 </Link>
