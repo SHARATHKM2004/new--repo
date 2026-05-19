@@ -518,8 +518,8 @@ export async function PageRenderer({
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-6 py-10 lg:px-10 lg:py-14">
       {showPageHeader ? (
-        <section className="relative overflow-hidden rounded-[2.5rem]">
-          {page.type === "home" ? (
+        page.type === "home" ? (
+          <section className="relative overflow-hidden rounded-[2.5rem]">
             <video
               autoPlay
               muted
@@ -542,56 +542,84 @@ export async function PageRenderer({
                 type="video/mp4"
               />
             </video>
-          ) : (
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=60')",
-              }}
-              aria-hidden
-            />
-          )}
-          <div className="absolute inset-0 bg-black/40" aria-hidden />
-          <div className="relative px-6 py-16 lg:px-10 lg:py-24">
-            <div className="max-w-2xl bg-[#1247ff] px-8 py-10 lg:px-12 lg:py-12">
-              {page.eyebrow ? (
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/85">
-                  {page.eyebrow}
-                </p>
-              ) : null}
-              {page.title ? (
-                <h1 className="mt-4 text-4xl font-extrabold uppercase leading-tight tracking-tight text-white lg:text-6xl">
-                  {page.title}
-                </h1>
-              ) : null}
-              {page.summary ? (
-                <p className="mt-5 max-w-xl text-base leading-7 text-white/95">{page.summary}</p>
-              ) : null}
-              {fallbackNotice ? (
-                <p className="mt-5 inline-flex border border-white/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">
-                  {fallbackNotice}
-                </p>
-              ) : null}
-              {insightAuthorName ? (
-                <p className="mt-5 text-sm text-white/90">
-                  By{" "}
-                  {author ? (
-                    <Link
-                      href={`/${locale}/${author.slug.join("/")}`}
-                      className="font-semibold text-white underline"
-                    >
-                      {author.title}
-                    </Link>
-                  ) : (
-                    <span className="font-semibold text-white">{insightAuthorName}</span>
-                  )}
-                </p>
-              ) : null}
-              {pageKicker ? <div className="mt-5 text-white">{pageKicker}</div> : null}
+            <div className="absolute inset-0 bg-black/40" aria-hidden />
+            <div className="relative px-6 py-16 lg:px-10 lg:py-24">
+              <div className="max-w-2xl bg-[#1247ff] px-8 py-10 lg:px-12 lg:py-12">
+                {page.eyebrow ? (
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/85">
+                    {page.eyebrow}
+                  </p>
+                ) : null}
+                {page.title ? (
+                  <h1 className="mt-4 text-4xl font-extrabold uppercase leading-tight tracking-tight text-white lg:text-6xl">
+                    {page.title}
+                  </h1>
+                ) : null}
+                {page.summary ? (
+                  <p className="mt-5 max-w-xl text-base leading-7 text-white/95">{page.summary}</p>
+                ) : null}
+                {fallbackNotice ? (
+                  <p className="mt-5 inline-flex border border-white/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">
+                    {fallbackNotice}
+                  </p>
+                ) : null}
+                {insightAuthorName ? (
+                  <p className="mt-5 text-sm text-white/90">
+                    By{" "}
+                    {author ? (
+                      <Link
+                        href={`/${locale}/${author.slug.join("/")}`}
+                        className="font-semibold text-white underline"
+                      >
+                        {author.title}
+                      </Link>
+                    ) : (
+                      <span className="font-semibold text-white">{insightAuthorName}</span>
+                    )}
+                  </p>
+                ) : null}
+                {pageKicker ? <div className="mt-5 text-white">{pageKicker}</div> : null}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : (
+          <section className="border-b border-[#e5e7eb] pb-10">
+            {page.eyebrow ? (
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1247ff]">
+                {page.eyebrow}
+              </p>
+            ) : null}
+            {page.title ? (
+              <h1 className="mt-4 text-4xl font-extrabold uppercase leading-tight tracking-tight text-[#0b1220] lg:text-5xl">
+                {page.title}
+              </h1>
+            ) : null}
+            {page.summary ? (
+              <p className="mt-5 max-w-3xl text-base leading-7 text-[#4b5563]">{page.summary}</p>
+            ) : null}
+            {fallbackNotice ? (
+              <p className="mt-5 inline-flex border border-[#1247ff] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#1247ff]">
+                {fallbackNotice}
+              </p>
+            ) : null}
+            {insightAuthorName ? (
+              <p className="mt-5 text-sm text-[#4b5563]">
+                By{" "}
+                {author ? (
+                  <Link
+                    href={`/${locale}/${author.slug.join("/")}`}
+                    className="font-semibold text-[#1247ff] underline"
+                  >
+                    {author.title}
+                  </Link>
+                ) : (
+                  <span className="font-semibold text-[#0b1220]">{insightAuthorName}</span>
+                )}
+              </p>
+            ) : null}
+            {pageKicker ? <div className="mt-5 text-[#0b1220]">{pageKicker}</div> : null}
+          </section>
+        )
       ) : null}
 
       {page.type === "home" && trendingInsights.length ? (
