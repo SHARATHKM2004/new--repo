@@ -121,29 +121,52 @@ export async function BlockRenderer({
   switch (block.type) {
     case "hero":
       return (
-        <section className="panel rounded-[2.25rem] px-6 py-10 lg:px-10 lg:py-14">
-          <p className="eyebrow text-xs font-semibold">{block.eyebrow}</p>
-          <h1 className="serif mt-4 max-w-4xl text-5xl font-semibold tracking-tight text-balance lg:text-7xl">
-            {block.title}
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">{block.intro}</p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            {block.primaryCta ? (
-              <Link
-                href={block.primaryCta.href}
-                className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-strong"
-              >
-                {block.primaryCta.label}
-              </Link>
-            ) : null}
-            {block.secondaryCta ? (
-              <Link
-                href={block.secondaryCta.href}
-                className="rounded-full border border-border px-5 py-3 text-sm font-semibold transition hover:border-accent hover:text-accent"
-              >
-                {block.secondaryCta.label}
-              </Link>
-            ) : null}
+        <section className="relative overflow-hidden rounded-[2.25rem]">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="absolute inset-0 h-full w-full object-cover"
+            poster="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=60"
+          >
+            <source
+              src="https://assets.mixkit.co/videos/preview/mixkit-business-team-meeting-in-a-modern-office-43066-large.mp4"
+              type="video/mp4"
+            />
+          </video>
+          <div className="absolute inset-0 bg-black/40" aria-hidden />
+          <div className="relative px-6 py-16 lg:px-10 lg:py-24">
+            <div className="max-w-2xl bg-[#1247ff] px-8 py-10 lg:px-12 lg:py-12">
+              {block.eyebrow ? (
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/85">
+                  {block.eyebrow}
+                </p>
+              ) : null}
+              <h1 className="mt-4 text-4xl font-extrabold uppercase leading-tight tracking-tight text-white lg:text-6xl">
+                {block.title}
+              </h1>
+              <p className="mt-5 max-w-xl text-base leading-7 text-white/95">{block.intro}</p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                {block.primaryCta ? (
+                  <Link
+                    href={block.primaryCta.href}
+                    className="inline-flex items-center justify-center border border-white px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-[#1247ff]"
+                  >
+                    {block.primaryCta.label}
+                  </Link>
+                ) : null}
+                {block.secondaryCta ? (
+                  <Link
+                    href={block.secondaryCta.href}
+                    className="inline-flex items-center justify-center border border-white/70 px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-[#1247ff]"
+                  >
+                    {block.secondaryCta.label}
+                  </Link>
+                ) : null}
+              </div>
+            </div>
           </div>
         </section>
       );
