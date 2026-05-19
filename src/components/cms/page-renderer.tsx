@@ -2,13 +2,12 @@ import Link from "next/link";
 import { BlockRenderer } from "@/components/cms/block-renderer";
 import {
   getAuthorForInsight,
-  getInsightFilterOptions,
   getInsights,
   getInsightsByAuthor,
   getRelatedInsights,
   getRelatedPages,
 } from "@/lib/cms";
-import type { Block, InsightFilterOptions, Locale, Page } from "@/lib/cms/types";
+import type { Block, Locale, Page } from "@/lib/cms/types";
 
 function isArticleBodyBlock(block: Block) {
   return block.type === "richText" || block.type === "html" || block.type === "image";
@@ -140,50 +139,34 @@ function PageKicker({ page }: { page: Page }) {
   }
 }
 
-function ResourceCenterToolbar({
-  locale,
-  options,
-  filters,
-}: {
-  locale: Locale;
-  options: InsightFilterOptions;
-  filters: {
-    q?: string;
-    topic?: string;
-    service?: string;
-    industry?: string;
-    author?: string;
-  };
-}) {
+function ResourceCenterToolbar({ locale }: { locale: Locale }) {
   const serviceOptions = [
     { value: "", label: locale === "en" ? "All services" : "Todos los servicios" },
-    ...options.services,
+    { value: "service-platform", label: "Digital platform strategy" },
+    { value: "service-risk", label: "Enterprise risk operations" },
   ];
   const industryOptions = [
     { value: "", label: locale === "en" ? "All industries" : "Todas las industrias" },
-    ...options.industries,
+    { value: "industry-healthcare", label: "Healthcare" },
   ];
   const topicOptions = [
     { value: "", label: locale === "en" ? "All topics" : "Todos los temas" },
-    ...options.topics,
-  ];
-  const authorOptions = [
-    { value: "", label: locale === "en" ? "All authors" : "Todos los autores" },
-    ...options.authors,
+    { value: "Preview", label: "Preview" },
+    { value: "Healthcare", label: "Healthcare" },
+    { value: "Taxonomy", label: "Taxonomy" },
   ];
 
   return (
-    <form className="panel grid gap-4 rounded-[2rem] p-6 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))_auto]">
+    <form className="panel grid gap-4 rounded-[2rem] p-6 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]">
       <input
         name="q"
         placeholder={locale === "en" ? "Search insights" : "Buscar articulos"}
-        defaultValue={filters.q ?? ""}
         className="rounded-full border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
       />
       <select
         name="service"
         className="rounded-full border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
-        defaultValue={filters.service ?? ""}
+        defaultValue=""
       >
         {serviceOptions.map((option) => (
           <option key={option.value || "all-services"} value={option.value}>
@@ -194,7 +177,7 @@ function ResourceCenterToolbar({
       <select
         name="industry"
         className="rounded-full border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
-        defaultValue={filters.industry ?? ""}
+        defaultValue=""
       >
         {industryOptions.map((option) => (
           <option key={option.value || "all-industries"} value={option.value}>
@@ -205,21 +188,10 @@ function ResourceCenterToolbar({
       <select
         name="topic"
         className="rounded-full border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
-        defaultValue={filters.topic ?? ""}
+        defaultValue=""
       >
         {topicOptions.map((option) => (
           <option key={option.value || "all-topics"} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <select
-        name="author"
-        className="rounded-full border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
-        defaultValue={filters.author ?? ""}
-      >
-        {authorOptions.map((option) => (
-          <option key={option.value || "all-authors"} value={option.value}>
             {option.label}
           </option>
         ))}
@@ -247,7 +219,6 @@ export async function PageRenderer({
     topic?: string;
     service?: string;
     industry?: string;
-    author?: string;
   };
 }) {
   const fallbackNotice =
@@ -323,11 +294,8 @@ export async function PageRenderer({
           topic: filters.topic,
           service: filters.service,
           industry: filters.industry,
-          author: filters.author,
         })
       : [];
-  const resourceFilterOptions =
-    page.type === "resourceCenter" ? await getInsightFilterOptions({ locale, draft }) : null;
   const isArticleLandingPage =
     page.type === "standard" &&
     page.slug[0] === "article" &&
@@ -579,9 +547,7 @@ export async function PageRenderer({
         </section>
       ) : null}
 
-      {page.type === "resourceCenter" && resourceFilterOptions ? (
-        <ResourceCenterToolbar locale={locale} options={resourceFilterOptions} filters={filters} />
-      ) : null}
+      {page.type === "resourceCenter" ? <ResourceCenterToolbar locale={locale} /> : null}
 
       {page.type === "resourceCenter" ? (
         <section className="grid gap-5 lg:grid-cols-3">

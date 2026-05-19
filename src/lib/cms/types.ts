@@ -285,20 +285,7 @@ export type InsightFilters = {
   topic?: string;
   service?: string;
   industry?: string;
-  author?: string;
   draft?: boolean;
-};
-
-export type InsightFilterOption = {
-  value: string;
-  label: string;
-};
-
-export type InsightFilterOptions = {
-  topics: InsightFilterOption[];
-  services: InsightFilterOption[];
-  industries: InsightFilterOption[];
-  authors: InsightFilterOption[];
 };
 
 export function isLocale(value: string): value is Locale {
