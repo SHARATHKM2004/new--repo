@@ -41,6 +41,7 @@ export type HeroBlock = {
 
 export type RichTextBlock = {
   type: "richText";
+  title?: string;
   body: string[];
 };
 
@@ -177,6 +178,19 @@ export type InsightPage = BasePage & {
   topics: string[];
   relatedServiceIds: string[];
   relatedIndustryIds: string[];
+  relatedInsightIds?: {
+    topPicks: string[];
+    readMore: string[];
+  };
+  uiLabels?: {
+    backToArticles?: string;
+    keyTakeaways?: string;
+    topPicks?: string;
+    readMore?: string;
+    authors?: string;
+    viewProfile?: string;
+    readFullStory?: string;
+  };
   cardImage?: {
     src: string;
     alt: string;

@@ -234,6 +234,18 @@ export async function PageRenderer({
         ? await getAuthorForInsight({ locale, authorId: page.authorId, draft })
         : null
       : null;
+  const explicitTopPickPages =
+    page.type === "insight" && page.relatedInsightIds?.topPicks.length
+      ? (await getRelatedPages({ locale, ids: page.relatedInsightIds.topPicks, draft })).filter(
+          (item): item is Extract<Page, { type: "insight" }> => item.type === "insight",
+        )
+      : [];
+  const explicitReadMorePages =
+    page.type === "insight" && page.relatedInsightIds?.readMore.length
+      ? (await getRelatedPages({ locale, ids: page.relatedInsightIds.readMore, draft })).filter(
+          (item): item is Extract<Page, { type: "insight" }> => item.type === "insight",
+        )
+      : [];
   const insightRecommendations =
     page.type === "insight"
       ? await getRelatedInsights({
@@ -311,9 +323,18 @@ export async function PageRenderer({
   );
 
   if (page.type === "insight") {
+    const labels = {
+      backToArticles: page.uiLabels?.backToArticles ?? (locale === "en" ? "Back to Articles" : "Volver a articulos"),
+      keyTakeaways: page.uiLabels?.keyTakeaways ?? "Key takeaways",
+      topPicks: page.uiLabels?.topPicks ?? (locale === "en" ? "Top picks" : "Destacados"),
+      readMore: page.uiLabels?.readMore ?? "Read more",
+      authors: page.uiLabels?.authors ?? "Author(s)",
+      viewProfile: page.uiLabels?.viewProfile ?? (locale === "en" ? "View Profile →" : "Ver perfil →"),
+      readFullStory: page.uiLabels?.readFullStory ?? (locale === "en" ? "Read full story →" : "Leer articulo →"),
+    };
     const backToArticlesHref = `/${locale}/article`;
-    const topPicks = insightRecommendations.slice(0, 3);
-    const readMore = insightRecommendations.slice(3, 6);
+    const topPicks = explicitTopPickPages.length ? explicitTopPickPages.slice(0, 3) : insightRecommendations.slice(0, 3);
+    const readMore = explicitReadMorePages.length ? explicitReadMorePages.slice(0, 6) : insightRecommendations.slice(3, 6);
     const renderedArticleSections = page.sections.length
       ? page.sections
       : [
@@ -330,7 +351,7 @@ export async function PageRenderer({
       <main className="article-detail mx-auto flex w-full max-w-[1260px] flex-1 flex-col gap-8 px-6 py-8 lg:px-10 lg:py-10">
         <div>
           <Link href={backToArticlesHref} className="text-sm font-semibold text-[#2563eb] transition hover:text-[#1d4ed8]">
-            ← {locale === "en" ? "Back to Articles" : "Volver a articulos"}
+            ← {labels.backToArticles}
           </Link>
         </div>
 
@@ -374,7 +395,9 @@ export async function PageRenderer({
 
             {leadBlock?.type === "richText" ? (
               <section className="max-w-[740px] bg-[#f3f4f6] px-6 py-6">
-                <h2 className="mb-4 text-[1.65rem] font-semibold tracking-tight text-[#374151]">Key takeaways</h2>
+                <h2 className="mb-4 text-[1.65rem] font-semibold tracking-tight text-[#374151]">
+                  {leadBlock.title ?? labels.keyTakeaways}
+                </h2>
                 <div className="article-copy">
                   {leadBlock.body.map((paragraph) => {
                     const trimmed = paragraph.trim();
@@ -408,7 +431,7 @@ export async function PageRenderer({
 
             {readMore.length ? (
               <section className="max-w-[760px] space-y-4 pt-8">
-                <h2 className="text-[2rem] font-medium tracking-tight text-[#2563eb]">Read more</h2>
+                <h2 className="text-[2rem] font-medium tracking-tight text-[#2563eb]">{labels.readMore}</h2>
                 <ul className="space-y-3 text-lg text-[#2563eb]">
                   {readMore.map((item) => (
                     <li key={item.translationKey}>
@@ -423,7 +446,7 @@ export async function PageRenderer({
 
             {author ? (
               <section className="max-w-[760px] space-y-5 pt-8">
-                <h2 className="text-[2.25rem] font-black tracking-tight text-black">Author(s)</h2>
+                <h2 className="text-[2.25rem] font-black tracking-tight text-black">{labels.authors}</h2>
                 <div className="flex items-center gap-4">
                   {author.avatarSrc ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -433,7 +456,7 @@ export async function PageRenderer({
                     <div className="text-xl font-semibold text-black">{author.title}</div>
                     <p className="text-sm text-[#4b5563]">{author.role}</p>
                     <Link href={`/${locale}/${author.slug.join("/")}`} className="mt-1 inline-flex text-sm font-semibold text-[#2563eb]">
-                      {locale === "en" ? "View Profile →" : "Ver perfil →"}
+                      {labels.viewProfile}
                     </Link>
                   </div>
                 </div>
@@ -443,7 +466,7 @@ export async function PageRenderer({
 
           <aside className="space-y-8 lg:sticky lg:top-24">
             <section>
-              <h2 className="text-xl font-semibold uppercase tracking-tight text-[#2563eb]">{locale === "en" ? "Top picks" : "Destacados"}</h2>
+              <h2 className="text-xl font-semibold uppercase tracking-tight text-[#2563eb]">{labels.topPicks}</h2>
               <div className="mt-5 space-y-5">
                 {topPicks.length ? (
                   topPicks.map((item, index) => {
@@ -470,7 +493,7 @@ export async function PageRenderer({
                           {item.title}
                         </Link>
                         <Link href={`/${locale}/${item.slug.join("/")}`} className="mt-3 inline-flex text-sm font-semibold text-[#2563eb]">
-                          {locale === "en" ? "Read full story →" : "Leer articulo →"}
+                          {labels.readFullStory}
                         </Link>
                       </article>
                     );
