@@ -276,6 +276,26 @@ export type SiteFooterContent = {
   alertsCallout?: AlertsCalloutContent;
 };
 
+export type SubscriptionTopic = {
+  title: string;
+  body: string;
+};
+
+export type SubscriptionPageContent = {
+  pageTitle: string;
+  breadcrumbHomeLabel: string;
+  heading: string;
+  intro: string;
+  emailsConsentTitle: string;
+  emailsConsentBody: string;
+  topicsHelpText: string;
+  topics: SubscriptionTopic[];
+  submitLabel: string;
+  successTitle: string;
+  successBody: string;
+  backLabel: string;
+};
+
 export type OptimizelyWebhookPayload = {
   id?: string;
   timestamp?: string;
