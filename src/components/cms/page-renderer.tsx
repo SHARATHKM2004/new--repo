@@ -519,28 +519,39 @@ export async function PageRenderer({
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-6 py-10 lg:px-10 lg:py-14">
       {showPageHeader ? (
         <section className="relative overflow-hidden rounded-[2.5rem]">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            poster="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=60"
-            className="absolute inset-0 h-full w-full object-cover"
-          >
-            <source
-              src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
-              type="video/mp4"
+          {page.type === "home" ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              poster="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=60"
+              className="absolute inset-0 h-full w-full object-cover"
+            >
+              <source
+                src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+                type="video/mp4"
+              />
+              <source
+                src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                type="video/mp4"
+              />
+              <source
+                src="https://cdn.pixabay.com/video/2024/03/15/204306-924035851_large.mp4"
+                type="video/mp4"
+              />
+            </video>
+          ) : (
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=60')",
+              }}
+              aria-hidden
             />
-            <source
-              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-              type="video/mp4"
-            />
-            <source
-              src="https://cdn.pixabay.com/video/2024/03/15/204306-924035851_large.mp4"
-              type="video/mp4"
-            />
-          </video>
+          )}
           <div className="absolute inset-0 bg-black/40" aria-hidden />
           <div className="relative px-6 py-16 lg:px-10 lg:py-24">
             <div className="max-w-2xl bg-[#1247ff] px-8 py-10 lg:px-12 lg:py-12">
