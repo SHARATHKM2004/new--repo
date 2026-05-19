@@ -1077,6 +1077,15 @@ async function getOptimizelyStartPage(locale: Locale, draft = false) {
     return null;
   }
 
+  if (process.env.OPTIMIZELY_DEBUG_STARTPAGE === "1") {
+    console.log(
+      "[StartPage._json keys]",
+      Object.keys(item._json ?? {}),
+      "headerVideoUrl=", item._json?.headerVideoUrl ?? item._json?.HeaderVideoUrl,
+      "headerVideoPoster=", item._json?.headerVideoPoster ?? item._json?.HeaderVideoPoster,
+    );
+  }
+
   return mapOptimizelyStartPage(item);
 }
 
