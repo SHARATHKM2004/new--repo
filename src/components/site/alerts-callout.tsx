@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 export function AlertsCallout({ locale }: { locale: string }) {
@@ -16,13 +17,6 @@ export function AlertsCallout({ locale }: { locale: string }) {
   const cta =
     locale === "es" ? "RECIBIR ALERTAS Y ACTUALIZACIONES" : "GET ALERTS AND UPDATES";
 
-  function handleClick() {
-    setActive(true);
-    setTimeout(() => {
-      window.location.reload();
-    }, 250);
-  }
-
   return (
     <section className="bg-[#f3f4f6]">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-20">
@@ -33,9 +27,9 @@ export function AlertsCallout({ locale }: { locale: string }) {
           {heading}
         </h2>
         <p className="mt-5 max-w-2xl text-sm leading-7 text-[#4b5563]">{body}</p>
-        <button
-          type="button"
-          onClick={handleClick}
+        <Link
+          href="/subscription"
+          onMouseDown={() => setActive(true)}
           className={`mt-8 inline-flex items-center justify-center border-2 border-[#1247ff] px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition ${
             active
               ? "bg-[#1247ff] text-white"
@@ -43,7 +37,7 @@ export function AlertsCallout({ locale }: { locale: string }) {
           }`}
         >
           {cta}
-        </button>
+        </Link>
       </div>
     </section>
   );
