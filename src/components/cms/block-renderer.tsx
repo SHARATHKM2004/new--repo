@@ -300,14 +300,6 @@ export async function BlockRenderer({
 
       return (
         <section className="article-listing-view relative left-1/2 right-1/2 w-screen -translate-x-1/2 bg-white">
-          <div className="bg-[#1554ff] text-white">
-            <div className="mx-auto max-w-[1040px] px-6 py-12 lg:px-8 lg:py-14">
-              <h2 className="text-5xl font-black uppercase tracking-tight lg:text-6xl">
-                {block.title}
-              </h2>
-            </div>
-          </div>
-
           <div className="mx-auto max-w-[1040px] px-6 py-10 lg:px-8 lg:py-14">
             <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
               {block.viewAllHref && block.viewAllLabel ? (
