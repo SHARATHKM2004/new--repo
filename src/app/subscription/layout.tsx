@@ -13,7 +13,7 @@ export default async function SubscriptionLayout({
   return (
     <div className="site-shell flex min-h-screen flex-col">
       <div className="flex-1">{children}</div>
-      <SiteFooter locale="en" content={footerContent} />
+      <SiteFooter locale="en" content={footerContent} hideCallout />
     </div>
   );
 }

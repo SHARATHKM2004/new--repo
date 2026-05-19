@@ -11,7 +11,7 @@ function pickHref(content: SiteFooterContent, keyword: string): string {
   return match?.href ?? "#";
 }
 
-export function SiteFooter({ locale, content }: { locale: Locale; content: SiteFooterContent }) {
+export function SiteFooter({ locale, content, hideCallout = false }: { locale: Locale; content: SiteFooterContent; hideCallout?: boolean }) {
   const linkedInHref = pickHref(content, "linkedin");
   const facebookHref = pickHref(content, "facebook");
   const twitterHref = (() => {
@@ -24,7 +24,7 @@ export function SiteFooter({ locale, content }: { locale: Locale; content: SiteF
 
   return (
     <>
-      <AlertsCallout locale={locale} />
+      {hideCallout ? null : <AlertsCallout locale={locale} />}
       <footer className="mt-20 bg-[#1247ff] text-white">
       <div className="mx-auto w-full max-w-[1400px] px-6 py-12 lg:px-10">
         {(content.eyebrow || content.title || content.body) ? (
