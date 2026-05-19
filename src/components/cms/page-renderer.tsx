@@ -127,9 +127,9 @@ function PageKicker({ page }: { page: Page }) {
         <div className="grid gap-4 md:grid-cols-2">
           {page.offices.map((office) => (
             <div key={office.city} className="rounded-[1.5rem] border border-border bg-white/75 p-5 text-sm">
-              <div className="font-semibold text-foreground">{office.city}</div>
-              <div className="mt-2 text-muted">{office.phone}</div>
-              <div className="mt-2 text-muted">{office.focus}</div>
+              <div className="font-semibold text-[#1247ff]">{office.city}</div>
+              <div className="mt-2 text-[#1247ff]">{office.phone}</div>
+              <div className="mt-2 text-[#1247ff]">{office.focus}</div>
             </div>
           ))}
         </div>
@@ -595,7 +595,7 @@ export async function PageRenderer({
               </h1>
             ) : null}
             {page.summary ? (
-              <p className="mt-5 max-w-3xl text-base leading-7 text-[#4b5563]">{page.summary}</p>
+              <p className="mt-5 max-w-3xl text-base leading-7 text-[#1247ff]">{page.summary}</p>
             ) : null}
             {fallbackNotice ? (
               <p className="mt-5 inline-flex border border-[#1247ff] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#1247ff]">

@@ -30,7 +30,7 @@ export function LeadForm({
           {locale === "en" ? "Lead generation" : "Captura de leads"}
         </p>
         <h2 className="serif text-3xl font-semibold tracking-tight">{title}</h2>
-        <p className="text-sm leading-7 text-muted">{intro}</p>
+        <p className="text-sm leading-7 text-[#1247ff]">{intro}</p>
       </div>
       <form
         className="mt-8 grid gap-4 md:grid-cols-2"
