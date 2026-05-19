@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Locale, SiteFooterContent } from "@/lib/cms/types";
+import { AlertsCallout } from "./alerts-callout";
 
 const BRAND_NAME = "Summit Advisory Group";
 
@@ -22,7 +23,9 @@ export function SiteFooter({ locale, content }: { locale: Locale; content: SiteF
   })();
 
   return (
-    <footer className="mt-20 bg-[#1247ff] text-white">
+    <>
+      <AlertsCallout locale={locale} />
+      <footer className="mt-20 bg-[#1247ff] text-white">
       <div className="mx-auto w-full max-w-[1400px] px-6 py-12 lg:px-10">
         {(content.eyebrow || content.title || content.body) ? (
           <div className="mb-10 max-w-3xl space-y-3">
@@ -108,5 +111,6 @@ export function SiteFooter({ locale, content }: { locale: Locale; content: SiteF
         </div>
       ) : null}
     </footer>
+    </>
   );
 }
