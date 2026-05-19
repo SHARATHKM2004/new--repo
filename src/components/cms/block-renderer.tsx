@@ -278,7 +278,7 @@ export async function BlockRenderer({
           <p className="mt-3 max-w-2xl text-sm leading-7 text-white/78">{block.body}</p>
           <Link
             href={block.action.href}
-            className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-foreground"
+            className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-bold text-[#1247ff]"
           >
             {block.action.label}
           </Link>
