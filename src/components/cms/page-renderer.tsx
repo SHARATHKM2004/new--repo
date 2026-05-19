@@ -321,6 +321,8 @@ export async function PageRenderer({
   const showPageHeader = Boolean(
     page.eyebrow || page.title || page.summary || fallbackNotice || author || pageKicker,
   );
+  const trendingInsights =
+    page.type === "home" ? (await getInsights({ locale, draft })).slice(0, 4) : [];
 
   if (page.type === "insight") {
     const labels = {
@@ -576,6 +578,42 @@ export async function PageRenderer({
                 </p>
               ) : null}
               {pageKicker ? <div className="mt-5 text-white">{pageKicker}</div> : null}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {page.type === "home" && trendingInsights.length ? (
+        <section className="-mx-6 bg-[#1247ff] px-6 py-16 lg:-mx-10 lg:px-10 lg:py-20">
+          <div className="mx-auto max-w-[1240px]">
+            <h2 className="text-4xl font-extrabold uppercase leading-tight tracking-tight text-white lg:text-5xl">
+              {locale === "en" ? "Trending Insights" : "Tendencias destacadas"}
+            </h2>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-white/90">
+              {locale === "en"
+                ? "Fresh perspectives and strategic insights from Summit Advisory Group"
+                : "Perspectivas frescas e ideas estrategicas de Summit Advisory Group"}
+            </p>
+            <div className="mt-10 grid gap-x-8 gap-y-10 md:grid-cols-2 lg:grid-cols-4">
+              {trendingInsights.map((item) => (
+                <article
+                  key={item.id}
+                  className="flex flex-col border-t-2 border-white pt-5"
+                >
+                  <h3 className="text-xl font-bold leading-snug text-white">
+                    <Link href={`/${locale}/${item.slug.join("/")}`} className="hover:underline">
+                      {item.title}
+                    </Link>
+                  </h3>
+                  <p className="mt-4 text-sm leading-7 text-white/90">{item.summary}</p>
+                  <Link
+                    href={`/${locale}/${item.slug.join("/")}`}
+                    className="mt-6 inline-flex text-sm font-semibold uppercase tracking-wide text-white hover:underline"
+                  >
+                    {locale === "en" ? "Read now >" : "Leer ahora >"}
+                  </Link>
+                </article>
+              ))}
             </div>
           </div>
         </section>
