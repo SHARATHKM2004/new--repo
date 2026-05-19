@@ -90,9 +90,11 @@ export function SiteFooter({ locale, content }: { locale: Locale; content: SiteF
           <div className="flex items-start justify-end">
             <Link
               href={`/${locale}`}
-              className="inline-flex min-w-[260px] items-center justify-center bg-white px-6 py-5 text-center text-base font-bold uppercase leading-tight tracking-wide text-[#1247ff]"
+              aria-label={BRAND_NAME}
+              style={{ color: "#1247ff" }}
+              className="inline-flex min-w-[260px] items-center justify-center border-4 border-[#1247ff] bg-white px-6 py-5 text-center text-lg font-extrabold uppercase leading-tight tracking-wide"
             >
-              {BRAND_NAME}
+              <span style={{ color: "#1247ff" }}>{BRAND_NAME}</span>
             </Link>
           </div>
         </div>
