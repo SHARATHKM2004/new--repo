@@ -527,15 +527,15 @@ export async function PageRenderer({
             className="absolute inset-0 h-full w-full object-cover"
           >
             <source
-              src="https://cdn.pixabay.com/video/2024/03/15/204306-924035851_large.mp4"
-              type="video/mp4"
-            />
-            <source
-              src="https://assets.mixkit.co/videos/preview/mixkit-business-team-meeting-in-a-modern-office-43066-large.mp4"
+              src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
               type="video/mp4"
             />
             <source
               src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+              type="video/mp4"
+            />
+            <source
+              src="https://cdn.pixabay.com/video/2024/03/15/204306-924035851_large.mp4"
               type="video/mp4"
             />
           </video>
