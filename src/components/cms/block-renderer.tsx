@@ -21,13 +21,17 @@ function resolveCardHref(href: string, locale: Locale) {
 
 function ContentCard({ page }: { page: Page }) {
   return (
-    <article className="rounded-[1.75rem] border border-border bg-surface-strong p-6 shadow-[0_16px_40px_rgba(21,49,58,0.08)]">
-      <p className="eyebrow text-[11px] font-semibold">{page.eyebrow ?? page.type}</p>
-      <h3 className="mt-3 text-xl font-semibold tracking-tight">{page.title}</h3>
-      <p className="mt-3 text-sm leading-7 text-muted">{page.summary}</p>
+    <article className="border-t-2 border-t-[#1554ff] bg-white px-3 pb-6 pt-4 shadow-none lg:px-4">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#1554ff]">
+        {page.eyebrow ?? page.type}
+      </p>
+      <h3 className="mt-3 max-w-[18rem] text-[2rem] font-medium leading-[1.02] tracking-tight text-[#1554ff]">
+        {page.title}
+      </h3>
+      <p className="mt-3 max-w-[18rem] text-[1.05rem] leading-8 text-[#111827]">{page.summary}</p>
       <Link
         href={`/${page.locale}/${page.slug.join("/")}`}
-        className="mt-5 inline-flex text-sm font-semibold text-accent transition hover:text-accent-strong"
+        className="mt-8 inline-flex border border-[#1554ff] px-5 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#1554ff] transition hover:bg-[#1554ff] hover:text-white"
       >
         Explore
       </Link>
