@@ -1,44 +1,53 @@
 import { NextResponse } from "next/server";
-import { saveLeadSubmission } from "@/lib/leads";
+import { ensureLeadsTable, sql } from "@/lib/db";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as Partial<{
-    name: string;
-    email: string;
-    company: string;
-    message: string;
-  }>;
+  try {
+    const body = (await request.json()) as Partial<{
+      name: string;
+      email: string;
+      company: string;
+      message: string;
+    }>;
 
-  const name = body.name?.trim() ?? "";
-  const email = body.email?.trim() ?? "";
-  const company = body.company?.trim() ?? "";
-  const message = body.message?.trim() ?? "";
+    const name = body.name?.trim() ?? "";
+    const email = body.email?.trim() ?? "";
+    const company = body.company?.trim() ?? "";
+    const message = body.message?.trim() ?? "";
 
-  if (!name || !email || !company || !message) {
+    if (!name || !email || !company || !message) {
+      return NextResponse.json(
+        { message: "All fields are required." },
+        { status: 400 },
+      );
+    }
+
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { message: "Please provide a valid email address." },
+        { status: 400 },
+      );
+    }
+
+    await ensureLeadsTable();
+    await sql`
+      INSERT INTO leads (name, email, company, message)
+      VALUES (${name}, ${email}, ${company}, ${message})
+    `;
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("[api/leads] failed", error);
     return NextResponse.json(
-      { message: "All fields are required." },
-      { status: 400 },
+      { message: "Unable to save lead." },
+      { status: 500 },
     );
   }
-
-  if (!isValidEmail(email)) {
-    return NextResponse.json(
-      { message: "Please provide a valid email address." },
-      { status: 400 },
-    );
-  }
-
-  await saveLeadSubmission({
-    name,
-    email,
-    company,
-    message,
-    createdAt: new Date().toISOString(),
-  });
-
-  return NextResponse.json({ ok: true });
 }

@@ -9,10 +9,11 @@ if (!url) {
 
 export const sql = neon(url ?? "");
 
-let initialized = false;
+let subscribersInitialized = false;
+let leadsInitialized = false;
 
 export async function ensureSubscribersTable() {
-  if (initialized) return;
+  if (subscribersInitialized) return;
   await sql`
     CREATE TABLE IF NOT EXISTS subscribers (
       id           SERIAL PRIMARY KEY,
@@ -26,5 +27,20 @@ export async function ensureSubscribersTable() {
       submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
-  initialized = true;
+  subscribersInitialized = true;
+}
+
+export async function ensureLeadsTable() {
+  if (leadsInitialized) return;
+  await sql`
+    CREATE TABLE IF NOT EXISTS leads (
+      id           SERIAL PRIMARY KEY,
+      name         TEXT NOT NULL,
+      email        TEXT NOT NULL,
+      company      TEXT NOT NULL,
+      message      TEXT NOT NULL,
+      submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+  leadsInitialized = true;
 }
