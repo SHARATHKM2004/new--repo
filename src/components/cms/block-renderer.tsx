@@ -121,7 +121,7 @@ export async function BlockRenderer({
   switch (block.type) {
     case "hero":
       return (
-        <section className="relative overflow-hidden rounded-[2.25rem]">
+        <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=70"
