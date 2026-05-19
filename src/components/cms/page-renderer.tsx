@@ -550,38 +550,40 @@ export async function PageRenderer({
       {page.type === "resourceCenter" ? <ResourceCenterToolbar locale={locale} /> : null}
 
       {page.type === "resourceCenter" ? (
-        <section className="grid gap-5 lg:grid-cols-3">
-          {resourceItems.length ? (
-            resourceItems.map((item) => (
-              <article key={item.id} className="panel rounded-[1.75rem] p-6">
-                <p className="eyebrow text-[11px] font-semibold">{item.topics.join(" • ")}</p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight">{item.title}</h2>
-                <p className="mt-3 text-sm leading-7 text-muted">{item.summary}</p>
-                <div className="mt-4 flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-muted">
-                  <span>{item.readTime}</span>
-                  <span>•</span>
-                  <span>{item.publishedAt}</span>
-                </div>
-                <Link
-                  href={`/${locale}/${item.slug.join("/")}`}
-                  className="mt-5 inline-flex text-sm font-semibold text-accent"
+        <section className="bg-[#f3f4f6] -mx-6 px-6 py-12 lg:-mx-10 lg:px-10 lg:py-16">
+          <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+            {resourceItems.length ? (
+              resourceItems.map((item) => (
+                <article
+                  key={item.id}
+                  className="flex flex-col border-t-2 border-[#1554ff] pt-5"
                 >
-                  {locale === "en" ? "Read insight" : "Leer articulo"}
-                </Link>
-              </article>
-            ))
-          ) : (
-            <div className="panel rounded-[1.75rem] p-6 lg:col-span-3">
-              <h2 className="text-2xl font-semibold tracking-tight">
-                {locale === "en" ? "No results matched your filters." : "No hay resultados para esos filtros."}
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-muted">
-                {locale === "en"
-                  ? "Clear one of the filters or add more insight content to the mock provider."
-                  : "Limpie un filtro o agregue mas contenido al proveedor mock."}
-              </p>
-            </div>
-          )}
+                  <h2 className="text-2xl font-semibold leading-tight text-[#1554ff]">
+                    <Link href={`/${locale}/${item.slug.join("/")}`} className="hover:underline">
+                      {item.title}
+                    </Link>
+                  </h2>
+                  <p className="mt-4 text-[15px] leading-7 text-[#1f2937]">{item.summary}</p>
+                  <div className="mt-4 flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-[#4b5563]">
+                    <span>{item.readTime}</span>
+                    <span>•</span>
+                    <span>{item.publishedAt}</span>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <div className="border-t-2 border-[#1554ff] pt-5 lg:col-span-3">
+                <h2 className="text-2xl font-semibold leading-tight text-[#1554ff]">
+                  {locale === "en" ? "No results matched your filters." : "No hay resultados para esos filtros."}
+                </h2>
+                <p className="mt-4 text-[15px] leading-7 text-[#1f2937]">
+                  {locale === "en"
+                    ? "Clear one of the filters or add more insight content to the mock provider."
+                    : "Limpie un filtro o agregue mas contenido al proveedor mock."}
+                </p>
+              </div>
+            )}
+          </div>
         </section>
       ) : null}
 
