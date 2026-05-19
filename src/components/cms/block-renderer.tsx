@@ -250,7 +250,8 @@ export async function BlockRenderer({
               <article key={card.title} className="border-t border-[#d1d5db] pt-5">
                 <Link
                   href={resolveCardHref(card.href, locale)}
-                  className="text-xl font-bold leading-snug text-[#1247ff] hover:underline"
+                  style={{ color: "#1247ff" }}
+                  className="text-xl font-bold leading-snug hover:underline"
                 >
                   {card.title}
                 </Link>
