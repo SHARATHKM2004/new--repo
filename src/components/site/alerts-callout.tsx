@@ -2,20 +2,32 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import type { AlertsCalloutContent } from "@/lib/cms/types";
 
-export function AlertsCallout({ locale }: { locale: string }) {
+export function AlertsCallout({
+  locale,
+  content,
+}: {
+  locale: string;
+  content?: AlertsCalloutContent;
+}) {
   const [active, setActive] = useState(false);
 
   const eyebrow =
-    locale === "es" ? "SUMMIT ALERTAS Y ACTUALIZACIONES" : "SUMMIT ALERTS & UPDATES";
+    content?.eyebrow ||
+    (locale === "es" ? "SUMMIT ALERTAS Y ACTUALIZACIONES" : "SUMMIT ALERTS & UPDATES");
   const heading =
-    locale === "es" ? "LA PERSPECTIVA LO CAMBIA TODO." : "FORESIGHT CHANGES OUTCOMES.";
+    content?.heading ||
+    (locale === "es" ? "LA PERSPECTIVA LO CAMBIA TODO." : "FORESIGHT CHANGES OUTCOMES.");
   const body =
-    locale === "es"
+    content?.body ||
+    (locale === "es"
       ? "Reciba a tiempo desarrollos de la industria, cambios regulatorios y otras noticias que impactan su exito."
-      : "Receive timely industry developments, regulatory changes and other news impacting your success.";
+      : "Receive timely industry developments, regulatory changes and other news impacting your success.");
   const cta =
-    locale === "es" ? "RECIBIR ALERTAS Y ACTUALIZACIONES" : "GET ALERTS AND UPDATES";
+    content?.ctaLabel ||
+    (locale === "es" ? "RECIBIR ALERTAS Y ACTUALIZACIONES" : "GET ALERTS AND UPDATES");
+  const href = content?.ctaHref || "/subscription";
 
   return (
     <section className="bg-[#f3f4f6]">
@@ -28,7 +40,7 @@ export function AlertsCallout({ locale }: { locale: string }) {
         </h2>
         <p className="mt-5 max-w-2xl text-sm leading-7 text-[#4b5563]">{body}</p>
         <Link
-          href="/subscription"
+          href={href}
           onMouseDown={() => setActive(true)}
           className={`mt-8 inline-flex items-center justify-center border-2 border-[#1247ff] px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition ${
             active

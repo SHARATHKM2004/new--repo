@@ -258,6 +258,14 @@ export type SiteFooterColumn = {
   links: LinkField[];
 };
 
+export type AlertsCalloutContent = {
+  eyebrow?: string;
+  heading?: string;
+  body?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+};
+
 export type SiteFooterContent = {
   eyebrow?: string;
   title?: string;
@@ -265,6 +273,7 @@ export type SiteFooterContent = {
   columns: SiteFooterColumn[];
   socialLinks: LinkField[];
   copyrightText?: string;
+  alertsCallout?: AlertsCalloutContent;
 };
 
 export type OptimizelyWebhookPayload = {

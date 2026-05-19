@@ -228,6 +228,16 @@ type OptimizelyFooterItem = {
       platform?: string;
       href?: string;
     }>;
+    alertsEyebrow?: string;
+    AlertsEyebrow?: string;
+    alertsHeading?: string;
+    AlertsHeading?: string;
+    alertsBody?: string;
+    AlertsBody?: string;
+    alertsCtaLabel?: string;
+    AlertsCtaLabel?: string;
+    alertsCtaHref?: string;
+    AlertsCtaHref?: string;
   };
 };
 
@@ -1499,6 +1509,22 @@ export async function getSiteFooterContent(
     })
     .filter((link): link is { label: string; href: string } => Boolean(link));
 
+  const alertsEyebrow = (footer._json?.alertsEyebrow ?? footer._json?.AlertsEyebrow)?.trim() || undefined;
+  const alertsHeading = (footer._json?.alertsHeading ?? footer._json?.AlertsHeading)?.trim() || undefined;
+  const alertsBody = (footer._json?.alertsBody ?? footer._json?.AlertsBody)?.trim() || undefined;
+  const alertsCtaLabel = (footer._json?.alertsCtaLabel ?? footer._json?.AlertsCtaLabel)?.trim() || undefined;
+  const alertsCtaHref = (footer._json?.alertsCtaHref ?? footer._json?.AlertsCtaHref)?.trim() || undefined;
+  const alertsCallout =
+    alertsEyebrow || alertsHeading || alertsBody || alertsCtaLabel || alertsCtaHref
+      ? {
+          eyebrow: alertsEyebrow,
+          heading: alertsHeading,
+          body: alertsBody,
+          ctaLabel: alertsCtaLabel,
+          ctaHref: alertsCtaHref,
+        }
+      : undefined;
+
   return {
     eyebrow: footer._json?.eyebrow?.trim() || fallback.eyebrow,
     title: footer._json?.title?.trim() || fallback.title,
@@ -1507,6 +1533,7 @@ export async function getSiteFooterContent(
     socialLinks,
     copyrightText:
       footer.copyrightText?.trim() || footer._json?.copyrightText?.trim() || undefined,
+    alertsCallout,
   };
 }
 

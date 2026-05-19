@@ -24,7 +24,7 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
 
   return (
     <>
-      {hideCallout ? null : <AlertsCallout locale={locale} />}
+      {hideCallout ? null : <AlertsCallout locale={locale} content={content.alertsCallout} />}
       <footer className="mt-20 bg-[#1247ff] text-white">
       <div className="mx-auto w-full max-w-[1400px] px-6 py-12 lg:px-10">
         {(content.eyebrow || content.title || content.body) ? (
