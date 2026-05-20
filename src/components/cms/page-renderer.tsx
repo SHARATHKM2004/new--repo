@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { BlockRenderer } from "@/components/cms/block-renderer";
 import {
   getAuthorForInsight,
@@ -42,7 +43,13 @@ function renderInlineArticleBlock(block: Block, key: string) {
     return (
       <figure key={key} className="my-8 space-y-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={block.src} alt={block.alt} className="w-full object-cover" />
+        <img
+          src={block.src}
+          alt={block.alt}
+          loading="lazy"
+          decoding="async"
+          className="w-full object-cover"
+        />
         {block.caption ? <figcaption className="text-sm text-muted">{block.caption}</figcaption> : null}
       </figure>
     );
@@ -203,6 +210,84 @@ function ResourceCenterToolbar({ locale }: { locale: Locale }) {
   );
 }
 
+function ResourceCenterResultsSkeleton() {
+  return (
+    <section className="bg-[#f3f4f6] -mx-6 px-6 py-12 lg:-mx-10 lg:px-10 lg:py-16">
+      <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <article key={`resource-skeleton-${index}`} className="flex flex-col border-t-2 border-[#1554ff] pt-5">
+            <div className="h-7 w-3/4 animate-pulse bg-[#dbe7ff]" />
+            <div className="mt-4 h-20 animate-pulse bg-[#e5e7eb]" />
+            <div className="mt-4 h-4 w-1/2 animate-pulse bg-[#d1d5db]" />
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+async function ResourceCenterResults({
+  locale,
+  draft,
+  filters,
+}: {
+  locale: Locale;
+  draft: boolean;
+  filters: {
+    q?: string;
+    topic?: string;
+    service?: string;
+    industry?: string;
+  };
+}) {
+  const resourceItems = await getInsights({
+    locale,
+    draft,
+    query: filters.q,
+    topic: filters.topic,
+    service: filters.service,
+    industry: filters.industry,
+  });
+
+  return (
+    <section className="bg-[#f3f4f6] -mx-6 px-6 py-12 lg:-mx-10 lg:px-10 lg:py-16">
+      <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+        {resourceItems.length ? (
+          resourceItems.map((item) => (
+            <article
+              key={item.id}
+              className="flex flex-col border-t-2 border-[#1554ff] pt-5"
+            >
+              <h2 className="text-2xl font-semibold leading-tight text-[#1554ff]">
+                <Link href={`/${locale}/${item.slug.join("/")}`} className="hover:underline">
+                  {item.title}
+                </Link>
+              </h2>
+              <p className="mt-4 text-[15px] leading-7 text-[#1f2937]">{item.summary}</p>
+              <div className="mt-4 flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-[#4b5563]">
+                <span>{item.readTime}</span>
+                <span>•</span>
+                <span>{item.publishedAt}</span>
+              </div>
+            </article>
+          ))
+        ) : (
+          <div className="border-t-2 border-[#1554ff] pt-5 lg:col-span-3">
+            <h2 className="text-2xl font-semibold leading-tight text-[#1554ff]">
+              {locale === "en" ? "No results matched your filters." : "No hay resultados para esos filtros."}
+            </h2>
+            <p className="mt-4 text-[15px] leading-7 text-[#1f2937]">
+              {locale === "en"
+                ? "Clear one of the filters or add more insight content to the mock provider."
+                : "Limpie un filtro o agregue mas contenido al proveedor mock."}
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export async function PageRenderer({
   page,
   locale,
@@ -285,17 +370,6 @@ export async function PageRenderer({
       : page.type === "caseStudy"
         ? await getRelatedPages({ locale, ids: page.relatedServiceIds, draft })
         : [];
-  const resourceItems =
-    page.type === "resourceCenter"
-      ? await getInsights({
-          locale,
-          draft,
-          query: filters.q,
-          topic: filters.topic,
-          service: filters.service,
-          industry: filters.industry,
-        })
-      : [];
   const isArticleLandingPage =
     page.type === "standard" &&
     page.slug[0] === "article" &&
@@ -367,7 +441,13 @@ export async function PageRenderer({
               <div className="flex flex-wrap items-center gap-3 text-sm text-[#4b5563]">
                 {author?.avatarSrc ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={author.avatarSrc} alt={author.title} className="h-8 w-8 rounded-full object-cover" />
+                  <img
+                    src={author.avatarSrc}
+                    alt={author.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
                 ) : null}
                 {insightAuthorName ? (
                   author ? (
@@ -452,7 +532,13 @@ export async function PageRenderer({
                 <div className="flex items-center gap-4">
                   {author.avatarSrc ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={author.avatarSrc} alt={author.title} className="h-16 w-16 rounded-full object-cover" />
+                    <img
+                      src={author.avatarSrc}
+                      alt={author.title}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-16 w-16 rounded-full object-cover"
+                    />
                   ) : null}
                   <div>
                     <div className="text-xl font-semibold text-black">{author.title}</div>
@@ -484,6 +570,8 @@ export async function PageRenderer({
                             <img
                               src={recommendationAuthor.avatarSrc}
                               alt={recommendationAuthor.title}
+                              loading="lazy"
+                              decoding="async"
                               className="h-8 w-8 rounded-full object-cover"
                             />
                           ) : null}
@@ -667,41 +755,9 @@ export async function PageRenderer({
       {page.type === "resourceCenter" ? <ResourceCenterToolbar locale={locale} /> : null}
 
       {page.type === "resourceCenter" ? (
-        <section className="bg-[#f3f4f6] -mx-6 px-6 py-12 lg:-mx-10 lg:px-10 lg:py-16">
-          <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
-            {resourceItems.length ? (
-              resourceItems.map((item) => (
-                <article
-                  key={item.id}
-                  className="flex flex-col border-t-2 border-[#1554ff] pt-5"
-                >
-                  <h2 className="text-2xl font-semibold leading-tight text-[#1554ff]">
-                    <Link href={`/${locale}/${item.slug.join("/")}`} className="hover:underline">
-                      {item.title}
-                    </Link>
-                  </h2>
-                  <p className="mt-4 text-[15px] leading-7 text-[#1f2937]">{item.summary}</p>
-                  <div className="mt-4 flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-[#4b5563]">
-                    <span>{item.readTime}</span>
-                    <span>•</span>
-                    <span>{item.publishedAt}</span>
-                  </div>
-                </article>
-              ))
-            ) : (
-              <div className="border-t-2 border-[#1554ff] pt-5 lg:col-span-3">
-                <h2 className="text-2xl font-semibold leading-tight text-[#1554ff]">
-                  {locale === "en" ? "No results matched your filters." : "No hay resultados para esos filtros."}
-                </h2>
-                <p className="mt-4 text-[15px] leading-7 text-[#1f2937]">
-                  {locale === "en"
-                    ? "Clear one of the filters or add more insight content to the mock provider."
-                    : "Limpie un filtro o agregue mas contenido al proveedor mock."}
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
+        <Suspense fallback={<ResourceCenterResultsSkeleton />}>
+          <ResourceCenterResults locale={locale} draft={draft} filters={filters} />
+        </Suspense>
       ) : null}
 
       <div className="flex flex-col gap-8">

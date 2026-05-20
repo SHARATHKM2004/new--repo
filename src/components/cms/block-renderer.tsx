@@ -1,7 +1,25 @@
 import Link from "next/link";
-import { LeadForm } from "@/components/forms/lead-form";
+import Image from "next/image";
+import { Suspense, lazy } from "react";
 import { getAuthorForInsight, getFeaturedContent, getInsights } from "@/lib/cms";
 import type { Block, Locale, Page } from "@/lib/cms/types";
+
+const LeadForm = lazy(() =>
+  import("@/components/forms/lead-form").then((module) => ({
+    default: module.LeadForm,
+  })),
+);
+
+function LeadFormFallback() {
+  return (
+    <section className="panel rounded-[2rem] p-8 space-y-6">
+      <div className="h-8 w-1/2 animate-pulse bg-[#e5e7eb]" />
+      <div className="h-4 w-3/4 animate-pulse bg-[#d1d5db]" />
+      <div className="h-40 animate-pulse bg-[#e5e7eb]" />
+      <div className="h-10 w-32 animate-pulse bg-[#dbe7ff]" />
+    </section>
+  );
+}
 
 function resolveCardHref(href: string, locale: Locale) {
   if (/^https?:\/\//.test(href)) {
@@ -56,10 +74,12 @@ function ArticleCard({
   return (
     <article className="flex h-full flex-col overflow-hidden bg-[#ececec]">
       <Link href={href} className="block overflow-hidden bg-slate-100">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={page.cardImage?.src ?? "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1200&q=80"}
           alt={page.cardImage?.alt ?? page.title}
+          width={1200}
+          height={640}
+          sizes="(max-width: 1024px) 100vw, 33vw"
           className="h-64 w-full object-cover transition duration-300 hover:scale-[1.02]"
         />
       </Link>
@@ -70,6 +90,8 @@ function ArticleCard({
             <img
               src={author.avatarSrc}
               alt={author.title}
+              loading="lazy"
+              decoding="async"
               className="h-7 w-7 rounded-full object-cover"
             />
           ) : null}
@@ -122,11 +144,12 @@ export async function BlockRenderer({
     case "hero":
       return (
         <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=70"
             alt=""
-            aria-hidden
+            fill
+            priority
+            sizes="100vw"
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-black/40" aria-hidden />
@@ -181,7 +204,13 @@ export async function BlockRenderer({
       return (
         <section className="panel overflow-hidden rounded-[2rem] p-4 lg:p-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={block.src} alt={block.alt} className="w-full rounded-[1.5rem] object-cover" />
+          <img
+            src={block.src}
+            alt={block.alt}
+            loading="lazy"
+            decoding="async"
+            className="w-full rounded-[1.5rem] object-cover"
+          />
           {block.caption ? <p className="mt-4 text-sm leading-7 text-muted">{block.caption}</p> : null}
         </section>
       );
@@ -350,12 +379,14 @@ export async function BlockRenderer({
     }
     case "form":
       return (
-        <LeadForm
-          locale={locale}
-          title={block.title}
-          intro={block.intro}
-          submitLabel={block.submitLabel ?? (locale === "en" ? "Submit" : "Enviar")}
-        />
+        <Suspense fallback={<LeadFormFallback />}>
+          <LeadForm
+            locale={locale}
+            title={block.title}
+            intro={block.intro}
+            submitLabel={block.submitLabel ?? (locale === "en" ? "Submit" : "Enviar")}
+          />
+        </Suspense>
       );
     default:
       return null;

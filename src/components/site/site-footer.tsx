@@ -1,6 +1,25 @@
 import Link from "next/link";
+import { Suspense, lazy } from "react";
 import type { Locale, SiteFooterContent } from "@/lib/cms/types";
-import { AlertsCallout } from "./alerts-callout";
+
+const AlertsCallout = lazy(() =>
+  import("./alerts-callout").then((module) => ({
+    default: module.AlertsCallout,
+  })),
+);
+
+function AlertsCalloutFallback() {
+  return (
+    <div className="bg-[#f3f4f6] px-6 py-16 lg:px-10 lg:py-20">
+      <div className="mx-auto max-w-7xl animate-pulse space-y-4">
+        <div className="h-3 w-32 bg-[#dbe7ff]" />
+        <div className="h-10 w-1/2 bg-[#e5e7eb]" />
+        <div className="h-20 bg-[#e5e7eb]" />
+        <div className="h-10 w-40 bg-[#d1d5db]" />
+      </div>
+    </div>
+  );
+}
 
 const BRAND_NAME = "Summit Advisory Group";
 
@@ -24,7 +43,11 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
 
   return (
     <>
-      {hideCallout ? null : <AlertsCallout locale={locale} content={content.alertsCallout} />}
+      {hideCallout ? null : (
+        <Suspense fallback={<AlertsCalloutFallback />}>
+          <AlertsCallout locale={locale} content={content.alertsCallout} />
+        </Suspense>
+      )}
       <footer className="mt-20 bg-[#1247ff] text-white">
       <div className="mx-auto w-full max-w-[1400px] px-6 py-12 lg:px-10">
         {(content.eyebrow || content.title || content.body) ? (
