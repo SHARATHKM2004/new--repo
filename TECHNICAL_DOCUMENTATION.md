@@ -268,32 +268,7 @@ A second engineer should follow this order. Each step is independently testable.
 
 ---
 
-## 14. Demo Script (suggested order for the meeting)
-
-1. Show `/en` — point out header/footer/blocks all come from Optimizely.
-2. Open Optimizely, edit a Hero title, publish.
-3. Reload `/en` — change is live (revalidated by webhook).
-4. Open `/api/optimizely/health` — show `true` across the board.
-5. Open a draft in Optimizely → Preview → show the draft cookie path renders unpublished content.
-6. Submit the contact form on `/en/contact` → open `/admin/leads` → show the row → click CSV export.
-7. Walk through `src/lib/cms/types.ts` and `index.ts` to explain the abstraction.
-8. Show `CMS_PROVIDER=mock` in `.env.local` → restart → entire site still works offline.
-
----
-
-## 15. Key Design Decisions (why, not what)
-
-- **One catch-all route, not file-per-page.** CMS owns URL structure; no code changes to add pages.
-- **Discriminated union for blocks.** Compile-time exhaustiveness when adding a new block type.
-- **`_json` payload over typed GraphQL fields.** Optimizely's `_json` lets authors add fields without changing GraphQL or redeploying.
-- **Merge live + mock, never just one.** Lets the site go live before every CMS item is authored.
-- **Tag-based revalidation.** Single webhook can invalidate any subset of the site.
-- **JSON file for leads with DB-ready interface.** Demo runs without external dependencies; production can swap to Neon by editing one file.
-- **Provider switch via env, not build flag.** Same artifact runs offline or live.
-
----
-
-## 16. Related Documents
+## 14. Related Documents
 
 - [README.md](README.md) — quickstart
 - [documentation.md](documentation.md) — full step-by-step setup, full CMS schema, and Vercel deployment guide
