@@ -11,14 +11,12 @@ const labels = {
     tagline: "CMS practice build",
     switchLabel: "ES",
     resourceCenter: "Resource Center",
-    contact: "Contact",
   },
   es: {
     title: "Summit Advisory Group",
     tagline: "Proyecto de practica CMS",
     switchLabel: "EN",
     resourceCenter: "Centro de Recursos",
-    contact: "Contacto",
   },
 } as const;
 
@@ -47,7 +45,7 @@ export function SiteHeader({
     "careers",
   ];
   const panelNavKeywords = ["software solutions", "about", "careers", "eventos", "events"];
-  const topRowExcludedKeywords = ["recursos", ...secondaryNavKeywords];
+  const topRowExcludedKeywords = ["insights", "recursos", ...secondaryNavKeywords];
 
   function findNavByKeywords(keywords: string[]) {
     return navigation.find((item) => keywords.includes(item.label.trim().toLowerCase()));
@@ -85,15 +83,9 @@ export function SiteHeader({
     careersItem,
   ];
 
-  // Strip "Contact" from the data-driven nav so we can place it at the end in the required order.
-  const contactKeywords = ["contact", "contacto"];
   const primaryNav = navigation.filter((item) => {
     const normalized = item.label.trim().toLowerCase();
-    return (
-      !contactKeywords.includes(normalized) &&
-      !secondaryNavKeywords.includes(normalized) &&
-      !topRowExcludedKeywords.includes(normalized)
-    );
+    return !secondaryNavKeywords.includes(normalized) && !topRowExcludedKeywords.includes(normalized);
   });
 
   const quickLinks = useMemo(
@@ -127,13 +119,6 @@ export function SiteHeader({
                   {item.label}
                 </Link>
               ))}
-              <Link
-                href={`/${locale}/contact`}
-                onClick={() => setActivePanel(null)}
-                className="text-[#101828] underline-offset-4 hover:underline hover:decoration-2"
-              >
-                {labels[locale].contact}
-              </Link>
             </nav>
             <HeaderSearch locale={locale} />
           </div>
