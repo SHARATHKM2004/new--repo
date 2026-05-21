@@ -485,7 +485,7 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
       return {
         type: "form",
         formId: "lead",
-        title: block.title ?? "Contact us",
+        title: block.title ?? "",
         intro: block.description ?? "",
       };
     case "StoryBlock": {
