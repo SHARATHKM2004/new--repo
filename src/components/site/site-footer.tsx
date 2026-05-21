@@ -58,8 +58,21 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
             </Link>
           </div>
 
-          {/* Link columns — center */}
+          {/* Link columns — center, with CMS content on the left */}
           <div className="flex flex-1 justify-center gap-16 px-10">
+            {(content.eyebrow || content.title || content.body) ? (
+              <div className="space-y-3 max-w-[220px]">
+                {content.eyebrow ? (
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/80">{content.eyebrow}</p>
+                ) : null}
+                {content.title ? (
+                  <h2 className="serif text-xl font-semibold tracking-tight text-white">{content.title}</h2>
+                ) : null}
+                {content.body ? (
+                  <p className="text-sm leading-7 text-white/90">{content.body}</p>
+                ) : null}
+              </div>
+            ) : null}
             {content.columns.slice(0, 2).map((column) => (
               <div key={column.title} className="space-y-3">
                 {column.links.map((link) => (
