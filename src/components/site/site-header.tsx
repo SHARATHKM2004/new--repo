@@ -152,7 +152,7 @@ export function SiteHeader({
                       key={item.href}
                       href={item.href}
                       onClick={() => setActivePanel(null)}
-                      className="px-2 py-1 text-[#1247ff] hover:bg-[#1247ff] hover:text-white"
+                      className="px-2 py-1 text-[#1247ff] hover:bg-[#1247ff] hover:!text-white focus:bg-[#1247ff] focus:!text-white"
                     >
                       {item.label}
                     </Link>
