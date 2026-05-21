@@ -114,7 +114,7 @@ export function SiteHeader({
                   key={item.href}
                   href={item.href}
                   onClick={() => setActivePanel(null)}
-                  className="text-[#101828] underline-offset-4 hover:underline hover:decoration-2"
+                  className="relative pb-1 text-[#101828] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-[#101828] after:transition-transform after:duration-200 after:content-[''] hover:after:scale-x-100 focus-visible:after:scale-x-100"
                 >
                   {item.label}
                 </Link>
