@@ -101,13 +101,14 @@ export function SiteHeader({
       <div className="flex w-full items-stretch">
         <Link
           href={`/${locale}`}
-          className="flex min-w-[180px] items-center justify-center bg-[#1247ff] px-6 py-5 text-center text-base font-bold uppercase leading-tight tracking-wide text-white lg:min-w-[220px] lg:text-lg"
+          className="flex min-w-[220px] items-center justify-center bg-[#1247ff] px-8 py-5 text-center text-base font-bold uppercase leading-tight tracking-wide text-white lg:min-w-[300px] lg:text-lg"
         >
           {brandTitle}
         </Link>
 
-        <div className="flex flex-1 flex-col justify-center px-6 py-3 lg:px-10">
-          <div className="flex items-center justify-end gap-6">
+        <div className="flex flex-1">
+          <div className="mx-auto flex w-full max-w-[1400px] flex-col justify-center px-6 py-3 lg:px-10">
+            <div className="flex items-center justify-end gap-6">
             <nav className="hidden flex-nowrap items-center justify-end gap-x-5 text-[12px] font-medium uppercase tracking-wide text-[#0f172a] lg:flex">
               {primaryNav.map((item) => (
                 <Link
@@ -121,48 +122,49 @@ export function SiteHeader({
               ))}
             </nav>
             <HeaderSearch locale={locale} />
-          </div>
+            </div>
 
-          {secondaryNav.length ? (
-            <nav className="mt-3 hidden items-center justify-end gap-x-8 text-[13px] font-semibold uppercase tracking-wide text-[#1247ff] lg:flex">
-              {secondaryNav.map((item) => {
-                const normalized = item.label.trim().toLowerCase();
-                const isPanelItem = panelNavKeywords.includes(normalized);
-                const isActive = activePanel === normalized;
+            {secondaryNav.length ? (
+              <nav className="mt-3 hidden items-center justify-end gap-x-8 text-[13px] font-semibold uppercase tracking-wide text-[#1247ff] lg:flex">
+                {secondaryNav.map((item) => {
+                  const normalized = item.label.trim().toLowerCase();
+                  const isPanelItem = panelNavKeywords.includes(normalized);
+                  const isActive = activePanel === normalized;
 
-                if (!isPanelItem) {
+                  if (!isPanelItem) {
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setActivePanel(null)}
+                        className="px-2 py-1 text-[#1247ff] hover:bg-[#1247ff] hover:!text-white focus:bg-[#1247ff] focus:!text-white"
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  }
+
                   return (
-                    <Link
+                    <button
                       key={item.href}
-                      href={item.href}
-                      onClick={() => setActivePanel(null)}
-                      className="px-2 py-1 text-[#1247ff] hover:bg-[#1247ff] hover:!text-white focus:bg-[#1247ff] focus:!text-white"
+                      type="button"
+                      onClick={() => {
+                        if (isActive) {
+                          setActivePanel(null);
+                          return;
+                        }
+
+                        setActivePanel(normalized);
+                      }}
+                      className={`px-2 py-1 ${isActive ? "bg-[#1247ff] text-white" : "text-[#1247ff] hover:bg-[#1247ff] hover:text-white"}`}
                     >
                       {item.label}
-                    </Link>
+                    </button>
                   );
-                }
-
-                return (
-                  <button
-                    key={item.href}
-                    type="button"
-                    onClick={() => {
-                      if (isActive) {
-                        setActivePanel(null);
-                        return;
-                      }
-
-                      setActivePanel(normalized);
-                    }}
-                    className={`px-2 py-1 ${isActive ? "bg-[#1247ff] text-white" : "text-[#1247ff] hover:bg-[#1247ff] hover:text-white"}`}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
-          ) : null}
+                })}
+              </nav>
+            ) : null}
+          </div>
         </div>
       </div>
 
