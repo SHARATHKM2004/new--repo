@@ -217,6 +217,10 @@ type OptimizelyFooterItem = {
     eyebrow?: string;
     title?: string;
     body?: string | OptimizelyRichTextField;
+    brandLabel?: string;
+    BrandLabel?: string;
+    logoLabel?: string;
+    LogoLabel?: string;
     copyrightText?: string;
     columns?: Array<{
       title?: string;
@@ -1443,6 +1447,7 @@ export async function getSiteFooterContent(
       locale === "en"
         ? "This scaffold is intentionally opinionated about page modeling, editor guardrails, and the split between CMS content and application-owned workflows."
         : "Esta base es intencionalmente opinionada sobre modelado de paginas, guardrails editoriales y la separacion entre contenido del CMS y flujos propios de la aplicacion.",
+    brandLabel: locale === "en" ? "Summit Advisory Groups" : "Summit Advisory Groups",
     columns: [
       {
         title: locale === "en" ? "Core paths" : "Rutas clave",
@@ -1530,6 +1535,12 @@ export async function getSiteFooterContent(
     eyebrow: footer._json?.eyebrow?.trim() || fallback.eyebrow,
     title: footer._json?.title?.trim() || fallback.title,
     body: getRichTextValue(footer._json?.body) || fallback.body,
+    brandLabel:
+      footer._json?.brandLabel?.trim() ||
+      footer._json?.BrandLabel?.trim() ||
+      footer._json?.logoLabel?.trim() ||
+      footer._json?.LogoLabel?.trim() ||
+      fallback.brandLabel,
     columns: columns.length ? columns : fallback.columns,
     socialLinks,
     copyrightText:

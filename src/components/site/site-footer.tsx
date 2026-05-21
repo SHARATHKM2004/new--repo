@@ -21,8 +21,6 @@ function AlertsCalloutFallback() {
   );
 }
 
-const BRAND_NAME = "Summit Advisory Group";
-
 function pickHref(content: SiteFooterContent, keyword: string): string {
   const match = content.socialLinks.find((link) =>
     link.label.toLowerCase().includes(keyword),
@@ -33,7 +31,8 @@ function pickHref(content: SiteFooterContent, keyword: string): string {
 export function SiteFooter({ locale, content, hideCallout = false }: { locale: Locale; content: SiteFooterContent; hideCallout?: boolean }) {
   const linkedInHref = pickHref(content, "linkedin");
   const facebookHref = pickHref(content, "facebook");
-  const footerLinks = content.columns[0]?.links ?? [];
+  const footerColumns = content.columns.slice(0, 2);
+  const brandLabel = content.brandLabel?.trim() || "Summit Advisory Groups";
 
   return (
     <>
@@ -43,28 +42,9 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
         </Suspense>
       )}
       <footer className="mt-20 bg-[#1247ff] text-white">
-      <div className="w-full py-12 pl-6 pr-0 lg:py-14 lg:pl-10">
-        <div className="flex w-full items-start justify-between gap-10">
-          <div className="max-w-[760px]">
-            {(content.eyebrow || content.title || content.body) ? (
-              <div className="space-y-3">
-                {content.eyebrow ? (
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
-                    {content.eyebrow}
-                  </p>
-                ) : null}
-                {content.title ? (
-                  <h2 className="serif text-3xl font-semibold tracking-tight text-white">
-                    {content.title}
-                  </h2>
-                ) : null}
-                {content.body ? (
-                  <p className="max-w-2xl text-sm leading-7 text-white/90">{content.body}</p>
-                ) : null}
-              </div>
-            ) : null}
-
-            <div className="mt-10 flex items-start gap-14">
+        <div className="w-full py-12 pl-6 pr-0 lg:py-14 lg:pl-10">
+          <div className="flex w-full items-start justify-between gap-10">
+            <div className="flex items-start gap-14 lg:gap-20">
               <div className="flex items-center gap-4 text-white">
                 <Link
                   href={linkedInHref}
@@ -86,32 +66,33 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
                 </Link>
               </div>
 
-              <div className="space-y-3 text-sm text-white">
-                {footerLinks.map((link) => (
-                  <Link
-                    key={`footer-left-${link.href}`}
-                    href={link.href}
-                    className="block text-sm font-normal text-white hover:underline"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
+              {footerColumns.map((column) => (
+                <div key={column.title} className="space-y-3 text-sm text-white">
+                  {column.links.map((link) => (
+                    <Link
+                      key={`${column.title}-${link.href}`}
+                      href={link.href}
+                      className="block text-sm font-normal text-white hover:underline"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex shrink-0 items-start justify-end pt-4">
+              <Link
+                href={`/${locale}`}
+                aria-label={brandLabel}
+                style={{ color: "#1247ff" }}
+                className="inline-flex items-center justify-center border-2 border-[#1247ff] bg-white px-4 py-3 text-center text-base font-extrabold uppercase leading-tight tracking-wide"
+              >
+                <span style={{ color: "#1247ff" }}>{brandLabel}</span>
+              </Link>
             </div>
           </div>
-
-          <div className="flex shrink-0 items-start justify-end pt-12">
-            <Link
-              href={`/${locale}`}
-              aria-label={BRAND_NAME}
-              style={{ color: "#1247ff" }}
-              className="inline-flex items-center justify-center border-2 border-[#1247ff] bg-white px-4 py-3 text-center text-base font-extrabold uppercase leading-tight tracking-wide"
-            >
-              <span style={{ color: "#1247ff" }}>{BRAND_NAME}</span>
-            </Link>
-          </div>
         </div>
-      </div>
 
       {content.copyrightText ? (
         <div className="border-t border-white/20">

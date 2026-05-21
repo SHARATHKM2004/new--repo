@@ -270,6 +270,7 @@ export type SiteFooterContent = {
   eyebrow?: string;
   title?: string;
   body?: string;
+  brandLabel?: string;
   columns: SiteFooterColumn[];
   socialLinks: LinkField[];
   copyrightText?: string;
