@@ -31,8 +31,6 @@ export function SiteHeader({
   navigation: NavigationItem[];
   content: SiteHeaderContent;
 }) {
-  const [activeTopNav, setActiveTopNav] = useState<string | null>(null);
-  const [activeLowerNav, setActiveLowerNav] = useState<string | null>(null);
   const [activePanel, setActivePanel] = useState<string | null>(null);
   const brandTitle = content.title || labels[locale].title;
 
@@ -124,24 +122,16 @@ export function SiteHeader({
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => {
-                    setActiveTopNav(item.label.trim().toLowerCase());
-                    setActivePanel(null);
-                  }}
-                  className={`text-[#101828] hover:underline ${
-                    activeTopNav === item.label.trim().toLowerCase() ? "underline" : ""
-                  }`}
+                  onClick={() => setActivePanel(null)}
+                  className="text-[#101828] underline-offset-4 hover:underline hover:decoration-2"
                 >
                   {item.label}
                 </Link>
               ))}
               <Link
                 href={`/${locale}/contact`}
-                onClick={() => {
-                  setActiveTopNav("contact");
-                  setActivePanel(null);
-                }}
-                className={`text-[#101828] hover:underline ${activeTopNav === "contact" ? "underline" : ""}`}
+                onClick={() => setActivePanel(null)}
+                className="text-[#101828] underline-offset-4 hover:underline hover:decoration-2"
               >
                 {labels[locale].contact}
               </Link>
@@ -161,13 +151,8 @@ export function SiteHeader({
                     <Link
                       key={item.href}
                       href={item.href}
-                      onClick={() => {
-                        setActiveLowerNav(normalized);
-                        setActivePanel(null);
-                      }}
-                      className={`px-2 py-1 text-[#1247ff] ${
-                        activeLowerNav === normalized ? "bg-[#1247ff] text-white" : ""
-                      }`}
+                      onClick={() => setActivePanel(null)}
+                      className="px-2 py-1 text-[#1247ff] hover:bg-[#1247ff] hover:text-white"
                     >
                       {item.label}
                     </Link>
@@ -181,16 +166,12 @@ export function SiteHeader({
                     onClick={() => {
                       if (isActive) {
                         setActivePanel(null);
-                        setActiveLowerNav(null);
                         return;
                       }
 
                       setActivePanel(normalized);
-                      setActiveLowerNav(normalized);
                     }}
-                    className={`px-2 py-1 ${
-                      isActive ? "bg-[#1247ff] text-white" : "text-[#1247ff]"
-                    }`}
+                    className="px-2 py-1 text-[#1247ff] hover:bg-[#1247ff] hover:text-white"
                   >
                     {item.label}
                   </button>
