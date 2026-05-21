@@ -11,20 +11,30 @@ function isValidEmail(value: string) {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<{
-      name: string;
       email: string;
-      company: string;
+      firstName: string;
+      lastName: string;
+      jobTitle: string;
+      organization: string;
+      city: string;
+      state: string;
+      phone: string;
       message: string;
     }>;
 
-    const name = body.name?.trim() ?? "";
     const email = body.email?.trim() ?? "";
-    const company = body.company?.trim() ?? "";
+    const firstName = body.firstName?.trim() ?? "";
+    const lastName = body.lastName?.trim() ?? "";
+    const jobTitle = body.jobTitle?.trim() ?? "";
+    const organization = body.organization?.trim() ?? "";
+    const city = body.city?.trim() ?? "";
+    const state = body.state?.trim() ?? "";
+    const phone = body.phone?.trim() ?? "";
     const message = body.message?.trim() ?? "";
 
-    if (!name || !email || !company || !message) {
+    if (!email || !firstName || !lastName || !jobTitle || !organization || !message) {
       return NextResponse.json(
-        { message: "All fields are required." },
+        { message: "Please complete all required fields." },
         { status: 400 },
       );
     }
@@ -36,10 +46,34 @@ export async function POST(request: Request) {
       );
     }
 
+    const name = `${firstName} ${lastName}`.trim();
+
     await ensureLeadsTable();
     await sql`
-      INSERT INTO leads (name, email, company, message)
-      VALUES (${name}, ${email}, ${company}, ${message})
+      INSERT INTO leads (
+        name,
+        email,
+        company,
+        message,
+        first_name,
+        last_name,
+        job_title,
+        city,
+        state,
+        phone
+      )
+      VALUES (
+        ${name},
+        ${email},
+        ${organization},
+        ${message},
+        ${firstName},
+        ${lastName},
+        ${jobTitle},
+        ${city || null},
+        ${state || null},
+        ${phone || null}
+      )
     `;
 
     return NextResponse.json({ ok: true });

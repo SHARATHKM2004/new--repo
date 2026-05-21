@@ -7,7 +7,13 @@ type LeadRow = {
   id: number;
   name: string;
   email: string;
+  first_name: string | null;
+  last_name: string | null;
+  job_title: string | null;
   company: string;
+  city: string | null;
+  state: string | null;
+  phone: string | null;
   message: string;
   submitted_at: string;
 };
@@ -33,7 +39,7 @@ export default async function AdminLeadsPage({
 
   await ensureLeadsTable();
   const rows = (await sql`
-    SELECT id, name, email, company, message, submitted_at
+    SELECT id, name, email, first_name, last_name, job_title, company, city, state, phone, message, submitted_at
     FROM leads
     ORDER BY submitted_at DESC
     LIMIT 500
@@ -59,10 +65,15 @@ export default async function AdminLeadsPage({
           <thead className="bg-[#f3f4f6] text-left text-xs uppercase tracking-wide text-[#4b5563]">
             <tr>
               <th className="px-3 py-2">Submitted</th>
-              <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Email</th>
-              <th className="px-3 py-2">Company</th>
-              <th className="px-3 py-2">Message</th>
+              <th className="px-3 py-2">First Name</th>
+              <th className="px-3 py-2">Last Name</th>
+              <th className="px-3 py-2">Job Title</th>
+              <th className="px-3 py-2">Organization</th>
+              <th className="px-3 py-2">City</th>
+              <th className="px-3 py-2">State</th>
+              <th className="px-3 py-2">Phone</th>
+              <th className="px-3 py-2">How can we help?</th>
             </tr>
           </thead>
           <tbody>
@@ -71,14 +82,19 @@ export default async function AdminLeadsPage({
                 <td className="px-3 py-2 whitespace-nowrap text-xs text-[#4b5563]">
                   {new Date(r.submitted_at).toLocaleString()}
                 </td>
-                <td className="px-3 py-2">{r.name}</td>
                 <td className="px-3 py-2">{r.email}</td>
+                <td className="px-3 py-2">{r.first_name ?? r.name.split(" ")[0] ?? ""}</td>
+                <td className="px-3 py-2">{r.last_name ?? r.name.split(" ").slice(1).join(" ") ?? ""}</td>
+                <td className="px-3 py-2">{r.job_title ?? ""}</td>
                 <td className="px-3 py-2">{r.company}</td>
+                <td className="px-3 py-2">{r.city ?? ""}</td>
+                <td className="px-3 py-2">{r.state ?? ""}</td>
+                <td className="px-3 py-2">{r.phone ?? ""}</td>
                 <td className="px-3 py-2 text-xs text-[#4b5563] whitespace-pre-wrap">{r.message}</td>
               </tr>
             ))}
             {rows.length === 0 ? (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-[#4b5563]">No leads yet.</td></tr>
+              <tr><td colSpan={10} className="px-3 py-6 text-center text-[#4b5563]">No leads yet.</td></tr>
             ) : null}
           </tbody>
         </table>

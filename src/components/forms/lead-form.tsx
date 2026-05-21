@@ -16,24 +16,23 @@ export function LeadForm({
   submitLabel,
 }: {
   locale: "en" | "es";
-  title: string;
-  intro: string;
+  title?: string;
+  intro?: string;
   submitLabel: string;
 }) {
   const [state, setState] = useState<FormState>(initialFormState);
   const [isPending, startTransition] = useTransition();
 
   return (
-    <section className="panel rounded-[2rem] p-8">
-      <div className="max-w-2xl space-y-3">
-        <p className="eyebrow text-xs font-semibold">
-          {locale === "en" ? "Lead generation" : "Captura de leads"}
-        </p>
-        <h2 className="serif text-3xl font-semibold tracking-tight">{title}</h2>
-        <p className="text-sm leading-7 text-[#1247ff]">{intro}</p>
-      </div>
+    <section className="mx-auto w-full max-w-[720px]">
+      {title || intro ? (
+        <div className="mb-6 max-w-2xl space-y-3">
+          {title ? <h2 className="text-[1.9rem] font-medium tracking-tight text-[#1f2937]">{title}</h2> : null}
+          {intro ? <p className="text-sm leading-7 text-[#4b5563]">{intro}</p> : null}
+        </div>
+      ) : null}
       <form
-        className="mt-8 grid gap-4 md:grid-cols-2"
+        className="grid gap-x-6 gap-y-3 md:grid-cols-2"
         onSubmit={(event) => {
           event.preventDefault();
           const formEl = event.currentTarget;
@@ -47,9 +46,14 @@ export function LeadForm({
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  name: form.get("name"),
                   email: form.get("email"),
-                  company: form.get("company"),
+                  firstName: form.get("firstName"),
+                  lastName: form.get("lastName"),
+                  jobTitle: form.get("jobTitle"),
+                  organization: form.get("organization"),
+                  city: form.get("city"),
+                  state: form.get("state"),
+                  phone: form.get("phone"),
                   message: form.get("message"),
                 }),
               });
@@ -90,46 +94,91 @@ export function LeadForm({
           });
         }}
       >
-        <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
-          {locale === "en" ? "Name" : "Nombre"}
-          <input
-            name="name"
-            required
-            className="rounded-2xl border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
-          {locale === "en" ? "Email" : "Correo"}
+        <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151] md:col-span-2">
+          {locale === "en" ? "Email *" : "Correo *"}
           <input
             name="email"
             type="email"
             required
-            className="rounded-2xl border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
+            placeholder={locale === "en" ? "Email" : "Correo"}
+            className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
-          {locale === "en" ? "Company" : "Empresa"}
+        <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
+          {locale === "en" ? "First Name *" : "Nombre *"}
           <input
-            name="company"
+            name="firstName"
             required
-            className="rounded-2xl border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
+            placeholder={locale === "en" ? "First name" : "Nombre"}
+            className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
-        <div className="hidden md:block" />
-        <label className="flex flex-col gap-2 text-sm font-medium text-foreground md:col-span-2">
-          {locale === "en" ? "What do you want to learn or build?" : "Que desea aprender o construir?"}
+        <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
+          {locale === "en" ? "Last Name *" : "Apellido *"}
+          <input
+            name="lastName"
+            required
+            placeholder={locale === "en" ? "Last name" : "Apellido"}
+            className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
+          {locale === "en" ? "Job title *" : "Puesto *"}
+          <input
+            name="jobTitle"
+            required
+            placeholder={locale === "en" ? "Job title" : "Puesto"}
+            className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
+          {locale === "en" ? "Organization *" : "Organizacion *"}
+          <input
+            name="organization"
+            required
+            placeholder={locale === "en" ? "Organization" : "Organizacion"}
+            className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
+          {locale === "en" ? "City" : "Ciudad"}
+          <input
+            name="city"
+            placeholder={locale === "en" ? "City" : "Ciudad"}
+            className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
+          {locale === "en" ? "State" : "Estado"}
+          <input
+            name="state"
+            placeholder={locale === "en" ? "State" : "Estado"}
+            className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151] md:col-span-2">
+          {locale === "en" ? "Phone" : "Telefono"}
+          <input
+            name="phone"
+            placeholder={locale === "en" ? "+1  Business phone" : "+1  Telefono"}
+            className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151] md:col-span-2">
+          {locale === "en" ? "How can we help you? *" : "Como podemos ayudarle? *"}
           <textarea
             name="message"
             required
-            rows={5}
-            className="rounded-[1.5rem] border border-border bg-white/75 px-4 py-3 outline-none transition focus:border-accent"
+            rows={4}
+            placeholder={locale === "en" ? "Topic" : "Tema"}
+            className="rounded-none border border-[#9ca3af] bg-white px-3 py-2 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
-        <div className="md:col-span-2 flex items-center justify-between gap-4 pt-2">
+        <div className="md:col-span-2 flex items-center gap-4 pt-3">
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-wait disabled:opacity-70"
+            className="border border-[#2563eb] px-8 py-2 text-sm font-semibold text-[#2563eb] transition hover:bg-[#2563eb] hover:text-white disabled:cursor-wait disabled:opacity-70"
           >
             {isPending
               ? locale === "en"
@@ -140,7 +189,7 @@ export function LeadForm({
           {state.type !== "idle" ? (
             <p
               className={`max-w-lg text-sm ${
-                state.type === "success" ? "text-accent-strong" : "text-accent-warm"
+                state.type === "success" ? "text-[#1d4ed8]" : "text-[#b91c1c]"
               }`}
             >
               {state.message}

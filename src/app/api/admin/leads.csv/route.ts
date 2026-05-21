@@ -4,9 +4,14 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type LeadRow = {
-  name: string;
   email: string;
+  first_name: string | null;
+  last_name: string | null;
+  job_title: string | null;
   company: string;
+  city: string | null;
+  state: string | null;
+  phone: string | null;
   message: string;
   submitted_at: string;
 };
@@ -30,15 +35,26 @@ export async function GET(request: Request) {
 
   await ensureLeadsTable();
   const rows = (await sql`
-    SELECT name, email, company, message, submitted_at
+    SELECT email, first_name, last_name, job_title, company, city, state, phone, message, submitted_at
     FROM leads
     ORDER BY submitted_at DESC
   `) as LeadRow[];
 
-  const header = "submitted_at,name,email,company,message";
+  const header = "submitted_at,email,first_name,last_name,job_title,organization,city,state,phone,message";
   const body = rows
     .map((r) =>
-      [r.submitted_at, r.name, r.email, r.company, r.message]
+      [
+        r.submitted_at,
+        r.email,
+        r.first_name,
+        r.last_name,
+        r.job_title,
+        r.company,
+        r.city,
+        r.state,
+        r.phone,
+        r.message,
+      ]
         .map(csvEscape)
         .join(","),
     )

@@ -42,5 +42,11 @@ export async function ensureLeadsTable() {
       submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
+  await sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS first_name TEXT`;
+  await sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS last_name TEXT`;
+  await sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS job_title TEXT`;
+  await sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS city TEXT`;
+  await sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS state TEXT`;
+  await sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS phone TEXT`;
   leadsInitialized = true;
 }
