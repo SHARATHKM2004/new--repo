@@ -49,7 +49,7 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
         </Suspense>
       )}
       <footer className="mt-20 bg-[#1247ff] text-white">
-      <div className="mx-auto w-full max-w-[1400px] px-6 py-12 lg:px-10">
+      <div className="w-full px-6 py-12 lg:px-10">
         {(content.eyebrow || content.title || content.body) ? (
           <div className="mb-10 max-w-3xl space-y-3">
             {content.eyebrow ? (
@@ -128,7 +128,7 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
 
       {content.copyrightText ? (
         <div className="border-t border-white/20">
-          <div className="mx-auto w-full max-w-[1400px] px-6 py-5 text-xs leading-6 text-white/90 lg:px-10">
+          <div className="w-full px-6 py-5 text-xs leading-6 text-white/90 lg:px-10">
             <p>{content.copyrightText}</p>
           </div>
         </div>

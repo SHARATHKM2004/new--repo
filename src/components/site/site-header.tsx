@@ -98,7 +98,7 @@ export function SiteHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-white">
-      <div className="mx-auto flex w-full max-w-[1400px] items-stretch">
+      <div className="flex w-full items-stretch">
         <Link
           href={`/${locale}`}
           className="flex min-w-[180px] items-center justify-center bg-[#1247ff] px-6 py-5 text-center text-base font-bold uppercase leading-tight tracking-wide text-white lg:min-w-[220px] lg:text-lg"
