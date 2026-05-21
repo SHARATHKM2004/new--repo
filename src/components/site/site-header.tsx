@@ -31,17 +31,62 @@ export function SiteHeader({
   navigation: NavigationItem[];
   content: SiteHeaderContent;
 }) {
+  const [activeTopNav, setActiveTopNav] = useState<string | null>(null);
+  const [activeLowerNav, setActiveLowerNav] = useState<string | null>(null);
   const [activePanel, setActivePanel] = useState<string | null>(null);
-  const otherLocale = locale === "en" ? "es" : "en";
   const brandTitle = content.title || labels[locale].title;
 
-  const secondaryNavKeywords = ["software solutions", "about", "events", "careers"];
+  const secondaryNavKeywords = [
+    "industries",
+    "industrias",
+    "services",
+    "servicios",
+    "software solutions",
+    "about",
+    "resource center",
+    "resource hub",
+    "recursos",
+    "events",
+    "careers",
+  ];
   const panelNavKeywords = ["software solutions", "about", "careers"];
-  const topRowExcludedKeywords = ["insights", "recursos"];
+  const topRowExcludedKeywords = ["insights", "recursos", ...secondaryNavKeywords];
 
-  const secondaryNav = navigation.filter((item) =>
-    secondaryNavKeywords.includes(item.label.trim().toLowerCase()),
-  );
+  function findNavByKeywords(keywords: string[]) {
+    return navigation.find((item) => keywords.includes(item.label.trim().toLowerCase()));
+  }
+
+  const industriesItem =
+    findNavByKeywords(["industries", "industrias"]) ??
+    ({ label: locale === "es" ? "Industrias" : "Industries", href: `/${locale}/industries/healthcare-financial-resilience` } as NavigationItem);
+  const servicesItem =
+    findNavByKeywords(["services", "servicios"]) ??
+    ({ label: locale === "es" ? "Servicios" : "Services", href: `/${locale}/services/digital-platform-strategy` } as NavigationItem);
+  const softwareSolutionsItem =
+    findNavByKeywords(["software solutions"]) ??
+    ({ label: "Software Solutions", href: `/${locale}/software-solutions` } as NavigationItem);
+  const aboutItem =
+    findNavByKeywords(["about"]) ??
+    ({ label: "About", href: `/${locale}/about` } as NavigationItem);
+  const resourceCenterItem =
+    findNavByKeywords(["resource center", "resource hub", "insights", "recursos"]) ??
+    ({ label: labels[locale].resourceCenter, href: `/${locale}/resource-center` } as NavigationItem);
+  const eventsItem =
+    findNavByKeywords(["events"]) ??
+    ({ label: "Events", href: `/${locale}/events` } as NavigationItem);
+  const careersItem =
+    findNavByKeywords(["careers"]) ??
+    ({ label: "Careers", href: `/${locale}/careers` } as NavigationItem);
+
+  const secondaryNav: NavigationItem[] = [
+    industriesItem,
+    servicesItem,
+    softwareSolutionsItem,
+    aboutItem,
+    resourceCenterItem,
+    eventsItem,
+    careersItem,
+  ];
 
   // Strip "Contact" from the data-driven nav so we can place it at the end in the required order.
   const contactKeywords = ["contact", "contacto"];
@@ -76,14 +121,28 @@ export function SiteHeader({
           <div className="flex items-center justify-end gap-6">
             <nav className="hidden flex-nowrap items-center justify-end gap-x-5 text-[12px] font-medium uppercase tracking-wide text-[#0f172a] lg:flex">
               {primaryNav.map((item) => (
-                <Link key={item.href} href={item.href} className="text-[#101828] hover:underline">
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => {
+                    setActiveTopNav(item.label.trim().toLowerCase());
+                    setActivePanel(null);
+                  }}
+                  className={`text-[#101828] hover:underline ${
+                    activeTopNav === item.label.trim().toLowerCase() ? "underline" : ""
+                  }`}
+                >
                   {item.label}
                 </Link>
               ))}
-              <Link href={`/${locale}/resource-center`} className="text-[#101828] hover:underline">
-                {labels[locale].resourceCenter}
-              </Link>
-              <Link href={`/${locale}/contact`} className="text-[#101828] hover:underline">
+              <Link
+                href={`/${locale}/contact`}
+                onClick={() => {
+                  setActiveTopNav("contact");
+                  setActivePanel(null);
+                }}
+                className={`text-[#101828] hover:underline ${activeTopNav === "contact" ? "underline" : ""}`}
+              >
                 {labels[locale].contact}
               </Link>
             </nav>
@@ -99,7 +158,17 @@ export function SiteHeader({
 
                 if (!isPanelItem) {
                   return (
-                    <Link key={item.href} href={item.href} className="text-[#1247ff] hover:underline">
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => {
+                        setActiveLowerNav(normalized);
+                        setActivePanel(null);
+                      }}
+                      className={`px-2 py-1 text-[#1247ff] ${
+                        activeLowerNav === normalized ? "bg-[#1247ff] text-white" : ""
+                      }`}
+                    >
                       {item.label}
                     </Link>
                   );
@@ -109,9 +178,18 @@ export function SiteHeader({
                   <button
                     key={item.href}
                     type="button"
-                    onClick={() => setActivePanel(isActive ? null : normalized)}
+                    onClick={() => {
+                      if (isActive) {
+                        setActivePanel(null);
+                        setActiveLowerNav(null);
+                        return;
+                      }
+
+                      setActivePanel(normalized);
+                      setActiveLowerNav(normalized);
+                    }}
                     className={`px-2 py-1 ${
-                      isActive ? "bg-[#1247ff] text-white" : "text-[#1247ff] hover:underline"
+                      isActive ? "bg-[#1247ff] text-white" : "text-[#1247ff]"
                     }`}
                   >
                     {item.label}
