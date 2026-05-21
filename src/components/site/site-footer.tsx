@@ -100,7 +100,7 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
             </div>
           </div>
 
-          <div className="flex shrink-0 items-start justify-end pt-10">
+          <div className="flex shrink-0 items-start justify-end pt-12">
             <Link
               href={`/${locale}`}
               aria-label={BRAND_NAME}
