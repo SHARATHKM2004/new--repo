@@ -47,7 +47,7 @@ export function SiteHeader({
     "events",
     "careers",
   ];
-  const panelNavKeywords = ["software solutions", "about", "careers", "industries", "industrias", "services", "servicios", "insights", "eventos", "events"];
+  const panelNavKeywords = ["software solutions", "about", "careers", "insights", "eventos", "events"];
   const topRowExcludedKeywords = ["insights", "recursos", ...secondaryNavKeywords];
 
   function findNavByKeywords(keywords: string[]) {
