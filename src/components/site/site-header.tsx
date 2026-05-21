@@ -41,14 +41,13 @@ export function SiteHeader({
     "servicios",
     "software solutions",
     "about",
-    "resource center",
-    "resource hub",
-    "recursos",
+    "article",
+    "articulo",
     "events",
     "careers",
   ];
-  const panelNavKeywords = ["software solutions", "about", "careers", "insights", "eventos", "events"];
-  const topRowExcludedKeywords = ["insights", "recursos", ...secondaryNavKeywords];
+  const panelNavKeywords = ["software solutions", "about", "careers", "eventos", "events"];
+  const topRowExcludedKeywords = ["recursos", ...secondaryNavKeywords];
 
   function findNavByKeywords(keywords: string[]) {
     return navigation.find((item) => keywords.includes(item.label.trim().toLowerCase()));
@@ -66,9 +65,9 @@ export function SiteHeader({
   const aboutItem =
     findNavByKeywords(["about"]) ??
     ({ label: "About", href: `/${locale}/about` } as NavigationItem);
-  const resourceCenterItem =
-    findNavByKeywords(["resource center", "resource hub", "insights", "recursos"]) ??
-    ({ label: labels[locale].resourceCenter, href: `/${locale}/resource-center` } as NavigationItem);
+  const articleItem =
+    findNavByKeywords(["article", "articulo"]) ??
+    ({ label: "Article", href: `/${locale}/article` } as NavigationItem);
   const eventsItem =
     findNavByKeywords(["events"]) ??
     ({ label: "Events", href: `/${locale}/events` } as NavigationItem);
@@ -81,7 +80,7 @@ export function SiteHeader({
     servicesItem,
     softwareSolutionsItem,
     aboutItem,
-    resourceCenterItem,
+    articleItem,
     eventsItem,
     careersItem,
   ];
