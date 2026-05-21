@@ -47,7 +47,7 @@ export function SiteHeader({
     "events",
     "careers",
   ];
-  const panelNavKeywords = ["software solutions", "about", "careers"];
+  const panelNavKeywords = ["software solutions", "about", "careers", "industries", "industrias", "services", "servicios", "insights", "eventos", "events"];
   const topRowExcludedKeywords = ["insights", "recursos", ...secondaryNavKeywords];
 
   function findNavByKeywords(keywords: string[]) {
@@ -171,7 +171,7 @@ export function SiteHeader({
 
                       setActivePanel(normalized);
                     }}
-                    className="px-2 py-1 text-[#1247ff] hover:bg-[#1247ff] hover:text-white"
+                    className={`px-2 py-1 ${isActive ? "bg-[#1247ff] text-white" : "text-[#1247ff] hover:bg-[#1247ff] hover:text-white"}`}
                   >
                     {item.label}
                   </button>
