@@ -170,36 +170,86 @@ export function SiteHeader({
 
       {activePanel ? (
         <div className="hidden border-t border-[#1247ff] bg-[#242933] text-white lg:block">
-          <div className="mx-auto grid w-full max-w-[1400px] grid-cols-4 gap-10 px-10 py-9">
-            <div>
-              <h3 className="text-[32px] font-semibold uppercase tracking-wide text-white/90">
-                {activePanel}
-              </h3>
-              <p className="mt-2 text-sm text-white/70">
-                Explore available links for this section.
-              </p>
-            </div>
-            <div className="space-y-3">
-              {quickLinks.slice(0, 2).map((item) => (
-                <Link key={item.href} href={item.href} className="block text-[17px] text-[#4f84ff] hover:underline">
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-            <div className="space-y-3">
-              {quickLinks.slice(2, 4).map((item) => (
-                <Link key={item.href} href={item.href} className="block text-[17px] text-[#4f84ff] hover:underline">
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-            <div className="space-y-3">
-              {quickLinks.slice(4, 6).map((item) => (
-                <Link key={item.href} href={item.href} className="block text-[17px] text-[#4f84ff] hover:underline">
-                  {item.label}
-                </Link>
-              ))}
-            </div>
+          <div className="mx-auto w-full max-w-[1400px] px-10 py-10">
+            {(() => {
+              const activeItem = secondaryNav.find(
+                (item) => item.label.trim().toLowerCase() === activePanel,
+              );
+              const groups = activeItem?.groups ?? [];
+
+              if (groups.length > 0) {
+                return (
+                  <div className="grid grid-cols-2 gap-x-10 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
+                    {groups.map((group) => (
+                      <div key={group.title} className="space-y-3">
+                        <h3 className="text-[18px] font-semibold text-[#4f84ff]">
+                          {group.title}
+                        </h3>
+                        <ul className="space-y-2">
+                          {group.links.map((link) => (
+                            <li key={`${group.title}-${link.href}`}>
+                              <Link
+                                href={link.href}
+                                onClick={() => setActivePanel(null)}
+                                className="block text-[14px] leading-snug text-white/85 hover:text-white hover:underline"
+                              >
+                                {link.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-4 gap-10">
+                  <div>
+                    <h3 className="text-[32px] font-semibold uppercase tracking-wide text-white/90">
+                      {activePanel}
+                    </h3>
+                    <p className="mt-2 text-sm text-white/70">
+                      Explore available links for this section.
+                    </p>
+                  </div>
+                  <div className="space-y-3">
+                    {quickLinks.slice(0, 2).map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="block text-[17px] text-[#4f84ff] hover:underline"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="space-y-3">
+                    {quickLinks.slice(2, 4).map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="block text-[17px] text-[#4f84ff] hover:underline"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="space-y-3">
+                    {quickLinks.slice(4, 6).map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="block text-[17px] text-[#4f84ff] hover:underline"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       ) : null}

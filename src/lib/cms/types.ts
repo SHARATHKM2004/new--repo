@@ -240,9 +240,15 @@ export type Page =
   | ResourceCenterPage
   | ContactPage;
 
+export type NavigationGroup = {
+  title: string;
+  links: Array<{ label: string; href: string }>;
+};
+
 export type NavigationItem = {
   label: string;
   href: string;
+  groups?: NavigationGroup[];
 };
 
 export type SiteHeaderContent = {

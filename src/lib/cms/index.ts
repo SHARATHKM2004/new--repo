@@ -7,6 +7,7 @@ import type {
   IndustryPage,
   Locale,
   NavigationItem,
+  NavigationGroup,
   LinkField,
   Page,
   PublishStatus,
@@ -1357,7 +1358,24 @@ export async function getNavigation(locale: Locale, draft = false): Promise<Navi
           return null;
         }
 
-        return { label, href };
+        const groups = toArray((item as { groups?: Array<{ title?: string; links?: Array<{ label?: string; href?: string }> }> }).groups)
+          .map((group) => {
+            const title = group.title?.trim();
+            const links = toArray(group.links)
+              .map((link) => {
+                const linkLabel = link.label?.trim();
+                const linkHref = link.href?.trim();
+                if (!linkLabel || !linkHref) return null;
+                return { label: linkLabel, href: linkHref };
+              })
+              .filter((link): link is { label: string; href: string } => Boolean(link));
+
+            if (!title || links.length === 0) return null;
+            return { title, links };
+          })
+          .filter((group): group is NavigationGroup => Boolean(group));
+
+        return groups.length ? { label, href, groups } : { label, href };
       })
       .filter((item): item is NavigationItem => Boolean(item));
 
@@ -1374,6 +1392,10 @@ export async function getNavigation(locale: Locale, draft = false): Promise<Navi
     {
       label: dictionary[locale].industries,
       href: `/${locale}/industries/healthcare-financial-resilience`,
+    },
+    {
+      label: locale === "es" ? "Soluciones de Software" : "Software Solutions",
+      href: `/${locale}/software-solutions`,
     },
     {
       label: dictionary[locale].insights,
