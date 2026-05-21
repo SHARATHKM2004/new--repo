@@ -101,7 +101,7 @@ export function SiteHeader({
       <div className="flex w-full items-stretch">
         <Link
           href={`/${locale}`}
-          className="flex min-w-[220px] items-center justify-center bg-[#1247ff] px-8 py-5 text-center text-base font-bold uppercase leading-tight tracking-wide text-white lg:min-w-[300px] lg:text-lg"
+          className="flex w-[150px] shrink-0 items-center justify-center bg-[#1247ff] px-4 py-5 text-center text-base font-bold uppercase leading-tight tracking-wide text-white lg:w-[160px] lg:text-lg"
         >
           {brandTitle}
         </Link>

@@ -89,7 +89,7 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
                 <Link
                   key={`${column.title}-${link.href}`}
                   href={link.href}
-                  className="block font-semibold text-white hover:underline"
+                  className="block text-sm font-normal text-white hover:underline"
                 >
                   {link.label}
                 </Link>
@@ -102,7 +102,7 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
               href={`/${locale}`}
               aria-label={BRAND_NAME}
               style={{ color: "#1247ff" }}
-              className="inline-flex min-w-[130px] items-center justify-center bg-white px-4 py-3 text-center text-4xl font-extrabold uppercase leading-tight tracking-wide"
+              className="inline-flex items-center justify-center border-2 border-[#1247ff] bg-white px-4 py-3 text-center text-base font-extrabold uppercase leading-tight tracking-wide"
             >
               <span style={{ color: "#1247ff" }}>{BRAND_NAME}</span>
             </Link>
