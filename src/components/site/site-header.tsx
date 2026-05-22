@@ -178,21 +178,10 @@ export function SiteHeader({
               const groups = activeItem?.groups ?? [];
 
               if (groups.length > 0) {
-                const isSingleGroupPanel = groups.length === 1;
-
                 return (
-                  <div
-                    className={
-                      isSingleGroupPanel
-                        ? "max-w-[920px]"
-                        : "grid grid-cols-2 gap-x-10 gap-y-8 md:grid-cols-3 lg:grid-cols-4"
-                    }
-                  >
+                  <div className="grid grid-cols-2 gap-x-10 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
                     {groups.map((group) => (
-                      <div
-                        key={group.title}
-                        className={isSingleGroupPanel ? "max-w-[360px] space-y-3" : "space-y-3"}
-                      >
+                      <div key={group.title} className="space-y-3">
                         <h3 className="text-[18px] font-semibold text-[#4f84ff]">
                           {group.title}
                         </h3>
@@ -202,7 +191,7 @@ export function SiteHeader({
                               <Link
                                 href={link.href}
                                 onClick={() => setActivePanel(null)}
-                                className="block text-[14px] leading-snug text-white hover:underline"
+                                className="block text-[14px] leading-snug text-white/85 hover:text-white hover:underline"
                               >
                                 {link.label}
                               </Link>
