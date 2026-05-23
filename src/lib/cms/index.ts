@@ -228,6 +228,12 @@ type OptimizelyJsonBlock = {
   OfficesJson?: string;
   heroImageUrl?: string;
   HeroImageUrl?: string;
+  bannerHeading?: string;
+  BannerHeading?: string;
+  sectionHeading?: string;
+  SectionHeading?: string;
+  applicationsJson?: string;
+  ApplicationsJson?: string;
 };
 
 type OptimizelyCmsPageListItem = {
@@ -589,6 +595,33 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
             offices: normalized,
           }
         : null;
+    }
+    case "PortalApplicationsBlock": {
+      const raw = block.applicationsJson ?? block.ApplicationsJson ?? "";
+      let apps: Array<Record<string, unknown>> = [];
+      if (raw && typeof raw === "string") {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) apps = parsed;
+        } catch {
+          apps = [];
+        }
+      }
+      const normalized = apps
+        .map((app) => ({
+          title: typeof app.title === "string" ? app.title.trim() : "",
+          description: typeof app.description === "string" ? app.description.trim() : undefined,
+          signInUrl: typeof app.signInUrl === "string" ? app.signInUrl.trim() : undefined,
+          signInLabel: typeof app.signInLabel === "string" ? app.signInLabel.trim() : undefined,
+        }))
+        .filter((a) => a.title);
+      return {
+        type: "portalApplications",
+        bannerHeading: block.bannerHeading?.trim() || block.BannerHeading?.trim() || undefined,
+        sectionHeading: block.sectionHeading?.trim() || block.SectionHeading?.trim() || undefined,
+        introText: block.introText?.trim() || block.IntroText?.trim() || undefined,
+        applications: normalized,
+      };
     }
     case "StoryBlock": {
       const body = [block.story, ...(block.highlights ?? []).map((item) => `- ${item}`)].filter(

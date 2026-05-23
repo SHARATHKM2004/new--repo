@@ -463,9 +463,12 @@ export async function PageRenderer({
   const hasLocationsDirectory = renderedSections.some(
     (block) => block.type === "locationsDirectory",
   );
+  const hasPortalApplications = renderedSections.some(
+    (block) => block.type === "portalApplications",
+  );
   const showPageHeader = Boolean(
     page.eyebrow || page.title || page.summary || fallbackNotice || author || pageKicker,
-  ) && !hasLocationsDirectory;
+  ) && !hasLocationsDirectory && !hasPortalApplications;
   const trendingInsights =
     page.type === "home" ? (await getInsights({ locale, draft })).slice(0, 4) : [];
 

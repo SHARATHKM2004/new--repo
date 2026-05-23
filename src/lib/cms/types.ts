@@ -161,6 +161,21 @@ export type LocationsDirectoryBlock = {
   offices: OfficeEntry[];
 };
 
+export type PortalApplicationEntry = {
+  title: string;
+  description?: string;
+  signInUrl?: string;
+  signInLabel?: string;
+};
+
+export type PortalApplicationsBlock = {
+  type: "portalApplications";
+  bannerHeading?: string;
+  sectionHeading?: string;
+  introText?: string;
+  applications: PortalApplicationEntry[];
+};
+
 export type Block =
   | HeroBlock
   | RichTextBlock
@@ -174,7 +189,8 @@ export type Block =
   | FeaturedContentBlock
   | ArticleListBlock
   | FormBlock
-  | LocationsDirectoryBlock;
+  | LocationsDirectoryBlock
+  | PortalApplicationsBlock;
 
 export type BasePage = {
   id: string;
