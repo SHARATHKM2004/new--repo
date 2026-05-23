@@ -58,6 +58,50 @@ function renderInlineArticleBlock(block: Block, key: string) {
   return null;
 }
 
+function renderInlineLinks(text: string) {
+  const pattern = /\[([^\]]+)\]\(([^)\s]+)\)/g;
+  const nodes: Array<string | JSX.Element> = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    const [, label, href] = match;
+    const isExternal = /^https?:\/\//i.test(href);
+    nodes.push(
+      isExternal ? (
+        <a
+          key={`link-${key++}`}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#1554ff] underline hover:text-[#1d4ed8]"
+        >
+          {label}
+        </a>
+      ) : (
+        <Link
+          key={`link-${key++}`}
+          href={href}
+          className="text-[#1554ff] underline hover:text-[#1d4ed8]"
+        >
+          {label}
+        </Link>
+      ),
+    );
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+
+  return nodes.length ? nodes : text;
+}
+
 function renderContactIntroBlock(block: Extract<Block, { type: "richText" | "html" }>) {
   if (block.type === "html") {
     return <div className="contact-intro-copy" dangerouslySetInnerHTML={{ __html: block.html }} />;
@@ -571,7 +615,7 @@ export async function PageRenderer({
                   .filter(Boolean)
                   .map((paragraph, index) => (
                     <p key={index} className="text-[14px] leading-7 text-[#374151]">
-                      {paragraph}
+                      {renderInlineLinks(paragraph)}
                     </p>
                   ))}
               </div>
