@@ -34,10 +34,34 @@ export function LocationsDirectory({ block, locale }: Props) {
   };
 
   const heading =
-    block.heading ?? (locale === "en" ? "Get in touch with your local office" : "Pongase en contacto con su oficina local");
+    block.heading ?? (locale === "en" ? "Get in touch with your local Summit office" : "Pongase en contacto con su oficina local de Summit");
 
   return (
     <section className="bg-white">
+      <div
+        className="relative h-[280px] w-full bg-cover bg-center lg:h-[380px]"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1517090504586-fde19ea6066f?auto=format&fit=crop&w=1920&q=70')",
+        }}
+        aria-hidden={false}
+      >
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="relative mx-auto flex h-full max-w-[1260px] items-center px-6 lg:px-10">
+          <h1 className="text-5xl font-light text-white lg:text-6xl">
+            {locale === "en" ? "Locations" : "Ubicaciones"}
+          </h1>
+        </div>
+      </div>
+      <div className="bg-[#5a6470] text-white">
+        <div className="mx-auto max-w-[1260px] px-6 py-3 text-sm lg:px-10">
+          <span className="opacity-90">{locale === "en" ? "Home" : "Inicio"}</span>
+          <span className="mx-3 opacity-60">|</span>
+          <span className="opacity-90">{locale === "en" ? "About" : "Acerca"}</span>
+          <span className="mx-3 opacity-60">|</span>
+          <span>{locale === "en" ? "Locations" : "Ubicaciones"}</span>
+        </div>
+      </div>
       <div className="mx-auto grid max-w-[1260px] gap-10 px-6 py-12 lg:grid-cols-[240px_minmax(0,1fr)] lg:px-10 lg:py-16">
         <aside className="text-sm">
           <h3 className="mb-4 text-xl font-semibold text-[#1554ff]">
@@ -86,28 +110,26 @@ export function LocationsDirectory({ block, locale }: Props) {
             {heading}
           </h2>
 
-          {grouped.map(([state, offices]) => (
-            <div key={state} className="mb-10">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {offices.map((office) => (
-                  <div
-                    key={`${state}-${office.city}`}
-                    id={`office-${slugify(state)}-${slugify(office.city)}`}
-                    className="relative overflow-hidden bg-[#f3f4f6] p-5 text-sm leading-6 text-[#374151]"
-                  >
-                    <h4 className="mb-2 text-sm font-bold uppercase tracking-wide text-[#1554ff]">
-                      {office.city}
-                    </h4>
-                    {office.address1 ? <div>{office.address1}</div> : null}
-                    {office.address2 ? <div>{office.address2}</div> : null}
-                    {office.cityStateZip ? <div>{office.cityStateZip}</div> : null}
-                    {office.phone ? <div className="mt-1">Tel: {office.phone}</div> : null}
-                    {office.fax ? <div>Fax: {office.fax}</div> : null}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {grouped.flatMap(([state, offices]) =>
+              offices.map((office) => (
+                <div
+                  key={`${state}-${office.city}`}
+                  id={`office-${slugify(state)}-${slugify(office.city)}`}
+                  className="relative overflow-hidden bg-[#f3f4f6] p-5 text-sm leading-6 text-[#374151]"
+                >
+                  <h4 className="mb-2 text-sm font-bold uppercase tracking-wide text-[#1554ff]">
+                    {office.city}
+                  </h4>
+                  {office.address1 ? <div>{office.address1}</div> : null}
+                  {office.address2 ? <div>{office.address2}</div> : null}
+                  {office.cityStateZip ? <div>{office.cityStateZip}</div> : null}
+                  {office.phone ? <div className="mt-1">Tel: {office.phone}</div> : null}
+                  {office.fax ? <div>Fax: {office.fax}</div> : null}
+                </div>
+              )),
+            )}
+          </div>
         </div>
       </div>
     </section>

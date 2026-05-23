@@ -460,9 +460,12 @@ export async function PageRenderer({
     page.type,
   );
   const pageKicker = shouldShowPageKicker ? <PageKicker page={page} /> : null;
+  const hasLocationsDirectory = renderedSections.some(
+    (block) => block.type === "locationsDirectory",
+  );
   const showPageHeader = Boolean(
     page.eyebrow || page.title || page.summary || fallbackNotice || author || pageKicker,
-  );
+  ) && !hasLocationsDirectory;
   const trendingInsights =
     page.type === "home" ? (await getInsights({ locale, draft })).slice(0, 4) : [];
 
