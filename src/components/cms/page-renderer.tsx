@@ -549,7 +549,7 @@ export async function PageRenderer({
     return (
       <main className="flex-1">
         <section className="bg-[#d9d9dd]">
-          <div className="mx-auto max-w-[1260px] px-6 py-8 text-center lg:px-10 lg:py-10">
+          <div className="mx-auto max-w-[1260px] px-6 py-8 lg:px-10 lg:py-10">
             <h1 className="text-[3.8rem] font-light tracking-tight text-[#1554ff] lg:text-[4.1rem]">
               {page.title}
             </h1>
@@ -558,15 +558,34 @@ export async function PageRenderer({
 
         <section className="bg-white">
           <div className="mx-auto max-w-[1260px] px-6 py-10 lg:px-10 lg:py-12">
+            {formBlocks.length ? (
+              <div className="max-w-[860px] space-y-4">
+                {formBlocks[0].intro ? (
+                  <h2 className="text-[2.4rem] font-normal leading-[1.15] text-[#1554ff] lg:text-[2.7rem]">
+                    {formBlocks[0].intro}
+                  </h2>
+                ) : null}
+                {(formBlocks[0].introText ?? "")
+                  .split(/\n\s*\n/)
+                  .map((p) => p.trim())
+                  .filter(Boolean)
+                  .map((paragraph, index) => (
+                    <p key={index} className="text-[13px] leading-6 text-[#374151]">
+                      {paragraph}
+                    </p>
+                  ))}
+              </div>
+            ) : null}
+
             {introBlock ? (
-              <div className="mx-auto max-w-[860px] text-center">{renderContactIntroBlock(introBlock)}</div>
+              <div className="mt-6 max-w-[860px]">{renderContactIntroBlock(introBlock)}</div>
             ) : null}
 
             <div className="mx-auto mt-8 max-w-[760px]">
               {formBlocks.map((block, index) => (
                 <BlockRenderer
                   key={`${page.id}-${block.type}-${index}`}
-                  block={block}
+                  block={{ ...block, title: "", intro: "", introText: "" }}
                   locale={locale}
                   draft={draft}
                 />
