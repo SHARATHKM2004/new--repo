@@ -44,8 +44,8 @@ export function AlertsCallout({
           onMouseDown={() => setActive(true)}
           className={`mt-8 inline-flex items-center justify-center border-2 border-[#1247ff] px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition ${
             active
-              ? "bg-[#1247ff] text-white"
-              : "bg-transparent text-[#1247ff] hover:bg-[#1247ff] hover:text-white"
+              ? "bg-[#1247ff] !text-white"
+              : "bg-transparent text-[#1247ff] hover:bg-[#1247ff] hover:!text-white"
           }`}
         >
           {cta}
