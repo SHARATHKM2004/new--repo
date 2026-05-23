@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { BlockRenderer } from "@/components/cms/block-renderer";
 import {
   getAuthorForInsight,
@@ -60,7 +60,7 @@ function renderInlineArticleBlock(block: Block, key: string) {
 
 function renderInlineLinks(text: string) {
   const pattern = /\[([^\]]+)\]\(([^)\s]+)\)/g;
-  const nodes: Array<string | JSX.Element> = [];
+  const nodes: ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   let key = 0;
