@@ -235,6 +235,36 @@ type OptimizelyJsonBlock = {
   applicationsJson?: string | unknown[];
   ApplicationsJson?: string | unknown[];
   ApplicationsJSON?: string | unknown[];
+  logoUrl?: string;
+  LogoUrl?: string;
+  brandLabel?: string;
+  BrandLabel?: string;
+  usernameLabel?: string;
+  UsernameLabel?: string;
+  usernameHelper?: string;
+  UsernameHelper?: string;
+  passwordLabel?: string;
+  PasswordLabel?: string;
+  passwordHelper?: string;
+  PasswordHelper?: string;
+  loginLabel?: string;
+  LoginLabel?: string;
+  forgotPasswordLabel?: string;
+  ForgotPasswordLabel?: string;
+  forgotPasswordUrl?: string;
+  ForgotPasswordUrl?: string;
+  needHelpLabel?: string;
+  NeedHelpLabel?: string;
+  needHelpUrl?: string;
+  NeedHelpUrl?: string;
+  oneTimePaymentLabel?: string;
+  OneTimePaymentLabel?: string;
+  oneTimePaymentUrl?: string;
+  OneTimePaymentUrl?: string;
+  registerLabel?: string;
+  RegisterLabel?: string;
+  registerUrl?: string;
+  RegisterUrl?: string;
 };
 
 type OptimizelyCmsPageListItem = {
@@ -624,6 +654,34 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
         sectionHeading: block.sectionHeading?.trim() || block.SectionHeading?.trim() || undefined,
         introText: block.introText?.trim() || block.IntroText?.trim() || undefined,
         applications: normalized,
+      };
+    }
+    case "PayBillBlock": {
+      return {
+        type: "payBill",
+        logoUrl: block.logoUrl?.trim() || block.LogoUrl?.trim() || undefined,
+        brandLabel: block.brandLabel?.trim() || block.BrandLabel?.trim() || undefined,
+        heading: block.title?.trim() || undefined,
+        introText: block.introText?.trim() || block.IntroText?.trim() || undefined,
+        usernameLabel: block.usernameLabel?.trim() || block.UsernameLabel?.trim() || undefined,
+        usernamePlaceholder: block.firstNamePlaceholder?.trim() || undefined,
+        usernameHelper: block.usernameHelper?.trim() || block.UsernameHelper?.trim() || undefined,
+        passwordLabel: block.passwordLabel?.trim() || block.PasswordLabel?.trim() || undefined,
+        passwordPlaceholder: block.lastNamePlaceholder?.trim() || undefined,
+        passwordHelper: block.passwordHelper?.trim() || block.PasswordHelper?.trim() || undefined,
+        loginLabel: block.loginLabel?.trim() || block.LoginLabel?.trim() || undefined,
+        forgotPasswordLabel:
+          block.forgotPasswordLabel?.trim() || block.ForgotPasswordLabel?.trim() || undefined,
+        forgotPasswordUrl:
+          block.forgotPasswordUrl?.trim() || block.ForgotPasswordUrl?.trim() || undefined,
+        needHelpLabel: block.needHelpLabel?.trim() || block.NeedHelpLabel?.trim() || undefined,
+        needHelpUrl: block.needHelpUrl?.trim() || block.NeedHelpUrl?.trim() || undefined,
+        oneTimePaymentLabel:
+          block.oneTimePaymentLabel?.trim() || block.OneTimePaymentLabel?.trim() || undefined,
+        oneTimePaymentUrl:
+          block.oneTimePaymentUrl?.trim() || block.OneTimePaymentUrl?.trim() || undefined,
+        registerLabel: block.registerLabel?.trim() || block.RegisterLabel?.trim() || undefined,
+        registerUrl: block.registerUrl?.trim() || block.RegisterUrl?.trim() || undefined,
       };
     }
     case "StoryBlock": {

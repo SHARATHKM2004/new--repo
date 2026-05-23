@@ -466,9 +466,10 @@ export async function PageRenderer({
   const hasPortalApplications = renderedSections.some(
     (block) => block.type === "portalApplications",
   );
+  const hasPayBill = renderedSections.some((block) => block.type === "payBill");
   const showPageHeader = Boolean(
     page.eyebrow || page.title || page.summary || fallbackNotice || author || pageKicker,
-  ) && !hasLocationsDirectory && !hasPortalApplications;
+  ) && !hasLocationsDirectory && !hasPortalApplications && !hasPayBill;
   const trendingInsights =
     page.type === "home" ? (await getInsights({ locale, draft })).slice(0, 4) : [];
 

@@ -5,6 +5,7 @@ import { getAuthorForInsight, getFeaturedContent, getInsights } from "@/lib/cms"
 import type { Block, Locale, Page } from "@/lib/cms/types";
 import { LocationsDirectory } from "@/components/cms/locations-directory";
 import { PortalApplications } from "@/components/cms/portal-applications";
+import { PayBill } from "@/components/cms/pay-bill";
 
 const LeadForm = lazy(() =>
   import("@/components/forms/lead-form").then((module) => ({
@@ -415,6 +416,8 @@ export async function BlockRenderer({
       return <LocationsDirectory block={block} locale={locale} />;
     case "portalApplications":
       return <PortalApplications block={block} locale={locale} />;
+    case "payBill":
+      return <PayBill block={block} locale={locale} />;
     default:
       return null;
   }

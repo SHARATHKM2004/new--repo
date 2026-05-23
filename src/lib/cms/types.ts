@@ -176,6 +176,29 @@ export type PortalApplicationsBlock = {
   applications: PortalApplicationEntry[];
 };
 
+export type PayBillBlock = {
+  type: "payBill";
+  logoUrl?: string;
+  brandLabel?: string;
+  heading?: string;
+  introText?: string;
+  usernameLabel?: string;
+  usernamePlaceholder?: string;
+  usernameHelper?: string;
+  passwordLabel?: string;
+  passwordPlaceholder?: string;
+  passwordHelper?: string;
+  loginLabel?: string;
+  forgotPasswordLabel?: string;
+  forgotPasswordUrl?: string;
+  needHelpLabel?: string;
+  needHelpUrl?: string;
+  oneTimePaymentLabel?: string;
+  oneTimePaymentUrl?: string;
+  registerLabel?: string;
+  registerUrl?: string;
+};
+
 export type Block =
   | HeroBlock
   | RichTextBlock
@@ -190,7 +213,8 @@ export type Block =
   | ArticleListBlock
   | FormBlock
   | LocationsDirectoryBlock
-  | PortalApplicationsBlock;
+  | PortalApplicationsBlock
+  | PayBillBlock;
 
 export type BasePage = {
   id: string;
