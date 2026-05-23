@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Suspense, lazy } from "react";
 import { getAuthorForInsight, getFeaturedContent, getInsights } from "@/lib/cms";
 import type { Block, Locale, Page } from "@/lib/cms/types";
+import { LocationsDirectory } from "@/components/cms/locations-directory";
 
 const LeadForm = lazy(() =>
   import("@/components/forms/lead-form").then((module) => ({
@@ -409,6 +410,8 @@ export async function BlockRenderer({
           />
         </Suspense>
       );
+    case "locationsDirectory":
+      return <LocationsDirectory block={block} locale={locale} />;
     default:
       return null;
   }

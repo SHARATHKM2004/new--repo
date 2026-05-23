@@ -144,6 +144,22 @@ export type FormBlock = {
   errorMessage?: string;
 };
 
+export type OfficeEntry = {
+  state: string;
+  city: string;
+  address1?: string;
+  address2?: string;
+  cityStateZip?: string;
+  phone?: string;
+  fax?: string;
+};
+
+export type LocationsDirectoryBlock = {
+  type: "locationsDirectory";
+  heading?: string;
+  offices: OfficeEntry[];
+};
+
 export type Block =
   | HeroBlock
   | RichTextBlock
@@ -156,7 +172,8 @@ export type Block =
   | CtaBlock
   | FeaturedContentBlock
   | ArticleListBlock
-  | FormBlock;
+  | FormBlock
+  | LocationsDirectoryBlock;
 
 export type BasePage = {
   id: string;

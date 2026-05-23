@@ -224,6 +224,8 @@ type OptimizelyJsonBlock = {
   SuccessMessage?: string;
   errorMessage?: string;
   ErrorMessage?: string;
+  officesJson?: string;
+  OfficesJson?: string;
 };
 
 type OptimizelyCmsPageListItem = {
@@ -555,6 +557,36 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
         successMessage: block.successMessage ?? block.SuccessMessage ?? undefined,
         errorMessage: block.errorMessage ?? block.ErrorMessage ?? undefined,
       };
+    case "LocationsDirectoryBlock": {
+      const raw = block.officesJson ?? block.OfficesJson ?? "";
+      let offices: Array<Record<string, unknown>> = [];
+      if (raw && typeof raw === "string") {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) offices = parsed;
+        } catch {
+          offices = [];
+        }
+      }
+      const normalized = offices
+        .map((office) => ({
+          state: typeof office.state === "string" ? office.state.trim() : "",
+          city: typeof office.city === "string" ? office.city.trim() : "",
+          address1: typeof office.address1 === "string" ? office.address1.trim() : undefined,
+          address2: typeof office.address2 === "string" ? office.address2.trim() : undefined,
+          cityStateZip: typeof office.cityStateZip === "string" ? office.cityStateZip.trim() : undefined,
+          phone: typeof office.phone === "string" ? office.phone.trim() : undefined,
+          fax: typeof office.fax === "string" ? office.fax.trim() : undefined,
+        }))
+        .filter((o) => o.state && o.city);
+      return normalized.length
+        ? {
+            type: "locationsDirectory",
+            heading: block.title?.trim() || block._metadata?.displayName?.trim() || undefined,
+            offices: normalized,
+          }
+        : null;
+    }
     case "StoryBlock": {
       const body = [block.story, ...(block.highlights ?? []).map((item) => `- ${item}`)].filter(
         (value): value is string => Boolean(value?.trim()),
