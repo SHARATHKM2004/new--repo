@@ -559,18 +559,18 @@ export async function PageRenderer({
         <section className="bg-white">
           <div className="mx-auto max-w-[1260px] px-6 py-10 lg:px-10 lg:py-12">
             {formBlocks.length ? (
-              <div className="max-w-[860px] space-y-4">
+              <div className="max-w-[1100px] space-y-4">
                 {formBlocks[0].intro ? (
                   <h2 className="text-[2.4rem] font-normal leading-[1.15] text-[#1554ff] lg:text-[2.7rem]">
                     {formBlocks[0].intro}
                   </h2>
                 ) : null}
                 {(formBlocks[0].introText ?? "")
-                  .split(/\n\s*\n/)
+                  .split(/\r?\n+/)
                   .map((p) => p.trim())
                   .filter(Boolean)
                   .map((paragraph, index) => (
-                    <p key={index} className="text-[13px] leading-6 text-[#374151]">
+                    <p key={index} className="text-[14px] leading-7 text-[#374151]">
                       {paragraph}
                     </p>
                   ))}
