@@ -13,22 +13,94 @@ export function LeadForm({
   locale,
   title,
   intro,
+  introText,
   submitLabel,
+  emailLabel,
+  firstNameLabel,
+  lastNameLabel,
+  jobTitleLabel,
+  organizationLabel,
+  cityLabel,
+  stateLabel,
+  phoneLabel,
+  messageLabel,
+  emailPlaceholder,
+  firstNamePlaceholder,
+  lastNamePlaceholder,
+  jobTitlePlaceholder,
+  organizationPlaceholder,
+  cityPlaceholder,
+  statePlaceholder,
+  phonePlaceholder,
+  messagePlaceholder,
+  successMessage,
+  errorMessage,
 }: {
   locale: "en" | "es";
   title?: string;
   intro?: string;
+  introText?: string;
   submitLabel: string;
+  emailLabel?: string;
+  firstNameLabel?: string;
+  lastNameLabel?: string;
+  jobTitleLabel?: string;
+  organizationLabel?: string;
+  cityLabel?: string;
+  stateLabel?: string;
+  phoneLabel?: string;
+  messageLabel?: string;
+  emailPlaceholder?: string;
+  firstNamePlaceholder?: string;
+  lastNamePlaceholder?: string;
+  jobTitlePlaceholder?: string;
+  organizationPlaceholder?: string;
+  cityPlaceholder?: string;
+  statePlaceholder?: string;
+  phonePlaceholder?: string;
+  messagePlaceholder?: string;
+  successMessage?: string;
+  errorMessage?: string;
 }) {
   const [state, setState] = useState<FormState>(initialFormState);
   const [isPending, startTransition] = useTransition();
 
+  const t = (en: string, es: string) => (locale === "en" ? en : es);
+  const lEmail = emailLabel ?? t("Email *", "Correo *");
+  const lFirstName = firstNameLabel ?? t("First Name *", "Nombre *");
+  const lLastName = lastNameLabel ?? t("Last Name *", "Apellido *");
+  const lJobTitle = jobTitleLabel ?? t("Job title *", "Puesto *");
+  const lOrg = organizationLabel ?? t("Organization *", "Organizacion *");
+  const lCity = cityLabel ?? t("City", "Ciudad");
+  const lState = stateLabel ?? t("State", "Estado");
+  const lPhone = phoneLabel ?? t("Phone", "Telefono");
+  const lMessage = messageLabel ?? t("How can we help you? *", "Como podemos ayudarle? *");
+  const pEmail = emailPlaceholder ?? t("Email", "Correo");
+  const pFirstName = firstNamePlaceholder ?? t("First name", "Nombre");
+  const pLastName = lastNamePlaceholder ?? t("Last name", "Apellido");
+  const pJobTitle = jobTitlePlaceholder ?? t("Job title", "Puesto");
+  const pOrg = organizationPlaceholder ?? t("Organization", "Organizacion");
+  const pCity = cityPlaceholder ?? t("City", "Ciudad");
+  const pState = statePlaceholder ?? t("State", "Estado");
+  const pPhone = phonePlaceholder ?? t("+1  Business phone", "+1  Telefono");
+  const pMessage = messagePlaceholder ?? t("Topic", "Tema");
+
+  const introParagraphs = (introText ?? "")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
   return (
     <section className="mx-auto w-full max-w-[720px]">
-      {title || intro ? (
+      {title || intro || introParagraphs.length ? (
         <div className="mb-6 max-w-2xl space-y-3">
           {title ? <h2 className="text-[1.9rem] font-medium tracking-tight text-[#1f2937]">{title}</h2> : null}
           {intro ? <p className="text-sm leading-7 text-[#4b5563]">{intro}</p> : null}
+          {introParagraphs.map((paragraph, index) => (
+            <p key={index} className="text-sm leading-7 text-[#4b5563]">
+              {paragraph}
+            </p>
+          ))}
         </div>
       ) : null}
       <form
@@ -67,9 +139,8 @@ export function LeadForm({
                   type: "error",
                   message:
                     payload.message ??
-                    (locale === "en"
-                      ? "Unable to submit the form."
-                      : "No fue posible enviar el formulario."),
+                    errorMessage ??
+                    t("Unable to submit the form.", "No fue posible enviar el formulario."),
                 });
                 return;
               }
@@ -78,99 +149,96 @@ export function LeadForm({
               setState({
                 type: "success",
                 message:
-                  locale === "en"
-                    ? "Thanks! We will reach out shortly."
-                    : "Gracias. Nos pondremos en contacto pronto.",
+                  successMessage ??
+                  t("Thanks! We will reach out shortly.", "Gracias. Nos pondremos en contacto pronto."),
               });
             } catch {
               setState({
                 type: "error",
                 message:
-                  locale === "en"
-                    ? "Network error. Please try again."
-                    : "Error de red. Intente de nuevo.",
+                  errorMessage ?? t("Network error. Please try again.", "Error de red. Intente de nuevo."),
               });
             }
           });
         }}
       >
         <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151] md:col-span-2">
-          {locale === "en" ? "Email *" : "Correo *"}
+          {lEmail}
           <input
             name="email"
             type="email"
             required
-            placeholder={locale === "en" ? "Email" : "Correo"}
+            placeholder={pEmail}
             className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
-          {locale === "en" ? "First Name *" : "Nombre *"}
+          {lFirstName}
           <input
             name="firstName"
             required
-            placeholder={locale === "en" ? "First name" : "Nombre"}
+            placeholder={pFirstName}
             className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
-          {locale === "en" ? "Last Name *" : "Apellido *"}
+          {lLastName}
           <input
             name="lastName"
             required
-            placeholder={locale === "en" ? "Last name" : "Apellido"}
+            placeholder={pLastName}
             className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
-          {locale === "en" ? "Job title *" : "Puesto *"}
+          {lJobTitle}
           <input
             name="jobTitle"
             required
-            placeholder={locale === "en" ? "Job title" : "Puesto"}
+            placeholder={pJobTitle}
             className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
-          {locale === "en" ? "Organization *" : "Organizacion *"}
+          {lOrg}
           <input
             name="organization"
             required
-            placeholder={locale === "en" ? "Organization" : "Organizacion"}
+            placeholder={pOrg}
             className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
-          {locale === "en" ? "City" : "Ciudad"}
+          {lCity}
           <input
             name="city"
-            placeholder={locale === "en" ? "City" : "Ciudad"}
+            placeholder={pCity}
             className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
-          {locale === "en" ? "State" : "Estado"}
+          {lState}
           <input
             name="state"
-            placeholder={locale === "en" ? "State" : "Estado"}
+            placeholder={pState}
             className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151] md:col-span-2">
-          {locale === "en" ? "Phone" : "Telefono"}
+          {lPhone}
           <input
             name="phone"
-            placeholder={locale === "en" ? "+1  Business phone" : "+1  Telefono"}
+            placeholder={pPhone}
             className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151] md:col-span-2">
-          {locale === "en" ? "How can we help you? *" : "Como podemos ayudarle? *"}
+          {lMessage}
           <textarea
             name="message"
             required
             rows={4}
-            placeholder={locale === "en" ? "Topic" : "Tema"}
+            placeholder={pMessage}
             className="rounded-none border border-[#9ca3af] bg-white px-3 py-2 text-[15px] outline-none transition focus:border-[#2563eb]"
           />
         </label>
@@ -180,11 +248,7 @@ export function LeadForm({
             disabled={isPending}
             className="border border-[#2563eb] px-8 py-2 text-sm font-semibold text-[#2563eb] transition hover:bg-[#2563eb] hover:text-white disabled:cursor-wait disabled:opacity-70"
           >
-            {isPending
-              ? locale === "en"
-                ? "Submitting..."
-                : "Enviando..."
-              : submitLabel}
+            {isPending ? t("Submitting...", "Enviando...") : submitLabel}
           </button>
           {state.type !== "idle" ? (
             <p

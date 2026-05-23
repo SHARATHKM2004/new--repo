@@ -384,7 +384,28 @@ export async function BlockRenderer({
             locale={locale}
             title={block.title}
             intro={block.intro}
+            introText={block.introText}
             submitLabel={block.submitLabel ?? (locale === "en" ? "Submit" : "Enviar")}
+            emailLabel={block.emailLabel}
+            firstNameLabel={block.firstNameLabel}
+            lastNameLabel={block.lastNameLabel}
+            jobTitleLabel={block.jobTitleLabel}
+            organizationLabel={block.organizationLabel}
+            cityLabel={block.cityLabel}
+            stateLabel={block.stateLabel}
+            phoneLabel={block.phoneLabel}
+            messageLabel={block.messageLabel}
+            emailPlaceholder={block.emailPlaceholder}
+            firstNamePlaceholder={block.firstNamePlaceholder}
+            lastNamePlaceholder={block.lastNamePlaceholder}
+            jobTitlePlaceholder={block.jobTitlePlaceholder}
+            organizationPlaceholder={block.organizationPlaceholder}
+            cityPlaceholder={block.cityPlaceholder}
+            statePlaceholder={block.statePlaceholder}
+            phonePlaceholder={block.phonePlaceholder}
+            messagePlaceholder={block.messagePlaceholder}
+            successMessage={block.successMessage}
+            errorMessage={block.errorMessage}
           />
         </Suspense>
       );

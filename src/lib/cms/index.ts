@@ -180,6 +180,50 @@ type OptimizelyJsonBlock = {
   html?: string;
   json?: unknown;
   _metadata?: OptimizelyJsonMetadata;
+  introText?: string;
+  IntroText?: string;
+  emailLabel?: string;
+  EmailLabel?: string;
+  firstNameLabel?: string;
+  FirstNameLabel?: string;
+  lastNameLabel?: string;
+  LastNameLabel?: string;
+  jobTitleLabel?: string;
+  JobTitleLabel?: string;
+  organizationLabel?: string;
+  OrganizationLabel?: string;
+  cityLabel?: string;
+  CityLabel?: string;
+  stateLabel?: string;
+  StateLabel?: string;
+  phoneLabel?: string;
+  PhoneLabel?: string;
+  messageLabel?: string;
+  MessageLabel?: string;
+  emailPlaceholder?: string;
+  EmailPlaceholder?: string;
+  firstNamePlaceholder?: string;
+  FirstNamePlaceholder?: string;
+  lastNamePlaceholder?: string;
+  LastNamePlaceholder?: string;
+  jobTitlePlaceholder?: string;
+  JobTitlePlaceholder?: string;
+  organizationPlaceholder?: string;
+  OrganizationPlaceholder?: string;
+  cityPlaceholder?: string;
+  CityPlaceholder?: string;
+  statePlaceholder?: string;
+  StatePlaceholder?: string;
+  phonePlaceholder?: string;
+  PhonePlaceholder?: string;
+  messagePlaceholder?: string;
+  MessagePlaceholder?: string;
+  submitLabel?: string;
+  SubmitLabel?: string;
+  successMessage?: string;
+  SuccessMessage?: string;
+  errorMessage?: string;
+  ErrorMessage?: string;
 };
 
 type OptimizelyCmsPageListItem = {
@@ -488,6 +532,28 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
         formId: "lead",
         title: block.title ?? "",
         intro: block.description ?? "",
+        introText: block.introText ?? block.IntroText ?? undefined,
+        emailLabel: block.emailLabel ?? block.EmailLabel ?? undefined,
+        firstNameLabel: block.firstNameLabel ?? block.FirstNameLabel ?? undefined,
+        lastNameLabel: block.lastNameLabel ?? block.LastNameLabel ?? undefined,
+        jobTitleLabel: block.jobTitleLabel ?? block.JobTitleLabel ?? undefined,
+        organizationLabel: block.organizationLabel ?? block.OrganizationLabel ?? undefined,
+        cityLabel: block.cityLabel ?? block.CityLabel ?? undefined,
+        stateLabel: block.stateLabel ?? block.StateLabel ?? undefined,
+        phoneLabel: block.phoneLabel ?? block.PhoneLabel ?? undefined,
+        messageLabel: block.messageLabel ?? block.MessageLabel ?? undefined,
+        emailPlaceholder: block.emailPlaceholder ?? block.EmailPlaceholder ?? undefined,
+        firstNamePlaceholder: block.firstNamePlaceholder ?? block.FirstNamePlaceholder ?? undefined,
+        lastNamePlaceholder: block.lastNamePlaceholder ?? block.LastNamePlaceholder ?? undefined,
+        jobTitlePlaceholder: block.jobTitlePlaceholder ?? block.JobTitlePlaceholder ?? undefined,
+        organizationPlaceholder: block.organizationPlaceholder ?? block.OrganizationPlaceholder ?? undefined,
+        cityPlaceholder: block.cityPlaceholder ?? block.CityPlaceholder ?? undefined,
+        statePlaceholder: block.statePlaceholder ?? block.StatePlaceholder ?? undefined,
+        phonePlaceholder: block.phonePlaceholder ?? block.PhonePlaceholder ?? undefined,
+        messagePlaceholder: block.messagePlaceholder ?? block.MessagePlaceholder ?? undefined,
+        submitLabel: block.submitLabel ?? block.SubmitLabel ?? undefined,
+        successMessage: block.successMessage ?? block.SuccessMessage ?? undefined,
+        errorMessage: block.errorMessage ?? block.ErrorMessage ?? undefined,
       };
     case "StoryBlock": {
       const body = [block.story, ...(block.highlights ?? []).map((item) => `- ${item}`)].filter(

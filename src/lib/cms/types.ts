@@ -119,8 +119,29 @@ export type FormBlock = {
   type: "form";
   title: string;
   intro: string;
+  introText?: string;
   submitLabel?: string;
   formId: "lead";
+  emailLabel?: string;
+  firstNameLabel?: string;
+  lastNameLabel?: string;
+  jobTitleLabel?: string;
+  organizationLabel?: string;
+  cityLabel?: string;
+  stateLabel?: string;
+  phoneLabel?: string;
+  messageLabel?: string;
+  emailPlaceholder?: string;
+  firstNamePlaceholder?: string;
+  lastNamePlaceholder?: string;
+  jobTitlePlaceholder?: string;
+  organizationPlaceholder?: string;
+  cityPlaceholder?: string;
+  statePlaceholder?: string;
+  phonePlaceholder?: string;
+  messagePlaceholder?: string;
+  successMessage?: string;
+  errorMessage?: string;
 };
 
 export type Block =
