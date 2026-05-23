@@ -234,6 +234,7 @@ type OptimizelyJsonBlock = {
   SectionHeading?: string;
   applicationsJson?: string | unknown[];
   ApplicationsJson?: string | unknown[];
+  ApplicationsJSON?: string | unknown[];
 };
 
 type OptimizelyCmsPageListItem = {
@@ -597,7 +598,7 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
         : null;
     }
     case "PortalApplicationsBlock": {
-      const raw = block.applicationsJson ?? block.ApplicationsJson;
+      const raw = block.applicationsJson ?? block.ApplicationsJson ?? block.ApplicationsJSON;
       let apps: Array<Record<string, unknown>> = [];
       if (Array.isArray(raw)) {
         apps = raw as Array<Record<string, unknown>>;
