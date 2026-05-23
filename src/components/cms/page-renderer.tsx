@@ -78,7 +78,7 @@ function renderInlineLinks(text: string) {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#1554ff] underline hover:text-[#1d4ed8]"
+          style={{ color: "#1554ff", textDecoration: "underline" }}
         >
           {label}
         </a>
@@ -86,7 +86,7 @@ function renderInlineLinks(text: string) {
         <Link
           key={`link-${key++}`}
           href={href}
-          className="text-[#1554ff] underline hover:text-[#1d4ed8]"
+          style={{ color: "#1554ff", textDecoration: "underline" }}
         >
           {label}
         </Link>
