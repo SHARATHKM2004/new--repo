@@ -11,46 +11,62 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
-  const slug = url.searchParams.get("slug") ?? "login";
+  const displayName = url.searchParams.get("slug") ?? "Login";
 
   const baseUrl = `${renderUrl.replace(/\/$/, "")}/content/v2`;
-  const query = `query {
-    CMSPage(limit: 5, locale: en, where: { _metadata: { displayName: { eq: "${slug}" } } }) {
+
+  const listQuery = `query {
+    CMSPage(limit: 5, locale: en, where: { _metadata: { displayName: { eq: "${displayName}" } } }) {
       items {
-        title
-        _json
-        _metadata { key locale displayName types url { default hierarchical } }
+        _metadata { key locale displayName }
       }
     }
   }`;
 
-  const response = await fetch(`${baseUrl}?auth=${encodeURIComponent(renderKey)}`, {
+  const listResp = await fetch(`${baseUrl}?auth=${encodeURIComponent(renderKey)}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ query: listQuery }),
     cache: "no-store",
   });
+  const listPayload = await listResp.json();
+  const items = listPayload?.data?.CMSPage?.items ?? [];
 
-  if (!response.ok) {
-    return NextResponse.json(
-      { error: "graph request failed", status: response.status, body: await response.text() },
-      { status: 502 },
-    );
+  if (!items.length) {
+    return NextResponse.json({ displayName, count: 0, errors: listPayload?.errors });
   }
 
-  const payload = await response.json();
-  const items = payload?.data?.CMSPage?.items ?? [];
+  const detailed = await Promise.all(
+    items.map(async (it: { _metadata?: { key?: string; displayName?: string } }) => {
+      const key = it._metadata?.key;
+      if (!key) return { metadata: it._metadata, item: null };
+      const itemQuery = `query {
+        CMSPage(locale: en, ids: ["${key}"]) {
+          item {
+            title
+            _json
+            _metadata { key locale displayName types url { default hierarchical } }
+          }
+        }
+      }`;
+      const r = await fetch(`${baseUrl}?auth=${encodeURIComponent(renderKey)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: itemQuery }),
+        cache: "no-store",
+      });
+      const payload = await r.json();
+      const item = payload?.data?.CMSPage?.item;
+      return {
+        metadata: item?._metadata ?? it._metadata,
+        title: item?.title,
+        jsonKeys: item?._json ? Object.keys(item._json) : null,
+        blocks: item?._json?.blocks ?? item?._json?.Blocks ?? null,
+        rawJson: item?._json,
+        errors: payload?.errors ?? null,
+      };
+    }),
+  );
 
-  return NextResponse.json({
-    slug,
-    count: items.length,
-    items: items.map((item: { title?: string; _json?: Record<string, unknown>; _metadata?: unknown }) => ({
-      title: item.title,
-      metadata: item._metadata,
-      jsonKeys: item._json ? Object.keys(item._json) : null,
-      blocks: item._json?.blocks ?? item._json?.Blocks ?? null,
-      rawJson: item._json,
-    })),
-    errors: payload?.errors ?? null,
-  });
+  return NextResponse.json({ displayName, count: items.length, items: detailed });
 }
