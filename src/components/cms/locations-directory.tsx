@@ -85,7 +85,8 @@ export function LocationsDirectory({ block, locale }: Props) {
                   <button
                     type="button"
                     onClick={() => toggle(state)}
-                    className="flex w-full items-center gap-2 py-1 text-left font-bold text-[#1f2937] hover:text-[#1554ff]"
+                    className="flex w-full items-center gap-2 py-1 text-left text-[#0b1220] hover:text-[#1554ff]"
+                    style={{ fontWeight: 700 }}
                   >
                     <span
                       className="inline-block w-3 text-xs"
@@ -93,7 +94,7 @@ export function LocationsDirectory({ block, locale }: Props) {
                     >
                       {isOpen ? "v" : ">"}
                     </span>
-                    {state}
+                    <span style={{ fontWeight: 700 }}>{state}</span>
                   </button>
                   {isOpen ? (
                     <ul className="ml-5 mt-1 space-y-1">
