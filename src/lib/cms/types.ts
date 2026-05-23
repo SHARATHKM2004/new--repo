@@ -157,6 +157,7 @@ export type OfficeEntry = {
 export type LocationsDirectoryBlock = {
   type: "locationsDirectory";
   heading?: string;
+  heroImageUrl?: string;
   offices: OfficeEntry[];
 };
 

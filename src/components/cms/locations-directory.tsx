@@ -37,14 +37,12 @@ export function LocationsDirectory({ block, locale }: Props) {
     block.heading ?? (locale === "en" ? "Get in touch with your local Summit office" : "Pongase en contacto con su oficina local de Summit");
 
   return (
-    <section className="bg-white">
+    <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-white">
       <div
-        className="relative h-[280px] w-full bg-cover bg-center lg:h-[380px]"
+        className="relative h-[280px] w-full bg-cover bg-center lg:h-[420px]"
         style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1517090504586-fde19ea6066f?auto=format&fit=crop&w=1920&q=70')",
+          backgroundImage: `url('${block.heroImageUrl ?? "https://images.unsplash.com/photo-1517090504586-fde19ea6066f?auto=format&fit=crop&w=1920&q=70"}')`,
         }}
-        aria-hidden={false}
       >
         <div className="absolute inset-0 bg-black/30" />
         <div className="relative mx-auto flex h-full max-w-[1260px] items-center px-6 lg:px-10">
@@ -89,12 +87,7 @@ export function LocationsDirectory({ block, locale }: Props) {
                     <ul className="ml-5 mt-1 space-y-1">
                       {offices.map((office) => (
                         <li key={`${state}-${office.city}`}>
-                          <a
-                            href={`#office-${slugify(state)}-${slugify(office.city)}`}
-                            className="text-[#1554ff] underline hover:text-[#1d4ed8]"
-                          >
-                            {office.city}
-                          </a>
+                          <span className="text-[#374151]">{office.city}</span>
                         </li>
                       ))}
                     </ul>

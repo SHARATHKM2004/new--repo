@@ -226,6 +226,8 @@ type OptimizelyJsonBlock = {
   ErrorMessage?: string;
   officesJson?: string;
   OfficesJson?: string;
+  heroImageUrl?: string;
+  HeroImageUrl?: string;
 };
 
 type OptimizelyCmsPageListItem = {
@@ -583,6 +585,7 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
         ? {
             type: "locationsDirectory",
             heading: block.title?.trim() || block._metadata?.displayName?.trim() || undefined,
+            heroImageUrl: block.heroImageUrl?.trim() || block.HeroImageUrl?.trim() || undefined,
             offices: normalized,
           }
         : null;
