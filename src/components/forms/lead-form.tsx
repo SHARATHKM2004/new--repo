@@ -92,12 +92,19 @@ export function LeadForm({
 
   return (
     <section className="mx-auto w-full max-w-[720px]">
-      {title || intro || introParagraphs.length ? (
-        <div className="mb-6 max-w-2xl space-y-3">
-          {title ? <h2 className="text-[1.9rem] font-medium tracking-tight text-[#1f2937]">{title}</h2> : null}
-          {intro ? <p className="text-sm leading-7 text-[#4b5563]">{intro}</p> : null}
+      {intro || introParagraphs.length || title ? (
+        <div className="mb-8 space-y-4 text-left">
+          {intro ? (
+            <h2 className="text-[2.4rem] font-normal leading-[1.15] text-[#1554ff] lg:text-[2.7rem]">
+              {intro}
+            </h2>
+          ) : title ? (
+            <h2 className="text-[2.4rem] font-normal leading-[1.15] text-[#1554ff] lg:text-[2.7rem]">
+              {title}
+            </h2>
+          ) : null}
           {introParagraphs.map((paragraph, index) => (
-            <p key={index} className="text-sm leading-7 text-[#4b5563]">
+            <p key={index} className="text-[13px] leading-6 text-[#374151]">
               {paragraph}
             </p>
           ))}
