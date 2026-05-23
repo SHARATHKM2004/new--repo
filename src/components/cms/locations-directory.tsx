@@ -53,11 +53,23 @@ export function LocationsDirectory({ block, locale }: Props) {
       </div>
       <div className="bg-[#5a6470] text-white">
         <div className="mx-auto max-w-[1260px] px-6 py-3 text-sm lg:px-10">
-          <span className="opacity-90">{locale === "en" ? "Home" : "Inicio"}</span>
+          <a href={`/${locale}`} className="font-semibold hover:underline">
+            {locale === "en" ? "Home" : "Inicio"}
+          </a>
           <span className="mx-3 opacity-60">|</span>
-          <span className="opacity-90">{locale === "en" ? "About" : "Acerca"}</span>
+          <a
+            href={`/${locale}/services/digital-platform-strategy`}
+            className="font-semibold hover:underline"
+          >
+            {locale === "en" ? "Services" : "Servicios"}
+          </a>
           <span className="mx-3 opacity-60">|</span>
-          <span>{locale === "en" ? "Locations" : "Ubicaciones"}</span>
+          <a
+            href={`/${locale}/industries/healthcare-financial-resilience`}
+            className="font-semibold hover:underline"
+          >
+            {locale === "en" ? "Industries" : "Industrias"}
+          </a>
         </div>
       </div>
       <div className="mx-auto grid max-w-[1260px] gap-10 px-6 py-12 lg:grid-cols-[240px_minmax(0,1fr)] lg:px-10 lg:py-16">
@@ -73,7 +85,7 @@ export function LocationsDirectory({ block, locale }: Props) {
                   <button
                     type="button"
                     onClick={() => toggle(state)}
-                    className="flex w-full items-center gap-2 py-1 text-left font-semibold text-[#1f2937] hover:text-[#1554ff]"
+                    className="flex w-full items-center gap-2 py-1 text-left font-bold text-[#1f2937] hover:text-[#1554ff]"
                   >
                     <span
                       className="inline-block w-3 text-xs"
