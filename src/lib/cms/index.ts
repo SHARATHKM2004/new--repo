@@ -232,8 +232,8 @@ type OptimizelyJsonBlock = {
   BannerHeading?: string;
   sectionHeading?: string;
   SectionHeading?: string;
-  applicationsJson?: string;
-  ApplicationsJson?: string;
+  applicationsJson?: string | unknown[];
+  ApplicationsJson?: string | unknown[];
 };
 
 type OptimizelyCmsPageListItem = {
@@ -597,9 +597,11 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
         : null;
     }
     case "PortalApplicationsBlock": {
-      const raw = block.applicationsJson ?? block.ApplicationsJson ?? "";
+      const raw = block.applicationsJson ?? block.ApplicationsJson;
       let apps: Array<Record<string, unknown>> = [];
-      if (raw && typeof raw === "string") {
+      if (Array.isArray(raw)) {
+        apps = raw as Array<Record<string, unknown>>;
+      } else if (typeof raw === "string" && raw.trim()) {
         try {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed)) apps = parsed;
