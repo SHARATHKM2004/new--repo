@@ -75,7 +75,7 @@ export function PortalApplications({ block, locale }: Props) {
                 {app.signInUrl ? (
                   <Link
                     href={app.signInUrl}
-                    className="inline-block border border-[#1554ff] px-6 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#1554ff] hover:bg-[#1554ff] hover:text-white"
+                    className="inline-block border border-[#1554ff] px-6 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#1554ff] hover:bg-[#1554ff] hover:!text-white"
                   >
                     {app.signInLabel ?? signInDefault}
                   </Link>
