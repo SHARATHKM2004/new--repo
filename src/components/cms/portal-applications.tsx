@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { PortalApplicationsBlock } from "@/lib/cms/types";
 
 type Props = {
@@ -8,7 +9,7 @@ type Props = {
 
 function renderInlineLinks(text: string) {
   const pattern = /\[([^\]]+)\]\(([^)]+)\)/g;
-  const nodes: Array<string | JSX.Element> = [];
+  const nodes: Array<ReactNode> = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   let key = 0;
