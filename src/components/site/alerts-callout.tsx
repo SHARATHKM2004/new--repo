@@ -30,7 +30,7 @@ export function AlertsCallout({
   const href = content?.ctaHref || "/subscription";
 
   return (
-    <section className="bg-[#f3f4f6]">
+    <section className="alerts-callout bg-[#f3f4f6]">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-20">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1247ff]">
           {eyebrow}

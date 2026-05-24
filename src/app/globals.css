@@ -61,6 +61,17 @@ textarea {
   position: relative;
 }
 
+.site-shell:has([data-chromeless="true"]) > header,
+.site-shell:has([data-chromeless="true"]) > footer,
+.site-shell:has([data-chromeless="true"]) > div[role="contentinfo"],
+.site-shell:has([data-chromeless="true"]) main > section.alerts-callout {
+  display: none !important;
+}
+
+.site-shell:has([data-chromeless="true"])::before {
+  display: none;
+}
+
 .site-shell::before {
   content: "";
   position: fixed;
