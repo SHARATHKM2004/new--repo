@@ -446,9 +446,15 @@ export async function PageRenderer({
     ? {
         type: "articleList",
         title: "Articles",
-        limit: page.slug[1] === "all" ? 15 : 3,
-        viewAllLabel: page.slug[1] === "all" ? undefined : "View all articles",
-        viewAllHref: page.slug[1] === "all" ? undefined : `/${locale}/article/all`,
+        limit: 999,
+        hero: {
+          title: "Articles",
+          breadcrumbHomeLabel: "Home",
+          breadcrumbCurrentLabel: "Articles",
+          breadcrumbHomeHref: `/${locale}`,
+        },
+        initialVisible: 9,
+        loadMoreStep: 6,
       }
     : null;
   const hasArticleListBlock = page.sections.some((block) => block.type === "articleList");
@@ -468,9 +474,12 @@ export async function PageRenderer({
   );
   const hasPayBill = renderedSections.some((block) => block.type === "payBill");
   const hasEventsListing = renderedSections.some((block) => block.type === "eventsListing");
+  const hasArticleListingHero = renderedSections.some(
+    (block) => block.type === "articleList" && Boolean(block.hero || block.introHeading),
+  );
   const showPageHeader = Boolean(
     page.eyebrow || page.title || page.summary || fallbackNotice || author || pageKicker,
-  ) && !hasLocationsDirectory && !hasPortalApplications && !hasPayBill && !hasEventsListing;
+  ) && !hasLocationsDirectory && !hasPortalApplications && !hasPayBill && !hasEventsListing && !hasArticleListingHero;
   const trendingInsights =
     page.type === "home" ? (await getInsights({ locale, draft })).slice(0, 4) : [];
 
@@ -854,7 +863,7 @@ export async function PageRenderer({
     );
   }
 
-  const isFullBleedStandalone = hasLocationsDirectory || hasPortalApplications || hasPayBill || hasEventsListing;
+  const isFullBleedStandalone = hasLocationsDirectory || hasPortalApplications || hasPayBill || hasEventsListing || hasArticleListingHero;
 
   return (
     <main

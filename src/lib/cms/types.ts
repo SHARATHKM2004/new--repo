@@ -113,6 +113,21 @@ export type ArticleListBlock = {
   limit: number;
   viewAllLabel?: string;
   viewAllHref?: string;
+  hero?: {
+    imageUrl?: string;
+    imageAlt?: string;
+    title: string;
+    breadcrumbHomeLabel?: string;
+    breadcrumbCurrentLabel?: string;
+    breadcrumbHomeHref?: string;
+  };
+  introHeading?: string;
+  introBody?: string[];
+  initialVisible?: number;
+  loadMoreStep?: number;
+  loadMoreLabel?: string;
+  readMoreLabel?: string;
+  fallbackImagePool?: string[];
 };
 
 export type FormBlock = {
