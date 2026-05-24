@@ -30,12 +30,12 @@ export function PayBill({ block, locale }: Props) {
       className="fixed inset-0 z-[100] overflow-y-auto bg-white"
     >
       <div className="border-b border-[#d1d5db] bg-white py-6">
-        <div className="flex justify-center">
+        <div className="mx-auto max-w-[1100px] px-6">
           {block.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={block.logoUrl} alt={block.brandLabel ?? "Brand"} className="h-14" />
           ) : (
-            <div className="bg-[#1554ff] px-8 py-3 text-xl font-bold uppercase tracking-wider text-white">
+            <div className="inline-block bg-[#1554ff] px-8 py-3 text-xl font-bold uppercase tracking-wider text-white">
               {block.brandLabel ?? "SUMMIT ADVISORY GROUP"}
             </div>
           )}
@@ -100,13 +100,15 @@ export function PayBill({ block, locale }: Props) {
           <div className="mt-5 space-y-2 text-center text-[13px]">
             <Link
               href={block.forgotPasswordUrl ?? "#"}
-              className="block text-[#f4791f] underline hover:text-[#d96512]"
+              className="block !text-[#f4791f] underline hover:!text-[#d96512]"
+              style={{ color: "#f4791f" }}
             >
               {forgotPasswordLabel}
             </Link>
             <Link
               href={block.needHelpUrl ?? "#"}
-              className="block text-[#f4791f] underline hover:text-[#d96512]"
+              className="block !text-[#f4791f] underline hover:!text-[#d96512]"
+              style={{ color: "#f4791f" }}
             >
               {needHelpLabel}
             </Link>
