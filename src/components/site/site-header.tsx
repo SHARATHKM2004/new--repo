@@ -44,7 +44,17 @@ export function SiteHeader({
     "events",
     "careers",
   ];
-  const panelNavKeywords = ["software solutions", "about", "careers", "eventos", "events"];
+  const panelNavKeywords = [
+    "industries",
+    "industrias",
+    "services",
+    "servicios",
+    "software solutions",
+    "about",
+    "careers",
+    "eventos",
+    "events",
+  ];
   const topRowExcludedKeywords = ["insights", "recursos", ...secondaryNavKeywords];
 
   function findNavByKeywords(keywords: string[]) {
@@ -57,6 +67,135 @@ export function SiteHeader({
   const servicesItem =
     findNavByKeywords(["services", "servicios"]) ??
     ({ label: locale === "es" ? "Servicios" : "Services", href: `/${locale}/services/digital-platform-strategy` } as NavigationItem);
+
+  const industriesFallbackGroups = [
+    {
+      title: locale === "es" ? "Industrias" : "Industries",
+      links: [
+        { label: "Construction", href: `/${locale}/industries/construction` },
+        { label: "Consumer products", href: `/${locale}/industries/consumer-products` },
+        { label: "Distribution", href: `/${locale}/industries/distribution` },
+        { label: "Education", href: `/${locale}/industries/education` },
+      ],
+    },
+    {
+      title: " ",
+      links: [
+        { label: "Governments", href: `/${locale}/industries/governments` },
+        { label: "Healthcare", href: `/${locale}/industries/healthcare-financial-resilience` },
+        { label: "Financial services", href: `/${locale}/industries/financial-services` },
+        { label: "Insurance", href: `/${locale}/industries/insurance` },
+      ],
+    },
+    {
+      title: " ",
+      links: [
+        { label: "Nonprofits", href: `/${locale}/industries/nonprofits` },
+        { label: "Manufacturing", href: `/${locale}/industries/manufacturing` },
+        { label: "Private equity", href: `/${locale}/industries/private-equity` },
+        { label: "Real estate", href: `/${locale}/industries/real-estate` },
+      ],
+    },
+    {
+      title: " ",
+      links: [
+        { label: "Retail", href: `/${locale}/industries/retail` },
+        { label: "Technology", href: `/${locale}/industries/technology` },
+        { label: "Tribal gaming and government", href: `/${locale}/industries/tribal-gaming-government` },
+      ],
+    },
+  ];
+
+  const servicesFallbackGroups = [
+    {
+      title: "Assurance",
+      links: [
+        { label: "Accounting services", href: `/${locale}/services/accounting` },
+        { label: "Audit and assurance", href: `/${locale}/services/audit-assurance` },
+      ],
+    },
+    {
+      title: "Performance management",
+      links: [
+        { label: "Leadership development", href: `/${locale}/services/leadership-development` },
+        { label: "Strategy and operations", href: `/${locale}/services/digital-platform-strategy` },
+      ],
+    },
+    {
+      title: "Business outsourcing",
+      links: [
+        { label: "Finance and accounting", href: `/${locale}/services/finance-accounting` },
+        { label: "Human resources", href: `/${locale}/services/human-resources` },
+        { label: "Technology", href: `/${locale}/services/technology` },
+        { label: "Operations", href: `/${locale}/services/operations` },
+        { label: "C-suite", href: `/${locale}/services/c-suite` },
+      ],
+    },
+    {
+      title: "Private client services",
+      links: [
+        { label: "Estate and tax planning", href: `/${locale}/services/estate-tax-planning` },
+        { label: "Business transition strategy", href: `/${locale}/services/business-transition` },
+        { label: "Wealth management and investment advisory services", href: `/${locale}/services/wealth-management` },
+      ],
+    },
+    {
+      title: "Risk advisory",
+      links: [
+        { label: "ESG services", href: `/${locale}/services/esg` },
+        { label: "Forensic advisory", href: `/${locale}/services/forensic-advisory` },
+        { label: "Fraud investigation and litigation support", href: `/${locale}/services/fraud-litigation` },
+        { label: "Governance risk and controls", href: `/${locale}/services/governance-risk` },
+        { label: "Internal controls", href: `/${locale}/services/internal-controls` },
+        { label: "Marketing compliance", href: `/${locale}/services/marketing-compliance` },
+        { label: "Operational risk", href: `/${locale}/services/operational-risk` },
+        { label: "Regulatory and compliance", href: `/${locale}/services/regulatory-compliance` },
+        { label: "Technology", href: `/${locale}/services/risk-technology` },
+      ],
+    },
+    {
+      title: "Tax",
+      links: [
+        { label: "Credits and incentives", href: `/${locale}/services/credits-incentives` },
+        { label: "Individual tax", href: `/${locale}/services/individual-tax` },
+        { label: "International expansion", href: `/${locale}/services/international-expansion` },
+        { label: "International tax", href: `/${locale}/services/international-tax` },
+        { label: "Strategic tax services", href: `/${locale}/services/strategic-tax` },
+        { label: "State and local tax services", href: `/${locale}/services/state-local-tax` },
+      ],
+    },
+    {
+      title: "Transaction advisory",
+      links: [
+        { label: "Buy-side", href: `/${locale}/services/buy-side` },
+        { label: "Sell-side", href: `/${locale}/services/sell-side` },
+        { label: "Investment banking", href: `/${locale}/services/investment-banking` },
+        { label: "Valuation services", href: `/${locale}/services/valuation` },
+      ],
+    },
+    {
+      title: "Technology consulting",
+      links: [
+        { label: "AI services", href: `/${locale}/services/ai` },
+        { label: "Cybersecurity", href: `/${locale}/services/cybersecurity` },
+        { label: "Data & analytics", href: `/${locale}/services/data-analytics` },
+        { label: "Digital strategy", href: `/${locale}/services/digital-platform-strategy` },
+        { label: "Enterprise solutions", href: `/${locale}/services/enterprise-solutions` },
+        { label: "iPaaS solutions", href: `/${locale}/services/ipaas` },
+        { label: "Application modernization", href: `/${locale}/services/application-modernization` },
+        { label: "Managed services", href: `/${locale}/services/managed-services` },
+        { label: "Alliances", href: `/${locale}/services/alliances` },
+        { label: "Software solutions", href: `/${locale}/software-solutions` },
+      ],
+    },
+  ];
+
+  if (!industriesItem.groups || industriesItem.groups.length === 0) {
+    industriesItem.groups = industriesFallbackGroups;
+  }
+  if (!servicesItem.groups || servicesItem.groups.length === 0) {
+    servicesItem.groups = servicesFallbackGroups;
+  }
   const softwareSolutionsItem =
     findNavByKeywords(["software solutions"]) ??
     ({ label: "Software Solutions", href: `/${locale}/software-solutions` } as NavigationItem);
