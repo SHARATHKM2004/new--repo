@@ -32,6 +32,25 @@ function formatDate(value: string) {
   }).format(new Date(`${value}T00:00:00`));
 }
 
+const BUILTIN_FALLBACK_POOL = [
+  "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1531973576160-7125cd663d86?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1454165205744-3b78555e5572?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1542626991-cbc4e32524cc?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1200&q=70",
+  "https://images.unsplash.com/photo-1573497019418-b400bb3ab074?auto=format&fit=crop&w=1200&q=70",
+];
+
 export function ArticleListing({
   block,
   locale,
@@ -49,7 +68,10 @@ export function ArticleListing({
   const shown = Math.min(visible, total);
   const visibleArticles = articles.slice(0, shown);
   const readMoreLabel = block.readMoreLabel ?? (locale === "es" ? "Leer mas" : "Read full story");
-  const pool = block.fallbackImagePool ?? [];
+  const pool =
+    block.fallbackImagePool && block.fallbackImagePool.length > 0
+      ? block.fallbackImagePool
+      : BUILTIN_FALLBACK_POOL;
 
   return (
     <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-white">
@@ -64,8 +86,9 @@ export function ArticleListing({
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : null}
+            <div className="absolute inset-0 bg-black/35" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <h1 className="px-6 text-center text-4xl font-light tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] lg:text-6xl">
+              <h1 className="px-6 text-center text-4xl font-light tracking-wide text-white drop-shadow-[0_3px_12px_rgba(0,0,0,0.6)] lg:text-6xl">
                 {block.hero.title}
               </h1>
             </div>
