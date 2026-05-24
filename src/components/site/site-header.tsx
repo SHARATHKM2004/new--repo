@@ -193,7 +193,7 @@ export function SiteHeader({
 
                 if (isFlatPanel) {
                   return (
-                    <div className="grid grid-cols-2 gap-x-10 gap-y-4 md:grid-cols-3 lg:grid-cols-3">
+                    <div className="grid grid-cols-2 gap-x-10 gap-y-4 md:grid-cols-3 lg:grid-cols-4">
                       {allLinks.map((link) => (
                         <Link
                           key={link.href}
