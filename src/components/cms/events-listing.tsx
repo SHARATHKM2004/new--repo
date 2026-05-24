@@ -20,7 +20,7 @@ export function EventsListing({
   locale: Locale;
 }) {
   const initial = Math.max(1, block.initialVisible ?? 6);
-  const step = Math.max(1, block.loadMoreStep ?? 4);
+  const step = Math.max(1, block.loadMoreStep ?? 5);
   const [visible, setVisible] = useState(initial);
 
   const events = block.events ?? [];
@@ -90,9 +90,6 @@ export function EventsListing({
               learnMoreLabel={learnMoreLabel}
             />
           ))}
-          {block.callout && shown <= initial ? (
-            <CalloutCard callout={block.callout} locale={locale} />
-          ) : null}
         </div>
 
         {total > 0 && shown < total ? (
@@ -168,34 +165,5 @@ function EventCard({
         </Link>
       </div>
     </article>
-  );
-}
-
-function CalloutCard({
-  callout,
-  locale,
-}: {
-  callout: NonNullable<EventsListingBlock["callout"]>;
-  locale: Locale;
-}) {
-  return (
-    <aside className="flex h-full flex-col justify-center bg-[#f3f4f6] p-6">
-      {callout.eyebrow ? (
-        <p className="text-[15px] font-bold uppercase tracking-wide text-[#1247ff]">
-          {callout.eyebrow}
-        </p>
-      ) : null}
-      {callout.body ? (
-        <p className="mt-3 text-[15px] leading-7 text-[#374151]">{callout.body}</p>
-      ) : null}
-      {callout.ctaLabel && callout.ctaHref ? (
-        <Link
-          href={resolveHref(callout.ctaHref, locale)}
-          className="mt-5 inline-flex w-fit items-center justify-center border border-[#1247ff] px-6 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-[#1247ff] transition hover:bg-[#1247ff] hover:text-white"
-        >
-          {callout.ctaLabel}
-        </Link>
-      ) : null}
-    </aside>
   );
 }
