@@ -188,6 +188,26 @@ export function SiteHeader({
               const groups = activeItem?.groups ?? [];
 
               if (groups.length > 0) {
+                const allLinks = groups.flatMap((g) => g.links);
+                const isFlatPanel = groups.length === 1;
+
+                if (isFlatPanel) {
+                  return (
+                    <div className="grid grid-cols-2 gap-x-10 gap-y-4 md:grid-cols-3 lg:grid-cols-3">
+                      {allLinks.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => setActivePanel(null)}
+                          className="block text-[18px] font-semibold text-[#4f84ff] hover:underline"
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                }
+
                 return (
                   <div className="grid grid-cols-2 gap-x-10 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
                     {groups.map((group) => (
