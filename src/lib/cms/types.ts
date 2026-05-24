@@ -176,6 +176,44 @@ export type PortalApplicationsBlock = {
   applications: PortalApplicationEntry[];
 };
 
+export type EventEntry = {
+  imageUrl: string;
+  imageAlt?: string;
+  dateLine: string;
+  typeLabel: string;
+  costLabel: string;
+  title: string;
+  href: string;
+  tags?: string[];
+};
+
+export type EventsCallout = {
+  eyebrow?: string;
+  body?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+};
+
+export type EventsListingBlock = {
+  type: "eventsListing";
+  hero?: {
+    imageUrl?: string;
+    imageAlt?: string;
+    title: string;
+    breadcrumbHomeLabel?: string;
+    breadcrumbCurrentLabel?: string;
+    breadcrumbHomeHref?: string;
+  };
+  introHeading?: string;
+  introBody?: string[];
+  callout?: EventsCallout;
+  events: EventEntry[];
+  initialVisible?: number;
+  loadMoreLabel?: string;
+  showingTemplate?: string;
+  learnMoreLabel?: string;
+};
+
 export type PayBillBlock = {
   type: "payBill";
   logoUrl?: string;
@@ -214,7 +252,8 @@ export type Block =
   | FormBlock
   | LocationsDirectoryBlock
   | PortalApplicationsBlock
-  | PayBillBlock;
+  | PayBillBlock
+  | EventsListingBlock;
 
 export type BasePage = {
   id: string;

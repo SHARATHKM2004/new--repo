@@ -265,6 +265,8 @@ type OptimizelyJsonBlock = {
   RegisterLabel?: string;
   registerUrl?: string;
   RegisterUrl?: string;
+  eventsJson?: string;
+  EventsJson?: string;
 };
 
 type OptimizelyCmsPageListItem = {
@@ -682,6 +684,85 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
           block.oneTimePaymentUrl?.trim() || block.OneTimePaymentUrl?.trim() || undefined,
         registerLabel: block.registerLabel?.trim() || block.RegisterLabel?.trim() || undefined,
         registerUrl: block.registerUrl?.trim() || block.RegisterUrl?.trim() || undefined,
+      };
+    }
+    case "EventsListingBlock": {
+      const raw = block.eventsJson ?? block.EventsJson ?? "";
+      if (!raw || typeof raw !== "string") {
+        return null;
+      }
+      let parsed: Record<string, unknown> | null = null;
+      try {
+        const value = JSON.parse(raw);
+        if (value && typeof value === "object" && !Array.isArray(value)) {
+          parsed = value as Record<string, unknown>;
+        }
+      } catch {
+        parsed = null;
+      }
+      if (!parsed) {
+        return null;
+      }
+      const eventsRaw = Array.isArray(parsed.events) ? (parsed.events as Array<Record<string, unknown>>) : [];
+      const events = eventsRaw
+        .map((event) => ({
+          imageUrl: typeof event.imageUrl === "string" ? event.imageUrl.trim() : "",
+          imageAlt: typeof event.imageAlt === "string" ? event.imageAlt.trim() : undefined,
+          dateLine: typeof event.dateLine === "string" ? event.dateLine.trim() : "",
+          typeLabel: typeof event.typeLabel === "string" ? event.typeLabel.trim() : "",
+          costLabel: typeof event.costLabel === "string" ? event.costLabel.trim() : "",
+          title: typeof event.title === "string" ? event.title.trim() : "",
+          href: typeof event.href === "string" ? event.href.trim() : "",
+          tags: Array.isArray(event.tags)
+            ? (event.tags as unknown[])
+                .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
+                .filter(Boolean)
+            : [],
+        }))
+        .filter((event) => event.title && event.href);
+      const hero = parsed.hero && typeof parsed.hero === "object"
+        ? (parsed.hero as Record<string, unknown>)
+        : null;
+      const callout = parsed.callout && typeof parsed.callout === "object"
+        ? (parsed.callout as Record<string, unknown>)
+        : null;
+      const introBody = Array.isArray(parsed.introBody)
+        ? (parsed.introBody as unknown[])
+            .map((value) => (typeof value === "string" ? value : ""))
+            .filter(Boolean)
+        : [];
+      return {
+        type: "eventsListing",
+        hero: hero
+          ? {
+              imageUrl: typeof hero.imageUrl === "string" ? hero.imageUrl.trim() : undefined,
+              imageAlt: typeof hero.imageAlt === "string" ? hero.imageAlt.trim() : undefined,
+              title: typeof hero.title === "string" && hero.title.trim()
+                ? hero.title.trim()
+                : "Upcoming Events",
+              breadcrumbHomeLabel:
+                typeof hero.breadcrumbHomeLabel === "string" ? hero.breadcrumbHomeLabel.trim() : undefined,
+              breadcrumbCurrentLabel:
+                typeof hero.breadcrumbCurrentLabel === "string" ? hero.breadcrumbCurrentLabel.trim() : undefined,
+              breadcrumbHomeHref:
+                typeof hero.breadcrumbHomeHref === "string" ? hero.breadcrumbHomeHref.trim() : undefined,
+            }
+          : undefined,
+        introHeading: typeof parsed.introHeading === "string" ? parsed.introHeading.trim() : undefined,
+        introBody,
+        callout: callout
+          ? {
+              eyebrow: typeof callout.eyebrow === "string" ? callout.eyebrow.trim() : undefined,
+              body: typeof callout.body === "string" ? callout.body.trim() : undefined,
+              ctaLabel: typeof callout.ctaLabel === "string" ? callout.ctaLabel.trim() : undefined,
+              ctaHref: typeof callout.ctaHref === "string" ? callout.ctaHref.trim() : undefined,
+            }
+          : undefined,
+        events,
+        initialVisible: typeof parsed.initialVisible === "number" ? parsed.initialVisible : 6,
+        loadMoreLabel: typeof parsed.loadMoreLabel === "string" ? parsed.loadMoreLabel.trim() : undefined,
+        showingTemplate: typeof parsed.showingTemplate === "string" ? parsed.showingTemplate.trim() : undefined,
+        learnMoreLabel: typeof parsed.learnMoreLabel === "string" ? parsed.learnMoreLabel.trim() : undefined,
       };
     }
     case "StoryBlock": {

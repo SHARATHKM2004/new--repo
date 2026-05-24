@@ -6,6 +6,7 @@ import type { Block, Locale, Page } from "@/lib/cms/types";
 import { LocationsDirectory } from "@/components/cms/locations-directory";
 import { PortalApplications } from "@/components/cms/portal-applications";
 import { PayBill } from "@/components/cms/pay-bill";
+import { EventsListing } from "@/components/cms/events-listing";
 
 const LeadForm = lazy(() =>
   import("@/components/forms/lead-form").then((module) => ({
@@ -418,6 +419,8 @@ export async function BlockRenderer({
       return <PortalApplications block={block} locale={locale} />;
     case "payBill":
       return <PayBill block={block} locale={locale} />;
+    case "eventsListing":
+      return <EventsListing block={block} locale={locale} />;
     default:
       return null;
   }

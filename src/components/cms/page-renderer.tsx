@@ -467,9 +467,10 @@ export async function PageRenderer({
     (block) => block.type === "portalApplications",
   );
   const hasPayBill = renderedSections.some((block) => block.type === "payBill");
+  const hasEventsListing = renderedSections.some((block) => block.type === "eventsListing");
   const showPageHeader = Boolean(
     page.eyebrow || page.title || page.summary || fallbackNotice || author || pageKicker,
-  ) && !hasLocationsDirectory && !hasPortalApplications && !hasPayBill;
+  ) && !hasLocationsDirectory && !hasPortalApplications && !hasPayBill && !hasEventsListing;
   const trendingInsights =
     page.type === "home" ? (await getInsights({ locale, draft })).slice(0, 4) : [];
 
@@ -853,7 +854,7 @@ export async function PageRenderer({
     );
   }
 
-  const isFullBleedStandalone = hasLocationsDirectory || hasPortalApplications || hasPayBill;
+  const isFullBleedStandalone = hasLocationsDirectory || hasPortalApplications || hasPayBill || hasEventsListing;
 
   return (
     <main

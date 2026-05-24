@@ -2,6 +2,285 @@ import type { Page } from "@/lib/cms/types";
 import { articleAuthors } from "./mock-authors";
 import { articleBlueprints, createArticleInsightPage, articleTranslationKeys, articleInsightPages } from "./mock-articles";
 
+const eventsImagePool = [
+  "https://images.unsplash.com/photo-1573497019418-b400bb3ab074?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1573164574572-cb89e39749b4?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1573497019236-17f8177b81e8?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1573497620053-ea5300f94f21?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1573497491208-6b1acb260507?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1552581234-26160f608093?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1573497161161-c3e73707e25c?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=70",
+  "https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=900&q=70",
+];
+
+const englishEvents = [
+  {
+    dateLine: "May 26 - May 28, 2026",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost $1050",
+    title: "Uniform Guidance regulation training",
+    href: "/en/events/uniform-guidance-regulation-training",
+    tags: ["Nonprofits", "Governments", "Education", "Tribal gaming and government"],
+  },
+  {
+    dateLine: "May 27, 2026 01:00 PM - 02:30 PM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost $95",
+    title: "Designing recruitment strategies to attract, inspire and hire talent",
+    href: "/en/events/designing-recruitment-strategies",
+    tags: [
+      "Nonprofits",
+      "Governments",
+      "Education",
+      "Construction",
+      "Consumer products",
+      "Distribution",
+      "Healthcare",
+      "Financial services",
+      "Insurance",
+      "Manufacturing",
+      "Private equity",
+      "Real estate",
+      "Retail consulting",
+      "Technology industry",
+    ],
+  },
+  {
+    dateLine: "May 27, 2026 01:00 PM - 02:00 PM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "Elevate your Sage Intacct: Q3 2026",
+    href: "/en/events/elevate-your-sage-intacct-q3-2026",
+    tags: [],
+  },
+  {
+    dateLine: "May 28, 2026 01:00 PM - 02:00 PM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "More than a return: Why you need a strategic tax review",
+    href: "/en/events/more-than-a-return-strategic-tax-review",
+    tags: [],
+  },
+  {
+    dateLine: "Jun 04, 2026 09:30 AM - 11:00 AM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "IT Leadership Roundtable: Evaluating hosting and \u201cas-a-service\u201d infrastructure models",
+    href: "/en/events/it-leadership-roundtable",
+    tags: ["Financial services", "Financial Institutions", "Banks", "Credit unions"],
+  },
+  {
+    dateLine: "Jun 18, 2026 12:00 PM - 01:00 PM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "AI in NetSuite: Practical use cases, strategies and tools",
+    href: "/en/events/ai-in-netsuite",
+    tags: [],
+  },
+  {
+    dateLine: "Jun 23, 2026 11:00 AM - 12:00 PM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "Modernizing FP&A: From spreadsheets to decision intelligence",
+    href: "/en/events/modernizing-fpa",
+    tags: ["Financial services", "Manufacturing", "Distribution"],
+  },
+  {
+    dateLine: "Jul 09, 2026 10:00 AM - 11:30 AM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "Cybersecurity readiness for community banks",
+    href: "/en/events/cybersecurity-readiness-banks",
+    tags: ["Banks", "Credit unions", "Financial Institutions"],
+  },
+  {
+    dateLine: "Jul 22, 2026 01:00 PM - 02:00 PM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "Healthcare revenue cycle optimization",
+    href: "/en/events/healthcare-revenue-cycle",
+    tags: ["Healthcare"],
+  },
+  {
+    dateLine: "Aug 05, 2026 12:00 PM - 01:00 PM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "ESG reporting essentials for private companies",
+    href: "/en/events/esg-reporting-essentials",
+    tags: ["Manufacturing", "Consumer products", "Private equity"],
+  },
+  {
+    dateLine: "Aug 19, 2026 09:00 AM - 03:00 PM (CT)",
+    typeLabel: "In-Person",
+    costLabel: "Cost $495",
+    title: "Annual nonprofit finance forum",
+    href: "/en/events/annual-nonprofit-finance-forum",
+    tags: ["Nonprofits"],
+  },
+  {
+    dateLine: "Sep 10, 2026 11:00 AM - 12:00 PM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "Tax planning for closely held businesses",
+    href: "/en/events/tax-planning-closely-held",
+    tags: ["Construction", "Real estate", "Manufacturing"],
+  },
+  {
+    dateLine: "Sep 24, 2026 02:00 PM - 03:00 PM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "Optimizing Microsoft Dynamics 365 Business Central",
+    href: "/en/events/optimizing-d365-business-central",
+    tags: ["Distribution", "Manufacturing", "Technology industry"],
+  },
+  {
+    dateLine: "Oct 14, 2026 10:00 AM - 11:00 AM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "Workforce planning trends for 2027",
+    href: "/en/events/workforce-planning-2027",
+    tags: ["Healthcare", "Financial services", "Manufacturing"],
+  },
+  {
+    dateLine: "Oct 28, 2026 09:00 AM - 04:00 PM (CT)",
+    typeLabel: "In-Person",
+    costLabel: "Cost $750",
+    title: "Government leadership summit",
+    href: "/en/events/government-leadership-summit",
+    tags: ["Governments", "Tribal gaming and government"],
+  },
+  {
+    dateLine: "Nov 12, 2026 12:00 PM - 01:00 PM (CT)",
+    typeLabel: "Live Webinar",
+    costLabel: "Cost Free",
+    title: "Year-end accounting and audit readiness",
+    href: "/en/events/year-end-accounting-audit-readiness",
+    tags: ["Nonprofits", "Construction", "Manufacturing"],
+  },
+] as const;
+
+const englishEventsListEntries = englishEvents.map((event, index) => ({
+  imageUrl: eventsImagePool[index % eventsImagePool.length],
+  imageAlt: event.title,
+  dateLine: event.dateLine,
+  typeLabel: event.typeLabel,
+  costLabel: event.costLabel,
+  title: event.title,
+  href: event.href,
+  tags: [...event.tags],
+}));
+
+const englishEventsPages: Page[] = [
+  {
+    id: "events-en",
+    translationKey: "events",
+    type: "standard",
+    locale: "en",
+    status: "published",
+    slug: ["events"],
+    title: "",
+    eyebrow: "",
+    summary: "",
+    seo: {
+      title: "Events | Summit Advisory Group",
+      description:
+        "Upcoming events, seminars, webinars, and forums hosted by Summit Advisory Group.",
+    },
+    sections: [
+      {
+        type: "eventsListing",
+        hero: {
+          imageUrl:
+            "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1920&q=70",
+          imageAlt: "Speaker presenting at an event",
+          title: "Upcoming Events",
+          breadcrumbHomeLabel: "Home",
+          breadcrumbCurrentLabel: "Events",
+          breadcrumbHomeHref: "/",
+        },
+        introHeading: "Events to help grow your organization",
+        introBody: [
+          "Summit Advisory Group offers various events, seminars and forums on a wide range of topics during the course of the year. We are excited to offer you a wide variety of forums to help you stay ahead of the curve and help your organization continue to grow.",
+          "Search our wide selection of learning opportunities via industry, service, type or location.",
+        ],
+        callout: {
+          eyebrow: "ARE YOU READY FOR THE FUTURE?",
+          body: "Our team provides insights through thought leadership articles, publications and events.",
+          ctaLabel: "Learn more",
+          ctaHref: "/resource-center",
+        },
+        events: englishEventsListEntries,
+        initialVisible: 6,
+        loadMoreLabel: "Load more",
+        showingTemplate: "{shown} of {total}",
+        learnMoreLabel: "Learn more",
+      },
+    ],
+  },
+];
+
+const spanishEventsListEntries = englishEventsListEntries.map((event) => ({
+  ...event,
+  href: event.href.replace("/en/", "/es/"),
+}));
+
+const spanishEventsPages: Page[] = [
+  {
+    id: "events-es",
+    translationKey: "events",
+    type: "standard",
+    locale: "es",
+    status: "published",
+    slug: ["events"],
+    title: "",
+    eyebrow: "",
+    summary: "",
+    seo: {
+      title: "Eventos | Summit Advisory Group",
+      description:
+        "Proximos eventos, seminarios, webinars y foros organizados por Summit Advisory Group.",
+    },
+    sections: [
+      {
+        type: "eventsListing",
+        hero: {
+          imageUrl:
+            "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1920&q=70",
+          imageAlt: "Ponente presentando en un evento",
+          title: "Proximos Eventos",
+          breadcrumbHomeLabel: "Inicio",
+          breadcrumbCurrentLabel: "Eventos",
+          breadcrumbHomeHref: "/",
+        },
+        introHeading: "Eventos para ayudar a crecer su organizacion",
+        introBody: [
+          "Summit Advisory Group ofrece distintos eventos, seminarios y foros sobre una amplia variedad de temas durante el ano. Nos complace ofrecerle una amplia variedad de foros para mantenerse a la vanguardia y ayudar a su organizacion a seguir creciendo.",
+          "Explore nuestra amplia seleccion de oportunidades de aprendizaje por industria, servicio, tipo o ubicacion.",
+        ],
+        callout: {
+          eyebrow: "ESTA LISTO PARA EL FUTURO?",
+          body: "Nuestro equipo aporta perspectivas a traves de articulos, publicaciones y eventos.",
+          ctaLabel: "Mas informacion",
+          ctaHref: "/resource-center",
+        },
+        events: spanishEventsListEntries,
+        initialVisible: 6,
+        loadMoreLabel: "Cargar mas",
+        showingTemplate: "{shown} of {total}",
+        learnMoreLabel: "Mas informacion",
+      },
+    ],
+  },
+];
+
 const englishArticlePages: Page[] = [
   {
     id: "article-en",
@@ -688,6 +967,7 @@ const enPages: Page[] = [
   ...articleAuthors,
   ...articleInsightPages,
   englishArticlePages[1],
+  ...englishEventsPages,
 ];
 
 const esPages: Page[] = [
@@ -877,6 +1157,7 @@ const esPages: Page[] = [
     sections: [],
   },
   ...spanishArticlePages,
+  ...spanishEventsPages,
 ];
 
 export const mockPages: Page[] = [...enPages, ...esPages];

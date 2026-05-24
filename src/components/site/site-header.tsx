@@ -52,8 +52,6 @@ export function SiteHeader({
     "software solutions",
     "about",
     "careers",
-    "eventos",
-    "events",
   ];
   const topRowExcludedKeywords = ["insights", "recursos", ...secondaryNavKeywords];
 
