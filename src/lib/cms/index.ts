@@ -760,6 +760,7 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
           : undefined,
         events,
         initialVisible: typeof parsed.initialVisible === "number" ? parsed.initialVisible : 6,
+        loadMoreStep: typeof parsed.loadMoreStep === "number" ? parsed.loadMoreStep : 4,
         loadMoreLabel: typeof parsed.loadMoreLabel === "string" ? parsed.loadMoreLabel.trim() : undefined,
         showingTemplate: typeof parsed.showingTemplate === "string" ? parsed.showingTemplate.trim() : undefined,
         learnMoreLabel: typeof parsed.learnMoreLabel === "string" ? parsed.learnMoreLabel.trim() : undefined,

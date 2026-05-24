@@ -20,16 +20,13 @@ export function EventsListing({
   locale: Locale;
 }) {
   const initial = Math.max(1, block.initialVisible ?? 6);
+  const step = Math.max(1, block.loadMoreStep ?? 4);
   const [visible, setVisible] = useState(initial);
 
   const events = block.events ?? [];
   const total = events.length;
   const shown = Math.min(visible, total);
   const visibleEvents = events.slice(0, shown);
-  const showingTemplate = block.showingTemplate ?? "{shown} of {total}";
-  const showingText = showingTemplate
-    .replace("{shown}", `1-${shown}`)
-    .replace("{total}", `${total}`);
   const learnMoreLabel = block.learnMoreLabel ?? (locale === "es" ? "Mas informacion" : "Learn more");
 
   return (
@@ -98,18 +95,15 @@ export function EventsListing({
           ) : null}
         </div>
 
-        {total > 0 ? (
-          <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[#e5e7eb] pt-6 sm:flex-row">
-            <p className="text-sm text-[#6b7280]">{showingText}</p>
-            {shown < total ? (
-              <button
-                type="button"
-                onClick={() => setVisible((current) => Math.min(current + initial, total))}
-                className="inline-flex items-center justify-center border border-[#1247ff] px-8 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-[#1247ff] transition hover:bg-[#1247ff] hover:text-white"
-              >
-                {block.loadMoreLabel ?? (locale === "es" ? "Cargar mas" : "Load more")}
-              </button>
-            ) : null}
+        {total > 0 && shown < total ? (
+          <div className="mt-10 flex justify-center border-t border-[#e5e7eb] pt-6">
+            <button
+              type="button"
+              onClick={() => setVisible((current) => Math.min(current + step, total))}
+              className="inline-flex items-center justify-center border border-[#1247ff] px-8 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-[#1247ff] transition hover:bg-[#1247ff] hover:text-white"
+            >
+              {block.loadMoreLabel ?? (locale === "es" ? "Cargar mas" : "Load more")}
+            </button>
           </div>
         ) : null}
       </div>

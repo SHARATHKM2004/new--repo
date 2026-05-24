@@ -209,6 +209,7 @@ export type EventsListingBlock = {
   callout?: EventsCallout;
   events: EventEntry[];
   initialVisible?: number;
+  loadMoreStep?: number;
   loadMoreLabel?: string;
   showingTemplate?: string;
   learnMoreLabel?: string;
