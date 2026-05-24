@@ -41,7 +41,7 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
           <AlertsCallout locale={locale} content={content.alertsCallout} />
         </Suspense>
       )}
-      <footer className="mt-20 bg-[#1247ff] text-white">
+      <footer className="bg-[#1247ff] text-white">
         <div className="w-full py-12 pl-6 pr-0 lg:py-14 lg:pl-10">
           <div className="flex w-full items-start justify-between gap-10">
             <div className="flex items-start gap-14 lg:gap-20">
