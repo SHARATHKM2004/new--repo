@@ -199,7 +199,8 @@ export function SiteHeader({
                           key={link.href}
                           href={link.href}
                           onClick={() => setActivePanel(null)}
-                          className="block text-[18px] font-semibold text-[#4f84ff] hover:underline"
+                          style={{ color: "#4f84ff" }}
+                          className="block text-[18px] font-semibold !text-[#4f84ff] hover:underline"
                         >
                           {link.label}
                         </Link>
