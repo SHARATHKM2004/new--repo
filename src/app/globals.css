@@ -59,6 +59,7 @@ textarea {
 
 .site-shell {
   position: relative;
+  background: #ffffff;
 }
 
 .site-shell:has([data-chromeless="true"]) > header,
