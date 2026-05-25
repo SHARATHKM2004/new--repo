@@ -52,6 +52,8 @@ export function SiteHeader({
     "software solutions",
     "about",
     "careers",
+    "eventos",
+    "events",
   ];
   const topRowExcludedKeywords = ["insights", "recursos", ...secondaryNavKeywords];
 
@@ -187,7 +189,7 @@ export function SiteHeader({
 
               if (groups.length > 0) {
                 const allLinks = groups.flatMap((g) => g.links);
-                const isFlatPanel = groups.length === 1;
+                const isFlatPanel = groups.every((g) => !g.title || !g.title.trim());
 
                 if (isFlatPanel) {
                   return (
