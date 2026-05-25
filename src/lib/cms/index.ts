@@ -1647,8 +1647,8 @@ export async function getNavigation(locale: Locale, draft = false): Promise<Navi
               })
               .filter((link): link is { label: string; href: string } => Boolean(link));
 
-            if (!title || links.length === 0) return null;
-            return { title, links };
+            if (links.length === 0) return null;
+            return { title: title ?? "", links };
           })
           .filter((group): group is NavigationGroup => Boolean(group));
 
