@@ -209,24 +209,54 @@ export function SiteHeader({
 
                 return (
                   <div className="columns-2 gap-x-10 md:columns-3 lg:columns-4">
-                    {groups.map((group) => (
-                      <div key={group.title} className="mb-8 space-y-3 break-inside-avoid">
-                        <h3 className="text-[18px] font-semibold text-[#4f84ff]">
-                          {group.title}
-                        </h3>
-                        <ul className="space-y-2">
-                          {group.links.map((link) => (
-                            <li key={`${group.title}-${link.href}`}>
-                              <Link
-                                href={link.href}
-                                onClick={() => setActivePanel(null)}
-                                className="block text-[14px] leading-snug text-white/85 hover:text-white hover:underline"
-                              >
-                                {link.label}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
+                    {groups.map((group, gi) => (
+                      <div key={`${group.title}-${gi}`} className="mb-8 space-y-3 break-inside-avoid">
+                        {group.title ? (
+                          <h3 className="text-[18px] font-semibold text-[#4f84ff]">
+                            {group.title}
+                          </h3>
+                        ) : null}
+                        {group.links.length > 0 ? (
+                          <ul className="space-y-2">
+                            {group.links.map((link) => (
+                              <li key={`${group.title}-${link.href}`}>
+                                <Link
+                                  href={link.href}
+                                  onClick={() => setActivePanel(null)}
+                                  className="block text-[14px] leading-snug text-white/85 hover:text-white hover:underline"
+                                >
+                                  {link.label}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                        {group.subgroups && group.subgroups.length > 0 ? (
+                          <div className="space-y-3">
+                            {group.subgroups.map((sub, si) => (
+                              <div key={`${group.title}-sub-${si}`} className="space-y-1">
+                                {sub.title ? (
+                                  <p className="text-[14px] font-semibold leading-snug text-white">
+                                    {sub.title}
+                                  </p>
+                                ) : null}
+                                <ul className="space-y-1 pl-4">
+                                  {sub.links.map((link) => (
+                                    <li key={`${sub.title}-${link.href}`}>
+                                      <Link
+                                        href={link.href}
+                                        onClick={() => setActivePanel(null)}
+                                        className="block text-[14px] leading-snug text-white/85 hover:text-white hover:underline"
+                                      >
+                                        {link.label}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
                       </div>
                     ))}
                   </div>

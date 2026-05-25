@@ -1635,7 +1635,18 @@ export async function getNavigation(locale: Locale, draft = false): Promise<Navi
           return null;
         }
 
-        const groups = toArray((item as { groups?: Array<{ title?: string; links?: Array<{ label?: string; href?: string }> }> }).groups)
+        const groups = toArray(
+          (item as {
+            groups?: Array<{
+              title?: string;
+              links?: Array<{ label?: string; href?: string }>;
+              subgroups?: Array<{
+                title?: string;
+                links?: Array<{ label?: string; href?: string }>;
+              }>;
+            }>;
+          }).groups,
+        )
           .map((group) => {
             const title = group.title?.trim();
             const links = toArray(group.links)
@@ -1647,8 +1658,26 @@ export async function getNavigation(locale: Locale, draft = false): Promise<Navi
               })
               .filter((link): link is { label: string; href: string } => Boolean(link));
 
-            if (links.length === 0) return null;
-            return { title: title ?? "", links };
+            const subgroups = toArray(group.subgroups)
+              .map((sub) => {
+                const subTitle = sub.title?.trim();
+                const subLinks = toArray(sub.links)
+                  .map((link) => {
+                    const linkLabel = link.label?.trim();
+                    const linkHref = link.href?.trim();
+                    if (!linkLabel || !linkHref) return null;
+                    return { label: linkLabel, href: linkHref };
+                  })
+                  .filter((link): link is { label: string; href: string } => Boolean(link));
+                if (subLinks.length === 0) return null;
+                return { title: subTitle ?? "", links: subLinks };
+              })
+              .filter((sub): sub is { title: string; links: Array<{ label: string; href: string }> } => Boolean(sub));
+
+            if (links.length === 0 && subgroups.length === 0) return null;
+            const groupResult: NavigationGroup = { title: title ?? "", links };
+            if (subgroups.length > 0) groupResult.subgroups = subgroups;
+            return groupResult;
           })
           .filter((group): group is NavigationGroup => Boolean(group));
 

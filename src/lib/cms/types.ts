@@ -374,9 +374,15 @@ export type Page =
   | ResourceCenterPage
   | ContactPage;
 
+export type NavigationSubgroup = {
+  title: string;
+  links: Array<{ label: string; href: string }>;
+};
+
 export type NavigationGroup = {
   title: string;
   links: Array<{ label: string; href: string }>;
+  subgroups?: NavigationSubgroup[];
 };
 
 export type NavigationItem = {
