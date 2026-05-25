@@ -1635,46 +1635,45 @@ export async function getNavigation(locale: Locale, draft = false): Promise<Navi
           return null;
         }
 
-        const groups = toArray(
-          (item as {
-            groups?: Array<{
-              title?: string;
-              links?: Array<{ label?: string; href?: string }>;
-              subgroups?: Array<{
-                title?: string;
-                links?: Array<{ label?: string; href?: string }>;
-              }>;
-            }>;
-          }).groups,
-        )
-          .map((group) => {
-            const title = group.title?.trim();
-            const links = toArray(group.links)
-              .map((link) => {
-                const linkLabel = link.label?.trim();
-                const linkHref = link.href?.trim();
-                if (!linkLabel || !linkHref) return null;
-                return { label: linkLabel, href: linkHref };
-              })
-              .filter((link): link is { label: string; href: string } => Boolean(link));
+        type RawGroup = {
+          title?: string;
+          Title?: string;
+          links?: Array<{ label?: string; href?: string; Label?: string; Href?: string }>;
+          Links?: Array<{ label?: string; href?: string; Label?: string; Href?: string }>;
+          subgroups?: Array<RawGroup>;
+          Subgroups?: Array<RawGroup>;
+        };
 
-            const subgroups = toArray(group.subgroups)
+        const pickLinks = (raw: RawGroup) => {
+          const list = toArray(raw.links ?? raw.Links);
+          return list
+            .map((link) => {
+              const linkLabel = (link.label ?? link.Label)?.trim();
+              const linkHref = (link.href ?? link.Href)?.trim();
+              if (!linkLabel || !linkHref) return null;
+              return { label: linkLabel, href: linkHref };
+            })
+            .filter((link): link is { label: string; href: string } => Boolean(link));
+        };
+
+        const rawGroups = toArray((item as { groups?: RawGroup[]; Groups?: RawGroup[] }).groups
+          ?? (item as { Groups?: RawGroup[] }).Groups);
+
+        const groups = rawGroups
+          .map((group) => {
+            const title = (group.title ?? group.Title)?.trim();
+            const links = pickLinks(group);
+
+            const subgroups = toArray(group.subgroups ?? group.Subgroups)
               .map((sub) => {
-                const subTitle = sub.title?.trim();
-                const subLinks = toArray(sub.links)
-                  .map((link) => {
-                    const linkLabel = link.label?.trim();
-                    const linkHref = link.href?.trim();
-                    if (!linkLabel || !linkHref) return null;
-                    return { label: linkLabel, href: linkHref };
-                  })
-                  .filter((link): link is { label: string; href: string } => Boolean(link));
+                const subTitle = (sub.title ?? sub.Title)?.trim();
+                const subLinks = pickLinks(sub);
                 if (subLinks.length === 0) return null;
                 return { title: subTitle ?? "", links: subLinks };
               })
               .filter((sub): sub is { title: string; links: Array<{ label: string; href: string }> } => Boolean(sub));
 
-            if (links.length === 0 && subgroups.length === 0) return null;
+            if (links.length === 0 && subgroups.length === 0 && !title) return null;
             const groupResult: NavigationGroup = { title: title ?? "", links };
             if (subgroups.length > 0) groupResult.subgroups = subgroups;
             return groupResult;
