@@ -208,9 +208,9 @@ export function SiteHeader({
                 }
 
                 return (
-                  <div className="grid grid-cols-2 gap-x-10 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
+                  <div className="columns-2 gap-x-10 md:columns-3 lg:columns-4">
                     {groups.map((group) => (
-                      <div key={group.title} className="space-y-3">
+                      <div key={group.title} className="mb-8 space-y-3 break-inside-avoid">
                         <h3 className="text-[18px] font-semibold text-[#4f84ff]">
                           {group.title}
                         </h3>
