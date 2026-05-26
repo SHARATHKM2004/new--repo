@@ -181,6 +181,12 @@ type OptimizelyJsonBlock = {
   };
   html?: string;
   json?: unknown;
+  body?: string | OptimizelyRichTextField;
+  Body?: string | OptimizelyRichTextField;
+  richText?: string | OptimizelyRichTextField;
+  RichText?: string | OptimizelyRichTextField;
+  text?: string | OptimizelyRichTextField;
+  Text?: string | OptimizelyRichTextField;
   _metadata?: OptimizelyJsonMetadata;
   introText?: string;
   IntroText?: string;
@@ -989,6 +995,34 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
           type: "html",
           html,
         };
+      }
+
+      // Fallback: any block carrying rich text / body / text fields becomes a richText block
+      const richCandidates = [
+        block.richText,
+        block.RichText,
+        block.body,
+        block.Body,
+        block.text,
+        block.Text,
+        block.description,
+        block.content,
+      ];
+      for (const candidate of richCandidates) {
+        const value = getRichTextValue(candidate);
+        if (value) {
+          const paragraphs = value
+            .split(/\r?\n+/)
+            .map((p) => p.trim())
+            .filter(Boolean);
+          if (paragraphs.length) {
+            return {
+              type: "richText",
+              title: block.title?.trim() || block._metadata?.displayName?.trim() || undefined,
+              body: paragraphs,
+            };
+          }
+        }
       }
 
       return null;
