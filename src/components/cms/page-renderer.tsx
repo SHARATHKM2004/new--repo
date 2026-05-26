@@ -654,6 +654,7 @@ export async function PageRenderer({
                   </h2>
                 ) : null}
                 {(formBlocks[0].introText ?? "")
+                  .replace(/<br\s*\/?>(\s*<br\s*\/?>)*/gi, "\n\n")
                   .split(/\r?\n+/)
                   .map((p) => p.trim())
                   .filter(Boolean)

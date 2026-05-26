@@ -574,7 +574,7 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
         type: "form",
         formId: "lead",
         title: block.title ?? "",
-        intro: block.description ?? "",
+        intro: (block.title?.trim() || block.description?.trim() || ""),
         introText: block.introText ?? block.IntroText ?? undefined,
         emailLabel: block.emailLabel ?? block.EmailLabel ?? undefined,
         firstNameLabel: block.firstNameLabel ?? block.FirstNameLabel ?? undefined,
