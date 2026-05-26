@@ -265,6 +265,12 @@ export type PayBillBlock = {
   registerUrl?: string;
 };
 
+export type SignInBlock = {
+  type: "signIn";
+  variant: "401k" | "hub" | "sharefile";
+  configJson?: string;
+};
+
 export type Block =
   | HeroBlock
   | RichTextBlock
@@ -281,7 +287,8 @@ export type Block =
   | LocationsDirectoryBlock
   | PortalApplicationsBlock
   | PayBillBlock
-  | EventsListingBlock;
+  | EventsListingBlock
+  | SignInBlock;
 
 export type BasePage = {
   id: string;

@@ -271,6 +271,10 @@ type OptimizelyJsonBlock = {
   RegisterUrl?: string;
   eventsJson?: string;
   EventsJson?: string;
+  variant?: string;
+  Variant?: string;
+  signInConfigJson?: string;
+  SignInConfigJson?: string;
 };
 
 type OptimizelyCmsPageListItem = {
@@ -712,6 +716,16 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
           block.oneTimePaymentUrl?.trim() || block.OneTimePaymentUrl?.trim() || undefined,
         registerLabel: block.registerLabel?.trim() || block.RegisterLabel?.trim() || undefined,
         registerUrl: block.registerUrl?.trim() || block.RegisterUrl?.trim() || undefined,
+      };
+    }
+    case "SignInBlock": {
+      const variantRaw = (block.variant ?? block.Variant ?? "").trim().toLowerCase();
+      const variant: "401k" | "hub" | "sharefile" =
+        variantRaw === "hub" ? "hub" : variantRaw === "sharefile" ? "sharefile" : "401k";
+      return {
+        type: "signIn",
+        variant,
+        configJson: block.signInConfigJson?.trim() || block.SignInConfigJson?.trim() || undefined,
       };
     }
     case "EventsListingBlock": {

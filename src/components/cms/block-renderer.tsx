@@ -6,6 +6,7 @@ import type { Block, Locale, Page } from "@/lib/cms/types";
 import { LocationsDirectory } from "@/components/cms/locations-directory";
 import { PortalApplications } from "@/components/cms/portal-applications";
 import { PayBill } from "@/components/cms/pay-bill";
+import { SignIn } from "@/components/cms/sign-in";
 import { EventsListing } from "@/components/cms/events-listing";
 import { ArticleListing } from "@/components/cms/article-listing";
 
@@ -342,6 +343,8 @@ export async function BlockRenderer({
       return <PortalApplications block={block} locale={locale} />;
     case "payBill":
       return <PayBill block={block} locale={locale} />;
+    case "signIn":
+      return <SignIn block={block} locale={locale} />;
     case "eventsListing":
       return <EventsListing block={block} locale={locale} />;
     default:

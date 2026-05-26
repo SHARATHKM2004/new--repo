@@ -500,13 +500,14 @@ export async function PageRenderer({
     (block) => block.type === "portalApplications",
   );
   const hasPayBill = renderedSections.some((block) => block.type === "payBill");
+  const hasSignIn = renderedSections.some((block) => block.type === "signIn");
   const hasEventsListing = renderedSections.some((block) => block.type === "eventsListing");
   const hasArticleListingHero = renderedSections.some(
     (block) => block.type === "articleList" && Boolean(block.hero || block.introHeading),
   );
   const showPageHeader = Boolean(
     page.eyebrow || page.title || page.summary || fallbackNotice || author || pageKicker,
-  ) && !hasLocationsDirectory && !hasPortalApplications && !hasPayBill && !hasEventsListing && !hasArticleListingHero;
+  ) && !hasLocationsDirectory && !hasPortalApplications && !hasPayBill && !hasSignIn && !hasEventsListing && !hasArticleListingHero;
   const trendingInsights =
     page.type === "home" ? (await getInsights({ locale, draft })).slice(0, 4) : [];
 
@@ -891,7 +892,7 @@ export async function PageRenderer({
     );
   }
 
-  const isFullBleedStandalone = hasLocationsDirectory || hasPortalApplications || hasPayBill || hasEventsListing || hasArticleListingHero;
+  const isFullBleedStandalone = hasLocationsDirectory || hasPortalApplications || hasPayBill || hasSignIn || hasEventsListing || hasArticleListingHero;
 
   return (
     <main
