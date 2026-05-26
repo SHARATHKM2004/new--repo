@@ -1123,6 +1123,8 @@ function inferCmsPageType(slug: string[], pageType?: string | null) {
       return "resourceCenter" as const;
     case "contact":
       return "contact" as const;
+    case "rfp":
+      return "contact" as const;
     default:
       return "standard" as const;
   }
