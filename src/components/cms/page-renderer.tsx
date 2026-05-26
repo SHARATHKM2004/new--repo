@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { BlockRenderer } from "@/components/cms/block-renderer";
 import { NewsListing } from "@/components/cms/news-listing";
+import { NewsSidebar } from "@/components/cms/news-sidebar";
 import {
   getAuthorForInsight,
   getInsights,
@@ -570,14 +571,7 @@ export async function PageRenderer({
 
             <aside className="space-y-8">
               {sidebarBlocks.length ? (
-                sidebarBlocks.map((block, index) => (
-                  <div
-                    key={`${page.id}-news-side-${index}`}
-                    className="bg-[#f3f4f6] p-6 text-sm leading-7 text-[#1f2937] contact-intro-copy"
-                  >
-                    <BlockRenderer block={block} locale={locale} draft={draft} />
-                  </div>
-                ))
+                <NewsSidebar locale={locale} blocks={sidebarBlocks} />
               ) : (
                 <div className="bg-[#f3f4f6] p-6 text-sm leading-7 text-[#4b5563]">
                   {locale === "en"
