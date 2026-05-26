@@ -331,6 +331,8 @@ export async function BlockRenderer({
             messagePlaceholder={block.messagePlaceholder}
             successMessage={block.successMessage}
             errorMessage={block.errorMessage}
+            uploadLabel={block.uploadLabel}
+            stateAsDropdown={block.stateAsDropdown}
           />
         </Suspense>
       );

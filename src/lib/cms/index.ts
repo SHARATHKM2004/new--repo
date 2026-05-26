@@ -224,6 +224,10 @@ type OptimizelyJsonBlock = {
   SuccessMessage?: string;
   errorMessage?: string;
   ErrorMessage?: string;
+  uploadLabel?: string;
+  UploadLabel?: string;
+  stateAsDropdown?: string;
+  StateAsDropdown?: string;
   officesJson?: string;
   OfficesJson?: string;
   heroImageUrl?: string;
@@ -597,6 +601,8 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
         submitLabel: block.submitLabel ?? block.SubmitLabel ?? undefined,
         successMessage: block.successMessage ?? block.SuccessMessage ?? undefined,
         errorMessage: block.errorMessage ?? block.ErrorMessage ?? undefined,
+        uploadLabel: block.uploadLabel ?? block.UploadLabel ?? undefined,
+        stateAsDropdown: block.stateAsDropdown ?? block.StateAsDropdown ?? undefined,
       };
     case "LocationsDirectoryBlock": {
       const raw = block.officesJson ?? block.OfficesJson ?? "";

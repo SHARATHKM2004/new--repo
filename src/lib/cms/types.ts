@@ -157,6 +157,8 @@ export type FormBlock = {
   messagePlaceholder?: string;
   successMessage?: string;
   errorMessage?: string;
+  uploadLabel?: string;
+  stateAsDropdown?: string;
 };
 
 export type OfficeEntry = {

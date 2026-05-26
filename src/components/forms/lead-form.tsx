@@ -2,6 +2,65 @@
 
 import { useState, useTransition } from "react";
 
+const US_STATES: ReadonlyArray<{ code: string; name: string }> = [
+  { code: "AL", name: "Alabama" },
+  { code: "AK", name: "Alaska" },
+  { code: "AZ", name: "Arizona" },
+  { code: "AR", name: "Arkansas" },
+  { code: "CA", name: "California" },
+  { code: "CO", name: "Colorado" },
+  { code: "CT", name: "Connecticut" },
+  { code: "DE", name: "Delaware" },
+  { code: "FL", name: "Florida" },
+  { code: "GA", name: "Georgia" },
+  { code: "HI", name: "Hawaii" },
+  { code: "ID", name: "Idaho" },
+  { code: "IL", name: "Illinois" },
+  { code: "IN", name: "Indiana" },
+  { code: "IA", name: "Iowa" },
+  { code: "KS", name: "Kansas" },
+  { code: "KY", name: "Kentucky" },
+  { code: "LA", name: "Louisiana" },
+  { code: "ME", name: "Maine" },
+  { code: "MD", name: "Maryland" },
+  { code: "MA", name: "Massachusetts" },
+  { code: "MI", name: "Michigan" },
+  { code: "MN", name: "Minnesota" },
+  { code: "MS", name: "Mississippi" },
+  { code: "MO", name: "Missouri" },
+  { code: "MT", name: "Montana" },
+  { code: "NE", name: "Nebraska" },
+  { code: "NV", name: "Nevada" },
+  { code: "NH", name: "New Hampshire" },
+  { code: "NJ", name: "New Jersey" },
+  { code: "NM", name: "New Mexico" },
+  { code: "NY", name: "New York" },
+  { code: "NC", name: "North Carolina" },
+  { code: "ND", name: "North Dakota" },
+  { code: "OH", name: "Ohio" },
+  { code: "OK", name: "Oklahoma" },
+  { code: "OR", name: "Oregon" },
+  { code: "PA", name: "Pennsylvania" },
+  { code: "RI", name: "Rhode Island" },
+  { code: "SC", name: "South Carolina" },
+  { code: "SD", name: "South Dakota" },
+  { code: "TN", name: "Tennessee" },
+  { code: "TX", name: "Texas" },
+  { code: "UT", name: "Utah" },
+  { code: "VT", name: "Vermont" },
+  { code: "VA", name: "Virginia" },
+  { code: "WA", name: "Washington" },
+  { code: "WV", name: "West Virginia" },
+  { code: "WI", name: "Wisconsin" },
+  { code: "WY", name: "Wyoming" },
+];
+
+const isTruthy = (v?: string) => {
+  if (!v) return false;
+  const s = v.trim().toLowerCase();
+  return s === "true" || s === "yes" || s === "1" || s === "on" || s === "us";
+};
+
 type FormState = {
   type: "idle" | "success" | "error";
   message?: string;
@@ -35,6 +94,8 @@ export function LeadForm({
   messagePlaceholder,
   successMessage,
   errorMessage,
+  uploadLabel,
+  stateAsDropdown,
 }: {
   locale: "en" | "es";
   title?: string;
@@ -61,6 +122,8 @@ export function LeadForm({
   messagePlaceholder?: string;
   successMessage?: string;
   errorMessage?: string;
+  uploadLabel?: string;
+  stateAsDropdown?: string;
 }) {
   const [state, setState] = useState<FormState>(initialFormState);
   const [isPending, startTransition] = useTransition();
@@ -134,6 +197,7 @@ export function LeadForm({
                   state: form.get("state"),
                   phone: form.get("phone"),
                   message: form.get("message"),
+                  documentName: (form.get("document") as File | null)?.name || undefined,
                 }),
               });
 
@@ -225,12 +289,39 @@ export function LeadForm({
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151]">
           {lState}
-          <input
-            name="state"
-            placeholder={pState}
-            className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
-          />
+          {isTruthy(stateAsDropdown) ? (
+            <select
+              name="state"
+              defaultValue=""
+              className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
+            >
+              <option value="" disabled>
+                {pState}
+              </option>
+              {US_STATES.map((st) => (
+                <option key={st.code} value={st.name}>
+                  {st.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              name="state"
+              placeholder={pState}
+              className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 text-[15px] outline-none transition focus:border-[#2563eb]"
+            />
+          )}
         </label>
+        {uploadLabel ? (
+          <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151] md:col-span-2">
+            {uploadLabel}
+            <input
+              name="document"
+              type="file"
+              className="h-10 rounded-none border border-[#9ca3af] bg-white px-3 py-2 text-[14px] outline-none transition focus:border-[#2563eb] file:mr-3 file:border file:border-[#9ca3af] file:bg-white file:px-3 file:py-1 file:text-[13px] file:text-[#374151]"
+            />
+          </label>
+        ) : null}
         <label className="flex flex-col gap-1 text-sm font-semibold text-[#374151] md:col-span-2">
           {lPhone}
           <input
