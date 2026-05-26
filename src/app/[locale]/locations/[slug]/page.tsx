@@ -4,6 +4,7 @@ import { draftMode } from "next/headers";
 import { getLocationOffices, getOfficeSlug } from "@/lib/cms";
 import { isLocale } from "@/lib/cms/types";
 import type { OfficeEntry } from "@/lib/cms/types";
+import { stateSlug } from "@/app/[locale]/locations/state/[state]/page";
 
 type RouteParams = { locale: string; slug: string };
 
@@ -71,7 +72,12 @@ export default async function LocationDetailPage({
             Locations
           </Link>
           <span className="mx-3 opacity-60">|</span>
-          <span className="font-semibold">{office.state}</span>
+          <Link
+            href={`/${locale}/locations/state/${stateSlug(office.state)}`}
+            className="font-semibold hover:underline"
+          >
+            {office.state}
+          </Link>
           <span className="mx-3 opacity-60">|</span>
           <span className="font-semibold">{office.city}</span>
         </div>
@@ -89,7 +95,12 @@ export default async function LocationDetailPage({
                 <li key={state}>
                   <div className="flex items-center gap-2 py-1 font-bold text-[#0b1220]">
                     <span aria-hidden="true">&gt;</span>
-                    <span>{state}</span>
+                    <Link
+                      href={`/${locale}/locations/state/${stateSlug(state)}`}
+                      className="hover:text-[#1554ff] hover:underline"
+                    >
+                      {state}
+                    </Link>
                   </div>
                   {isCurrentState ? (
                     <ul className="ml-5 mt-1 space-y-1">
