@@ -543,8 +543,28 @@ function toArray<T>(value: T[] | null | undefined) {
   return Array.isArray(value) ? value : [];
 }
 
+function decodeHtmlEntities(value: string) {
+  return value
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&apos;/gi, "'")
+    .replace(/&#(\d+);/g, (_m, n) => String.fromCharCode(Number(n)));
+}
+
 function stripHtmlTags(value: string) {
-  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  const withBreaks = value
+    .replace(/<\s*br\s*\/?\s*>/gi, "\n")
+    .replace(/<\/\s*(p|div|li|h[1-6]|tr)\s*>/gi, "\n")
+    .replace(/<[^>]*>/g, " ");
+  return decodeHtmlEntities(withBreaks)
+    .split(/\r?\n+/)
+    .map((line) => line.replace(/[ \t]+/g, " ").trim())
+    .filter(Boolean)
+    .join("\n");
 }
 
 function getRichTextValue(value: string | OptimizelyRichTextField | null | undefined) {
