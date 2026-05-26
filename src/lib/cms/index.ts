@@ -51,7 +51,9 @@ type OptimizelyCmsPageItem = {
     relatedServiceIds?: string[];
     relatedIndustryIds?: string[];
     cardImageUrl?: string;
+    CardImageUrl?: string;
     cardImageAlt?: string;
+    CardImageAlt?: string;
     role?: string;
     expertise?: string[];
     avatarSrc?: string;
@@ -1276,10 +1278,13 @@ function mapOptimizelyCmsPage(item: OptimizelyCmsPageItem): Page | null {
             ? relatedInsightIds
             : undefined,
         uiLabels: Object.values(uiLabels).some(Boolean) ? uiLabels : undefined,
-        cardImage: item._json?.cardImageUrl?.trim()
+        cardImage: (item._json?.cardImageUrl?.trim() || item._json?.CardImageUrl?.trim())
           ? {
-              src: item._json.cardImageUrl.trim(),
-              alt: item._json.cardImageAlt?.trim() || title,
+              src: (item._json?.cardImageUrl?.trim() || item._json?.CardImageUrl?.trim()) as string,
+              alt:
+                item._json?.cardImageAlt?.trim() ||
+                item._json?.CardImageAlt?.trim() ||
+                title,
             }
           : undefined,
       } satisfies InsightPage;
