@@ -616,15 +616,37 @@ function mapOptimizelyBlock(block: OptimizelyJsonBlock, fallbackTitle?: string):
         }
       }
       const normalized = offices
-        .map((office) => ({
-          state: typeof office.state === "string" ? office.state.trim() : "",
-          city: typeof office.city === "string" ? office.city.trim() : "",
-          address1: typeof office.address1 === "string" ? office.address1.trim() : undefined,
-          address2: typeof office.address2 === "string" ? office.address2.trim() : undefined,
-          cityStateZip: typeof office.cityStateZip === "string" ? office.cityStateZip.trim() : undefined,
-          phone: typeof office.phone === "string" ? office.phone.trim() : undefined,
-          fax: typeof office.fax === "string" ? office.fax.trim() : undefined,
-        }))
+        .map((office) => {
+          const strArr = (v: unknown): string[] | undefined => {
+            if (!Array.isArray(v)) return undefined;
+            const arr = v
+              .filter((x): x is string => typeof x === "string")
+              .map((x) => x.trim())
+              .filter(Boolean);
+            return arr.length ? arr : undefined;
+          };
+          const str = (v: unknown): string | undefined =>
+            typeof v === "string" && v.trim() ? v.trim() : undefined;
+          return {
+            state: str(office.state) ?? "",
+            city: str(office.city) ?? "",
+            address1: str(office.address1),
+            address2: str(office.address2),
+            cityStateZip: str(office.cityStateZip),
+            phone: str(office.phone),
+            fax: str(office.fax),
+            slug: str(office.slug),
+            intro: str(office.intro),
+            paragraphs: strArr(office.paragraphs),
+            services: strArr(office.services),
+            aboutTitle: str(office.aboutTitle),
+            aboutParagraphs: strArr(office.aboutParagraphs),
+            email: str(office.email),
+            mapEmbedUrl: str(office.mapEmbedUrl),
+            mapLinkUrl: str(office.mapLinkUrl),
+            mapLinkLabel: str(office.mapLinkLabel),
+          };
+        })
         .filter((o) => o.state && o.city);
       return normalized.length
         ? {
@@ -1564,6 +1586,35 @@ export async function getPageBySlug(options: {
 
   const pages = await getPagesForLocale(options.locale, options.draft);
   return pages.find((page) => slugKey(page.slug) === slugKey(options.slug)) ?? null;
+}
+
+function officeSlug(office: { slug?: string; city: string }): string {
+  return (
+    office.slug?.trim().toLowerCase() ||
+    office.city
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+  );
+}
+
+export async function getLocationOffices(locale: Locale, draft = false) {
+  const page = await getPageBySlug({ locale, slug: ["locations"], draft });
+  if (!page) return { heading: undefined, heroImageUrl: undefined, offices: [] };
+  const block = page.sections.find(
+    (b): b is Extract<typeof page.sections[number], { type: "locationsDirectory" }> =>
+      b.type === "locationsDirectory",
+  );
+  if (!block) return { heading: undefined, heroImageUrl: undefined, offices: [] };
+  return {
+    heading: block.heading,
+    heroImageUrl: block.heroImageUrl,
+    offices: block.offices,
+  };
+}
+
+export function getOfficeSlug(office: { slug?: string; city: string }): string {
+  return officeSlug(office);
 }
 
 async function getOptimizelyHeader(locale: Locale, draft = false) {

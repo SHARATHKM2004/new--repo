@@ -169,6 +169,16 @@ export type OfficeEntry = {
   cityStateZip?: string;
   phone?: string;
   fax?: string;
+  slug?: string;
+  intro?: string;
+  paragraphs?: string[];
+  services?: string[];
+  aboutTitle?: string;
+  aboutParagraphs?: string[];
+  email?: string;
+  mapEmbedUrl?: string;
+  mapLinkUrl?: string;
+  mapLinkLabel?: string;
 };
 
 export type LocationsDirectoryBlock = {

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { LocationsDirectoryBlock, OfficeEntry } from "@/lib/cms/types";
 
@@ -23,6 +24,11 @@ function slugify(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function officeHref(locale: string, office: OfficeEntry) {
+  const slug = office.slug?.trim().toLowerCase() || slugify(office.city);
+  return `/${locale}/locations/${slug}`;
 }
 
 export function LocationsDirectory({ block, locale }: Props) {
@@ -100,7 +106,12 @@ export function LocationsDirectory({ block, locale }: Props) {
                     <ul className="ml-5 mt-1 space-y-1">
                       {offices.map((office) => (
                         <li key={`${state}-${office.city}`}>
-                          <span className="text-[#374151]">{office.city}</span>
+                          <Link
+                            href={officeHref(locale, office)}
+                            className="text-[#374151] hover:text-[#1554ff] hover:underline"
+                          >
+                            {office.city}
+                          </Link>
                         </li>
                       ))}
                     </ul>
@@ -119,10 +130,11 @@ export function LocationsDirectory({ block, locale }: Props) {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {grouped.flatMap(([state, offices]) =>
               offices.map((office) => (
-                <div
+                <Link
                   key={`${state}-${office.city}`}
                   id={`office-${slugify(state)}-${slugify(office.city)}`}
-                  className="relative overflow-hidden bg-[#f3f4f6] p-5 text-sm leading-6 text-[#374151]"
+                  href={officeHref(locale, office)}
+                  className="relative block overflow-hidden bg-[#f3f4f6] p-5 text-sm leading-6 text-[#374151] transition hover:bg-[#e5e7eb]"
                 >
                   <h4 className="mb-2 text-sm font-bold uppercase tracking-wide text-[#1554ff]">
                     {office.city}
@@ -132,7 +144,7 @@ export function LocationsDirectory({ block, locale }: Props) {
                   {office.cityStateZip ? <div>{office.cityStateZip}</div> : null}
                   {office.phone ? <div className="mt-1">Tel: {office.phone}</div> : null}
                   {office.fax ? <div>Fax: {office.fax}</div> : null}
-                </div>
+                </Link>
               )),
             )}
           </div>
