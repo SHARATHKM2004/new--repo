@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { BlockRenderer } from "@/components/cms/block-renderer";
+import { NewsListing } from "@/components/cms/news-listing";
 import {
   getAuthorForInsight,
   getInsights,
@@ -553,53 +554,18 @@ export async function PageRenderer({
         </section>
 
         <section className="mx-auto max-w-[1260px] px-6 py-10 lg:px-10 lg:py-14">
-          <form className="mb-10 flex flex-wrap gap-4">
-            <select
-              name="date"
-              defaultValue=""
-              className="h-12 min-w-[260px] rounded-none border border-[#d1d5db] bg-[#f3f4f6] px-4 text-sm text-[#1f2937]"
-            >
-              <option value="">{locale === "en" ? "Filter By Date (all)" : "Filtrar por fecha (todas)"}</option>
-            </select>
-            <select
-              name="industry"
-              defaultValue=""
-              className="h-12 min-w-[260px] rounded-none border border-[#d1d5db] bg-[#f3f4f6] px-4 text-sm text-[#1f2937]"
-            >
-              <option value="">{locale === "en" ? "Industry (all)" : "Industria (todas)"}</option>
-            </select>
-          </form>
-
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div>
-              <h2 className="text-xl font-semibold uppercase tracking-wide text-[#1554ff]">
-                {locale === "en" ? "Most recent news" : "Noticias recientes"}
-              </h2>
-              <ul className="mt-6 space-y-8">
-                {newsItems.map((item) => (
-                  <li key={item.id} className="space-y-2">
-                    <h3 className="text-[1.35rem] font-semibold leading-snug text-[#1554ff]">
-                      <Link href={`/${locale}/${item.slug.join("/")}`} className="hover:underline">
-                        {item.title}
-                      </Link>
-                    </h3>
-                    <p className="text-sm text-[#4b5563]">{formatInsightDate(item.publishedAt)}</p>
-                    <Link
-                      href={`/${locale}/${item.slug.join("/")}`}
-                      className="inline-flex text-sm text-[#1554ff] hover:underline"
-                    >
-                      {locale === "en" ? "View More" : "Ver mas"}
-                    </Link>
-                  </li>
-                ))}
-                {newsItems.length === 0 ? (
-                  <li className="text-sm text-[#4b5563]">
-                    {locale === "en"
-                      ? "No news items yet. Publish CMS articles to populate this list."
-                      : "Aun no hay noticias. Publique articulos en el CMS."}
-                  </li>
-                ) : null}
-              </ul>
+              <NewsListing
+                locale={locale}
+                items={newsItems.map((it) => ({
+                  id: it.id,
+                  slug: it.slug,
+                  title: it.title,
+                  publishedAt: it.publishedAt,
+                  industries: it.relatedIndustryIds ?? [],
+                }))}
+              />
             </div>
 
             <aside className="space-y-8">
