@@ -167,7 +167,7 @@ export function DefaultView({
             <h2 className="text-4xl font-extrabold uppercase leading-tight tracking-tight text-white lg:text-5xl">
               {locale === "en" ? "Trending Insights" : "Tendencias destacadas"}
             </h2>
-            <p className="mt-4 max-w-xl text-sm leading-7 text-white">
+            <p className="mt-4 max-w-xl text-sm leading-7 text-white/90">
               {locale === "en"
                 ? "Fresh perspectives and strategic insights from Summit Advisory Group"
                 : "Perspectivas frescas e ideas estrategicas de Summit Advisory Group"}
@@ -186,7 +186,7 @@ export function DefaultView({
                   <p className="mt-4 text-sm leading-7 text-white/90">{item.summary}</p>
                   <Link
                     href={`/${locale}/${item.slug.join("/")}`}
-                    className="mt-6 inline-flex text-base font-bold uppercase tracking-wide text-white underline underline-offset-4 hover:no-underline"
+                    className="mt-6 inline-flex text-sm font-semibold uppercase tracking-wide text-white underline underline-offset-4 hover:no-underline"
                   >
                     {locale === "en" ? "Read now >" : "Leer ahora >"}
                   </Link>
