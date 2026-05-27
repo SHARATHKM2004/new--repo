@@ -57,6 +57,8 @@ export function DefaultView({
               loop
               playsInline
               preload="auto"
+              // @ts-expect-error -- fetchpriority valid HTML attribute, types lag
+              fetchpriority="high"
               poster={
                 page.headerVideoPoster ??
                 "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=60"
@@ -184,7 +186,7 @@ export function DefaultView({
                   <p className="mt-4 text-sm leading-7 text-white/90">{item.summary}</p>
                   <Link
                     href={`/${locale}/${item.slug.join("/")}`}
-                    className="mt-6 inline-flex text-sm font-semibold uppercase tracking-wide text-white hover:underline"
+                    className="mt-6 inline-flex text-sm font-semibold uppercase tracking-wide text-white underline underline-offset-4 hover:no-underline"
                   >
                     {locale === "en" ? "Read now >" : "Leer ahora >"}
                   </Link>
