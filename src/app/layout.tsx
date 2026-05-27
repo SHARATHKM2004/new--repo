@@ -13,6 +13,7 @@ const serif = Fraunces({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://project-coral-eight.vercel.app"),
   title: "Summit Advisory Group",
   description: "A CMS-driven corporate marketing and insights platform scaffolded for local Optimizely practice.",
 };

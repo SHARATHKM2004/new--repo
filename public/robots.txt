@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://project-coral-eight.vercel.app/sitemap.xml

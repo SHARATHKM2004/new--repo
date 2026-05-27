@@ -79,6 +79,8 @@ export function HeaderSearch({ locale }: { locale: Locale }) {
       <div className="flex items-center gap-2 rounded-sm bg-[#f3f4f6] px-3 py-1.5">
         <input
           type="search"
+          id="site-header-search"
+          name="q"
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
@@ -86,7 +88,7 @@ export function HeaderSearch({ locale }: { locale: Locale }) {
           }}
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
-          className="w-44 bg-transparent text-xs text-[#111827] placeholder:text-[#6b7280] focus:outline-none"
+          className="w-44 bg-transparent text-xs text-[#111827] placeholder:text-[#4b5563] focus:outline-none"
           aria-label={placeholder}
         />
         <svg

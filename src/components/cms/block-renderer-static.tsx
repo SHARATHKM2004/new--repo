@@ -22,10 +22,11 @@ export function HeroBlockView({ block }: { block: Extract<Block, { type: "hero" 
   return (
     <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden">
       <Image
-        src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=70"
+        src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=60"
         alt=""
         fill
         priority
+        fetchPriority="high"
         sizes="100vw"
         className="absolute inset-0 h-full w-full object-cover"
       />
