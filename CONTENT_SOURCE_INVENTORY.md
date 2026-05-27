@@ -1,86 +1,67 @@
-# Content Source Inventory
+# Content Source Inventory — Where Every String Lives
 
-Every user-visible string on the website, split by where its value comes from. Three tables, no mixing.
+This file is the ground truth for "what is editable in Optimizely?" vs. "what is hardcoded in the codebase?". For every user-visible element it lists:
 
-- **Table 1 — CMS (Optimizely Graph)**: comes from Optimizely (or the mock dataset in `src/lib/cms/mock-content.ts` when `CMS_PROVIDER=mock`). No string fallback in the component.
-- **Table 2 — CMS with hardcoded fallback**: fetched from Optimizely, but `src/lib/cms/index.ts` supplies a default string used when the field is missing or the provider is `mock`.
-- **Table 3 — Hardcoded in the frontend**: literal strings in components or `dictionary[locale]` objects. Cannot be edited in Optimizely.
+- The literal text shown to a visitor (EN + ES where relevant).
+- Whether it is **CMS-sourced**, **CMS-sourced with a hardcoded fallback**, or **hardcoded** in the frontend.
+- The exact file (and line where stable) it lives in today.
 
----
+> **May 2026 split.** The `src/lib/cms/index.ts` file was 2 400+ lines and is now a 16-line barrel. The functions and fallback constants that used to live in it have moved to dedicated files (`navigation.ts`, `footer.ts`, `subscription.ts`, `page-resolver.ts`, etc.). All references in the tables below point to the new homes. The mock dataset previously in `mock-content.ts` is now split across `mock-content-pages-*.ts`, `mock-content-articles.ts`, `mock-content-events.ts`, and `mock-articles.ts`. Where exact line numbers shift between content edits, the reference uses the file only.
 
-## Table 1 — CMS (Optimizely Graph)
-
-| Area | Element / Label | Example text | File:line |
-|------|-----------------|--------------|-----------|
-| Home (StartPage) | Hero eyebrow | Corporate marketing platform | [mock-content.ts](src/lib/cms/mock-content.ts#L655) |
-| Home (StartPage) | Hero title | Advisory storytelling built for... | [mock-content.ts](src/lib/cms/mock-content.ts#L656) |
-| Home (StartPage) | Hero intro | Create service pages, industry... | [mock-content.ts](src/lib/cms/mock-content.ts#L657) |
-| Home (StartPage) | Hero primary CTA | Explore services | [mock-content.ts](src/lib/cms/mock-content.ts#L661) |
-| Home (StartPage) | Hero secondary CTA | Visit resource center | [mock-content.ts](src/lib/cms/mock-content.ts#L665) |
-| Home (StartPage) | Stats block title | What this practice build is... | [mock-content.ts](src/lib/cms/mock-content.ts#L670) |
-| Home (StartPage) | Stats items | Page types (8), Reusable sections (7), Locales (2), Preview path (Ready) | [mock-content.ts](src/lib/cms/mock-content.ts#L671-L674) |
-| Home (StartPage) | Card grid title | Practice the same site shape... | [mock-content.ts](src/lib/cms/mock-content.ts#L677) |
-| Home (StartPage) | Card grid intro | The structure mirrors a... | [mock-content.ts](src/lib/cms/mock-content.ts#L678) |
-| Home (StartPage) | Card 1 (eyebrow/title/body) | Service pages → Position capabilities clearly → Model outcomes... | [mock-content.ts](src/lib/cms/mock-content.ts#L681-L683) |
-| Home (StartPage) | Card 2 (eyebrow/title/body) | Industry pages → Tell focused market stories → Connect industry pain points... | [mock-content.ts](src/lib/cms/mock-content.ts#L687-L689) |
-| Home (StartPage) | Card 3 (eyebrow/title/body) | Insights hub → Build filterable editorial... → Practice tagging... | [mock-content.ts](src/lib/cms/mock-content.ts#L693-L695) |
-| Home (StartPage) | Featured content section | Latest insights + intro | [mock-content.ts](src/lib/cms/mock-content.ts#L701-L702) |
-| Home (StartPage) | CTA block | Pressure-test the full stack... / Open contact page | [mock-content.ts](src/lib/cms/mock-content.ts#L709-L712) |
-| Service Page | Title | Digital platform strategy | [mock-content.ts](src/lib/cms/mock-content.ts#L713) |
-| Service Page | Eyebrow | Service | [mock-content.ts](src/lib/cms/mock-content.ts#L715) |
-| Service Page | Outcome tags | Composable web architecture, Clear CMS governance, Faster campaign launches | [mock-content.ts](src/lib/cms/mock-content.ts#L728-L730) |
-| Service Page | Body text | Enterprise web programs... | [mock-content.ts](src/lib/cms/mock-content.ts#L733-L734) |
-| Industry / Insight / Author / Contact / Resource Center pages | All headings, summaries, body, office details, related IDs | (per content item) | [mock-content.ts](src/lib/cms/mock-content.ts) |
-| Contact Page | Office labels (Client / Challenge / Result) | (per office record) | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L140-L146) |
-| Block — Hero | eyebrow, title, intro, CTAs | (per block) | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L109) |
-| Block — Rich Text | body paragraphs | (per block) | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L130) |
-| Block — HTML | raw HTML | (per block) | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L136) |
-| Block — Image | alt text, caption | (per block) | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L145-L146) |
-| Block — Video | iframe title, caption | (per block) | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L154-L158) |
-| Block — Stats | title, item label, item value | (per block) | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L164-L169) |
-| Block — Quote | quote, attribution, role | (per block) | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L177-L180) |
-| Block — Card Grid | title, intro, card title, card body | (per block) | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L184-L198) |
-| Block — CTA | title, body, action label | (per block) | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L213-L218) |
-| Block — Featured Content | title, intro, resolved card content | (per block) | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L41-L234) |
-| Block — Form | title, intro | (per block) | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L276-L277) |
-| Admin Leads (rows) | Submitted, Name, Email, Company, Message values | (per submission) | [data/leads.json](data/leads.json) |
-| Admin Subscribers (rows) | Subscriber field values | (per submission) | persisted via `/api/subscribe` |
+Legend:
+- **CMS** — fetched from Optimizely Graph and rendered as-is (no in-app fallback for this string).
+- **CMS + fallback** — fetched from Optimizely; if the CMS returns null or the provider is `mock`, the hardcoded default in the file:line below is used.
+- **Hardcoded** — never read from the CMS; editing requires a code change.
 
 ---
 
-## Table 2 — CMS with hardcoded fallback
+## Table 1 — Page content sourced from the CMS (mock fallback when offline)
 
-These come from Optimizely when authored; if missing, the default string in `src/lib/cms/index.ts` is used.
+Every page rendered through `/[locale]/[[...slug]]` resolves via `getPageBySlug` (in `src/lib/cms/page-resolver.ts`). With `CMS_PROVIDER=optimizely` these strings come from Optimizely. With `CMS_PROVIDER=mock` they come from the split mock dataset.
 
-| Area | Element / Label | Fallback text (EN) | Fallback text (ES) | File:line |
-|------|-----------------|---------------------|---------------------|-----------|
-| Global Header | Brand title | Summit Advisory Group | Summit Advisory Group | [cms/index.ts](src/lib/cms/index.ts#L1318-L1335) |
-| Global Header | Tagline | CMS practice build | Proyecto de practica CMS | [cms/index.ts](src/lib/cms/index.ts#L1318-L1335) |
-| Global Header | CTA label | Talk to us | Contactar | [cms/index.ts](src/lib/cms/index.ts#L1318-L1335) |
-| Locale Switcher | Switch label | ES | EN | [cms/index.ts](src/lib/cms/index.ts#L1318-L1335) |
-| Global Footer | Eyebrow | Practice project | Proyecto de practica | [cms/index.ts](src/lib/cms/index.ts#L1369) |
-| Global Footer | Title | Build the architecture you actually want to inherit. | Construya la arquitectura que si quiera heredar. | [cms/index.ts](src/lib/cms/index.ts#L1371-L1373) |
-| Global Footer | Body | This scaffold is intentionally opinionated... | Esta base es intencionalmente opinionada... | [cms/index.ts](src/lib/cms/index.ts#L1375-L1378) |
-| Global Footer | Column 1 title | Core paths | Rutas clave | [cms/index.ts](src/lib/cms/index.ts#L1380) |
-| Global Footer | Column 1 links | Home, Resource center, Contact | — | [cms/index.ts](src/lib/cms/index.ts#L1381-L1383) |
-| Global Footer | Column 2 title | Developer hooks | — | [cms/index.ts](src/lib/cms/index.ts#L1387) |
-| Global Footer | Column 2 links | Enable preview, Disable preview | — | [cms/index.ts](src/lib/cms/index.ts#L1388-L1389) |
-| Subscription Page | Page title | Summit Advisory Group subscription center | — | [cms/index.ts](src/lib/cms/index.ts#L1520) |
-| Subscription Page | Breadcrumb home label | Home | — | [cms/index.ts](src/lib/cms/index.ts#L1521) |
-| Subscription Page | Heading | Want to stay in the know? | — | [cms/index.ts](src/lib/cms/index.ts#L1522) |
-| Subscription Page | Intro | At Summit Advisory Group, we strive... | — | [cms/index.ts](src/lib/cms/index.ts#L1523-L1524) |
-| Subscription Page | Emails consent title | Sign up for Summit Advisory Group emails. | — | [cms/index.ts](src/lib/cms/index.ts#L1525) |
-| Subscription Page | Emails consent body | You can select specific e-communications... | — | [cms/index.ts](src/lib/cms/index.ts#L1526) |
-| Subscription Page | Topics help text | Check the boxes below to receive... | — | [cms/index.ts](src/lib/cms/index.ts#L1527) |
-| Subscription Page | Topic 1 (title + body) | Thought Leadership + body | — | [cms/index.ts](src/lib/cms/index.ts#L1529-L1530) |
-| Subscription Page | Topic 2 (title + body) | Event Invitations + body | — | [cms/index.ts](src/lib/cms/index.ts#L1534-L1535) |
-| Subscription Page | Topic 3 (title + body) | Summit Weekly + body | — | [cms/index.ts](src/lib/cms/index.ts#L1539-L1540) |
-| Subscription Page | Topic 4 (title + body) | Regulatory Reporting Requirements + body | — | [cms/index.ts](src/lib/cms/index.ts#L1543-L1544) |
-| Subscription Page | Submit label | Submit | — | [cms/index.ts](src/lib/cms/index.ts#L1546) |
-| Subscription Page | Success title | Thanks for subscribing! | — | [cms/index.ts](src/lib/cms/index.ts#L1547) |
-| Subscription Page | Success body | You will receive Summit Advisory Group updates... | — | [cms/index.ts](src/lib/cms/index.ts#L1548) |
-| Subscription Page | Back link | Back to home | — | [cms/index.ts](src/lib/cms/index.ts#L1549) |
-| Block — Article List | View all label | View all articles | — | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L357) |
+| Area | Element | Source (when live) | Fallback file |
+|------|---------|--------------------|---------------|
+| Home page hero | Eyebrow, title, body, CTA, video poster | Optimizely `StartPage` | `src/lib/cms/mock-content-pages-en.ts` |
+| Home page sections | Story, Services, Industries, Logos, Testimonials, CTA blocks | Optimizely `StartPage.blocks` | `src/lib/cms/mock-content-pages-en.ts` |
+| Service pages | Title, summary, outcomes, audience, related industries, blocks | Optimizely `CMSPage` (`pageType=service`) | `src/lib/cms/mock-content-pages-en-1.ts` / `-2.ts` |
+| Industry pages | Title, summary, related services, blocks | Optimizely `CMSPage` (`pageType=industry`) | `src/lib/cms/mock-content-pages-en-1.ts` / `-2.ts` |
+| Insight / article pages | Title, summary, body (RichText), author, publishedAt, readTime, topics, card image | Optimizely `CMSPage` (`pageType=insight`) | `src/lib/cms/mock-content-articles.ts` + `src/lib/cms/mock-articles.ts` |
+| Author pages | Name, role, expertise, avatar, bio (RichText) | Optimizely `CMSPage` (`pageType=author`) | `src/lib/cms/mock-authors.ts` |
+| Contact page | Hero, intro, lead-form labels (CMS-overridable), office cards | Optimizely `CMSPage` (`pageType=contact`) | `src/lib/cms/mock-content-pages-en-2.ts` |
+| Resource Center | Listing eyebrow, title, summary, filter options | Optimizely `CMSPage` (`pageType=resource-center`) | `src/lib/cms/mock-content-pages-en-2.ts` |
+| News landing | News items, sidebar, featured | Optimizely `CMSPage` (`pageType=news-landing`) | `src/lib/cms/mock-content-pages-en-2.ts` |
+| Events | Event title, date, location, summary | `EventsListingBlock` (CMS) | `src/lib/cms/mock-content-events.ts` |
+| Locations | Office name, address, contact, lat/lng | Optimizely `LocationsDirectoryBlock` | `src/lib/cms/mock-content-pages-en-2.ts` |
+| Spanish pages | Mirror of EN pages | Optimizely (locale-scoped) | `src/lib/cms/mock-content-pages-es.ts` |
+| Block — Article List | Card title, summary, author label, link href | Optimizely block fields | `block-renderer-static.tsx` for layout, content from page data |
+| Block — CardGrid | Card title, body, href | Optimizely block fields | `block-renderer-static.tsx` |
+| Block — Form | Field labels, submit text | Optimizely `FormBlock` | [block-renderer-static.tsx](src/components/cms/block-renderer-static.tsx) |
+
+---
+
+## Table 2 — CMS-sourced strings with a hardcoded fallback in the codebase
+
+These have an authored value in Optimizely, but if the CMS returns nothing the in-app constant is used. Edit Optimizely first; the file below is the safety net.
+
+| Area | Element | Fallback EN | Fallback ES | Hardcoded fallback location |
+|------|---------|-------------|-------------|------------------------------|
+| Global Header | Brand label | Summit Advisory Group | Summit Advisory Group | [src/lib/cms/navigation.ts](src/lib/cms/navigation.ts) |
+| Global Header | Primary nav (Services / Industries / Insights / Article / Contact) | Services / Industries / Insights / Article / Contact | Servicios / Industrias / Recursos / Articulo / Contacto | [src/lib/cms/navigation.ts](src/lib/cms/navigation.ts) |
+| Global Header | CTA button label + href | Get in touch → `/contact` | Contactenos → `/contact` | [src/lib/cms/navigation.ts](src/lib/cms/navigation.ts) |
+| Global Footer | Tagline / body | Strategy, design and engineering that compounds. | Estrategia, diseno e ingenieria que compone valor. | [src/lib/cms/footer.ts](src/lib/cms/footer.ts) |
+| Global Footer | Column headings (Practice / Capabilities / Resources / Contact) | Practice / Capabilities / Resources / Contact | Practica / Capacidades / Recursos / Contacto | [src/lib/cms/footer.ts](src/lib/cms/footer.ts) |
+| Global Footer | Column links | About / Careers / Insights / Locations / ... | Acerca / Carreras / Articulos / Ubicaciones / ... | [src/lib/cms/footer.ts](src/lib/cms/footer.ts) |
+| Global Footer | Copyright line | © {year} Summit Advisory Group ... | © {year} Summit Advisory Group ... | [src/lib/cms/footer.ts](src/lib/cms/footer.ts) |
+| Global Footer | Social link aria-labels | LinkedIn / Facebook / Twitter | — | [src/components/site/site-footer.tsx](src/components/site/site-footer.tsx) |
+| Subscription Page | Eyebrow / Title / Subtitle | Stay in the loop / Subscribe to Summit insights / Receive curated updates... | — | [src/lib/cms/subscription.ts](src/lib/cms/subscription.ts) |
+| Subscription Page | Topic group labels | Insights, Events, Industry updates | — | [src/lib/cms/subscription.ts](src/lib/cms/subscription.ts) |
+| Subscription Page | Topic items + descriptions | Articles / Webinars / Healthcare ... | — | [src/lib/cms/subscription.ts](src/lib/cms/subscription.ts) |
+| Subscription Page | Consent text | I agree to receive marketing emails... | — | [src/lib/cms/subscription.ts](src/lib/cms/subscription.ts) |
+| Subscription Page | Submit / Submitting button labels | Subscribe / Submitting... | — | [src/lib/cms/subscription.ts](src/lib/cms/subscription.ts) |
+| Subscription Page | Success title / body / back link | Thanks for subscribing! / You will receive Summit Advisory Group updates... / Back to home | — | [src/lib/cms/subscription.ts](src/lib/cms/subscription.ts) |
+| Insights — featured | "Featured content" rail title + view-all | Featured insights / View all | — | [src/lib/cms/insights.ts](src/lib/cms/insights.ts) |
+| Search | API search result limit + ordering | 10 results, score-ordered | — | [src/lib/cms/search.ts](src/lib/cms/search.ts) |
+| Block — Article List | View all label | View all articles | — | [src/components/cms/page-renderer-resource-center.tsx](src/components/cms/page-renderer-resource-center.tsx) |
 
 ---
 
@@ -88,83 +69,76 @@ These come from Optimizely when authored; if missing, the default string in `src
 
 Literal strings inside components or `dictionary[locale]` objects. Editing Optimizely will not change these.
 
-| Area | Element / Label | EN | ES | File:line |
-|------|-----------------|----|----|-----------|
-| Global Header | Tagline rendering | CMS practice build | Proyecto de practica CMS | [site-header.tsx](src/components/site/site-header.tsx#L24) |
-| Global Header | Resource Center link | Resource Center | Centro de Recursos | [site-header.tsx](src/components/site/site-header.tsx#L18-L20) |
-| Global Header | Contact link | Contact | Contacto | [site-header.tsx](src/components/site/site-header.tsx#L18-L20) |
-| Locale Switcher | Switch label | ES | EN | [site-header.tsx](src/components/site/site-header.tsx#L18-L20) |
-| Navigation Menu | Services | Services | Servicios | [cms/index.ts](src/lib/cms/index.ts#L1285-L1293) |
-| Navigation Menu | Industries | Industries | Industrias | [cms/index.ts](src/lib/cms/index.ts#L1285-L1293) |
-| Navigation Menu | Insights | Insights | Recursos | [cms/index.ts](src/lib/cms/index.ts#L1285-L1293) |
-| Navigation Menu | Article | Article | Articulo | [cms/index.ts](src/lib/cms/index.ts#L1285-L1293) |
-| Navigation Menu | Contact | Contact | Contacto | [cms/index.ts](src/lib/cms/index.ts#L1285-L1293) |
-| Header Search | Input placeholder | Search ... | Buscar ... | [header-search.tsx](src/components/site/header-search.tsx#L68) |
-| Header Search | Match count words | match / matches | coincidencia / coincidencias | [header-search.tsx](src/components/site/header-search.tsx#L69) |
-| Header Search | Loading status | Searching... | Buscando... | [header-search.tsx](src/components/site/header-search.tsx#L81) |
-| Header Search | Overflow text | Showing top {n} | Mostrando {n} | [header-search.tsx](src/components/site/header-search.tsx#L82-L84) |
-| Header Search | Empty state | No matches found. | Sin coincidencias. | [header-search.tsx](src/components/site/header-search.tsx#L100) |
-| Alerts Callout | Eyebrow | SUMMIT ALERTS & UPDATES | SUMMIT ALERTAS Y ACTUALIZACIONES | [alerts-callout.tsx](src/components/site/alerts-callout.tsx#L21) |
-| Alerts Callout | Heading | FORESIGHT CHANGES OUTCOMES. | LA PERSPECTIVA LO CAMBIA TODO. | [alerts-callout.tsx](src/components/site/alerts-callout.tsx#L23-L25) |
-| Alerts Callout | Body | Receive timely industry developments... | Reciba a tiempo desarrollos de la... | [alerts-callout.tsx](src/components/site/alerts-callout.tsx#L26-L29) |
-| Alerts Callout | CTA button | GET ALERTS AND UPDATES | RECIBIR ALERTAS Y ACTUALIZACIONES | [alerts-callout.tsx](src/components/site/alerts-callout.tsx#L30-L32) |
-| Global Footer | Social aria-labels | LinkedIn / Facebook / Twitter | — | [site-footer.tsx](src/components/site/site-footer.tsx#L31-L53) |
-| Global Footer | Brand aria-label | Summit Advisory Group | — | [site-footer.tsx](src/components/site/site-footer.tsx#L81) |
-| Insight Page | Back link | Back to Articles | Volver a articulos | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L204) |
-| Insight Page | Key takeaways label | Key takeaways | — | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L205) |
-| Insight Page | Top picks label | Top picks | Destacados | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L206) |
-| Insight Page | Read more label | Read more | — | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L207) |
-| Insight Page | Authors label | Author(s) | — | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L208) |
-| Insight Page | View profile | View Profile → | Ver perfil → | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L209) |
-| Insight Page | Read full story | Read full story → | Leer articulo → | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L210) |
-| Insight Page | Fallback notice | This page is falling back to mock content... | Esta pagina usa contenido de respaldo... | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L166) |
-| Article Card | Author fallback | Editorial team | — | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L47) |
-| Article Card | Read full story link | Read full story | — | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L90) |
-| Resource Center | Search placeholder | Search insights | Buscar articulos | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L264) |
-| Resource Center | Service filter default | All services | Todos los servicios | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L268) |
-| Resource Center | Industry filter default | All industries | Todas las industrias | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L273) |
-| Resource Center | Topic filter default | All topics | Todos los temas | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L278) |
-| Resource Center | Filter button | Filter | Filtrar | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L290) |
-| Resource Center | Filter option values | Digital platform strategy, Healthcare, Preview, Taxonomy, ... | — | [page-renderer.tsx](src/components/cms/page-renderer.tsx#L267-L279) |
-| Lead Form | Section label | Lead generation | Captura de leads | [lead-form.tsx](src/components/forms/lead-form.tsx#L30) |
-| Lead Form | Name field label | Name | Nombre | [lead-form.tsx](src/components/forms/lead-form.tsx#L69) |
-| Lead Form | Email field label | Email | Correo | [lead-form.tsx](src/components/forms/lead-form.tsx#L72) |
-| Lead Form | Company field label | Company | Empresa | [lead-form.tsx](src/components/forms/lead-form.tsx#L75) |
-| Lead Form | Message label | What do you want to learn or build? | Que desea aprender o construir? | [lead-form.tsx](src/components/forms/lead-form.tsx#L81) |
-| Lead Form | Submit button | Submit / Submitting... | Enviar / Enviando... | [lead-form.tsx](src/components/forms/lead-form.tsx#L88) |
-| Lead Form | Success message | Thanks! We will reach out shortly. | Gracias. Nos pondremos en contacto pronto. | [lead-form.tsx](src/components/forms/lead-form.tsx#L62-L64) |
-| Lead Form | Validation error | Unable to submit the form. | No fue posible enviar el formulario. | [lead-form.tsx](src/components/forms/lead-form.tsx#L57-L59) |
-| Lead Form | Network error | Network error. Please try again. | Error de red. Intente de nuevo. | [lead-form.tsx](src/components/forms/lead-form.tsx#L75-L78) |
-| Subscription Form | Email field label | Email | — | [subscription-form.tsx](src/app/subscription/subscription-form.tsx#L80) |
-| Subscription Form | First Name field label | First Name | — | [subscription-form.tsx](src/app/subscription/subscription-form.tsx#L81) |
-| Subscription Form | Last Name field label | Last Name | — | [subscription-form.tsx](src/app/subscription/subscription-form.tsx#L82) |
-| Subscription Form | Job Title field label | Job Title | — | [subscription-form.tsx](src/app/subscription/subscription-form.tsx#L83) |
-| Subscription Form | Company field label | Company | — | [subscription-form.tsx](src/app/subscription/subscription-form.tsx#L84) |
-| Subscription Form | Company placeholder | Company or Organization | — | [subscription-form.tsx](src/app/subscription/subscription-form.tsx#L84) |
-| Subscription Form | Robot checkbox | I'm not a robot | — | [subscription-form.tsx](src/app/subscription/subscription-form.tsx#L101) |
-| Subscription Form | reCAPTCHA label | reCAPTCHA (demo) | — | [subscription-form.tsx](src/app/subscription/subscription-form.tsx#L102) |
-| Subscription Form | Submit button (busy) | Submitting... | — | [subscription-form.tsx](src/app/subscription/subscription-form.tsx#L114) |
-| Admin Leads | Auth gate heading | Admin access | — | [admin/leads/page.tsx](src/app/admin/leads/page.tsx#L23) |
-| Admin Leads | Auth gate instruction | Append ?key=YOUR_ADMIN_KEY to the URL | — | [admin/leads/page.tsx](src/app/admin/leads/page.tsx#L24-L25) |
-| Admin Leads | Page heading | Leads | — | [admin/leads/page.tsx](src/app/admin/leads/page.tsx#L39) |
-| Admin Leads | Counter text | entries (latest 500) | — | [admin/leads/page.tsx](src/app/admin/leads/page.tsx#L40) |
-| Admin Leads | Download button | Download CSV | — | [admin/leads/page.tsx](src/app/admin/leads/page.tsx#L44) |
-| Admin Leads | Table headers | Submitted, Name, Email, Company, Message | — | [admin/leads/page.tsx](src/app/admin/leads/page.tsx#L50-L54) |
-| Admin Leads | Empty state | No leads yet. | — | [admin/leads/page.tsx](src/app/admin/leads/page.tsx#L65) |
-| Admin Subscribers | Auth gate heading | Admin access | — | [admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx#L23) |
-| Admin Subscribers | Auth gate instruction | Append ?key=YOUR_ADMIN_KEY to the URL | — | [admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx#L24-L25) |
-| Admin Subscribers | Page heading | Subscribers | — | [admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx#L39) |
-| Admin Subscribers | Counter text | entries (latest 500) | — | [admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx#L40) |
-| Admin Subscribers | Download button | Download CSV | — | [admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx#L44) |
-| Admin Subscribers | Table headers | Submitted, Name, Email, Company, Job Title, Consent, Topics | — | [admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx#L50-L56) |
-| Admin Subscribers | Consent values | Yes / No | — | [admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx#L66) |
-| Admin Subscribers | Empty state | No subscribers yet. | — | [admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx#L72) |
-| 404 / Not Found | Eyebrow | 404 | — | [not-found.tsx](src/app/not-found.tsx#L6) |
-| 404 / Not Found | Heading | Page not found | — | [not-found.tsx](src/app/not-found.tsx#L7) |
-| 404 / Not Found | Message | The requested route does not exist. | — | [not-found.tsx](src/app/not-found.tsx#L8) |
-| 404 / Not Found | Return button | Return home | — | [not-found.tsx](src/app/not-found.tsx#L15) |
-| Draft Mode Banner | Banner text | Preview mode is enabled. | — | [[locale]/layout.tsx](src/app/%5Blocale%5D/layout.tsx#L26) |
-| Block — Card Grid | "Explore →" link label | Explore → | — | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L204) |
-| Block — Featured Content | Explore link | Explore | — | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L47) |
-| Block — Article List | "Showing top" line | Showing top {n} | — | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L257) |
-| Block — Form | Submit label | Submit | Enviar | [block-renderer.tsx](src/components/cms/block-renderer.tsx#L278) |
+| Area | Element / Label | EN | ES | File |
+|------|-----------------|----|----|------|
+| Global Header | Tagline rendering | CMS practice build | Proyecto de practica CMS | [src/components/site/site-header.tsx](src/components/site/site-header.tsx) |
+| Global Header | Resource Center label | Resource Center | Centro de Recursos | [src/components/site/site-header.tsx](src/components/site/site-header.tsx) |
+| Global Header | Contact label | Contact | Contacto | [src/components/site/site-header.tsx](src/components/site/site-header.tsx) |
+| Locale Switcher | Switch label | ES | EN | [src/components/site/site-header.tsx](src/components/site/site-header.tsx) |
+| Header Search | Input placeholder | Search ... | Buscar ... | [src/components/site/header-search.tsx](src/components/site/header-search.tsx) |
+| Header Search | Match count words | match / matches | coincidencia / coincidencias | [src/components/site/header-search.tsx](src/components/site/header-search.tsx) |
+| Header Search | Loading status | Searching... | Buscando... | [src/components/site/header-search.tsx](src/components/site/header-search.tsx) |
+| Header Search | Overflow text | Showing top {n} | Mostrando {n} | [src/components/site/header-search.tsx](src/components/site/header-search.tsx) |
+| Header Search | Empty state | No matches found. | Sin coincidencias. | [src/components/site/header-search.tsx](src/components/site/header-search.tsx) |
+| Header Panel | Section dividers + close button labels | "Explore" / "Close menu" | "Explorar" / "Cerrar menu" | [src/components/site/site-header-panel.tsx](src/components/site/site-header-panel.tsx) |
+| Alerts Callout | Eyebrow | SUMMIT ALERTS & UPDATES | SUMMIT ALERTAS Y ACTUALIZACIONES | [src/components/site/alerts-callout.tsx](src/components/site/alerts-callout.tsx) |
+| Alerts Callout | Heading | FORESIGHT CHANGES OUTCOMES. | LA PERSPECTIVA LO CAMBIA TODO. | [src/components/site/alerts-callout.tsx](src/components/site/alerts-callout.tsx) |
+| Alerts Callout | Body | Receive timely industry developments... | Reciba a tiempo desarrollos de la... | [src/components/site/alerts-callout.tsx](src/components/site/alerts-callout.tsx) |
+| Alerts Callout | CTA button | GET ALERTS AND UPDATES | RECIBIR ALERTAS Y ACTUALIZACIONES | [src/components/site/alerts-callout.tsx](src/components/site/alerts-callout.tsx) |
+| Global Footer | Social aria-labels | LinkedIn / Facebook / Twitter | — | [src/components/site/site-footer.tsx](src/components/site/site-footer.tsx) |
+| Global Footer | Brand aria-label | Summit Advisory Group | — | [src/components/site/site-footer.tsx](src/components/site/site-footer.tsx) |
+| Default page view | Trending heading / View-all link | "Trending" / "View all →" | "Tendencias" / "Ver todos →" | [src/components/cms/page-renderer-default-view.tsx](src/components/cms/page-renderer-default-view.tsx) |
+| Insight Page | Back link | Back to Articles | Volver a articulos | [src/components/cms/page-renderer-insight-view.tsx](src/components/cms/page-renderer-insight-view.tsx) |
+| Insight Page | Key takeaways label | Key takeaways | — | [src/components/cms/page-renderer-insight-view.tsx](src/components/cms/page-renderer-insight-view.tsx) |
+| Insight Page | Top picks label | Top picks | Destacados | [src/components/cms/page-renderer-insight-view.tsx](src/components/cms/page-renderer-insight-view.tsx) |
+| Insight Page | Read more label | Read more | — | [src/components/cms/page-renderer-insight-view.tsx](src/components/cms/page-renderer-insight-view.tsx) |
+| Insight Page | Authors label | Author(s) | — | [src/components/cms/page-renderer-insight-view.tsx](src/components/cms/page-renderer-insight-view.tsx) |
+| Insight Page | View profile | View Profile → | Ver perfil → | [src/components/cms/page-renderer-insight-view.tsx](src/components/cms/page-renderer-insight-view.tsx) |
+| Insight Page | Read full story | Read full story → | Leer articulo → | [src/components/cms/page-renderer-insight-view.tsx](src/components/cms/page-renderer-insight-view.tsx) |
+| Insight Page | Fallback notice | This page is falling back to mock content... | Esta pagina usa contenido de respaldo... | [src/components/cms/page-renderer-insight-view.tsx](src/components/cms/page-renderer-insight-view.tsx) |
+| Article Card | Author fallback | Editorial team | — | [src/components/cms/article-listing.tsx](src/components/cms/article-listing.tsx) |
+| Article Card | Read full story link | Read full story | — | [src/components/cms/article-listing.tsx](src/components/cms/article-listing.tsx) |
+| Resource Center | Search placeholder | Search insights | Buscar articulos | [src/components/cms/page-renderer-resource-center.tsx](src/components/cms/page-renderer-resource-center.tsx) |
+| Resource Center | Service filter default | All services | Todos los servicios | [src/components/cms/page-renderer-resource-center.tsx](src/components/cms/page-renderer-resource-center.tsx) |
+| Resource Center | Industry filter default | All industries | Todas las industrias | [src/components/cms/page-renderer-resource-center.tsx](src/components/cms/page-renderer-resource-center.tsx) |
+| Resource Center | Topic filter default | All topics | Todos los temas | [src/components/cms/page-renderer-resource-center.tsx](src/components/cms/page-renderer-resource-center.tsx) |
+| Resource Center | Filter button | Filter | Filtrar | [src/components/cms/page-renderer-resource-center.tsx](src/components/cms/page-renderer-resource-center.tsx) |
+| News Listing | Filter labels, "Load more" | Topic / All / Load more | Tema / Todos / Cargar mas | [src/components/cms/news-listing.tsx](src/components/cms/news-listing.tsx) |
+| Events Listing | "Register" / "Add to calendar" labels | Register → / Add to calendar | Registrarse → / Anadir al calendario | [src/components/cms/events-listing.tsx](src/components/cms/events-listing.tsx) |
+| Locations Directory | "Search offices" placeholder + state labels | Search offices / All states | Buscar oficinas / Todos los estados | [src/components/cms/locations-directory.tsx](src/components/cms/locations-directory.tsx) |
+| Sign-in (401k) | Field labels, "Sign in" button | Username / Password / Sign in | — | [src/components/cms/sign-in/variant-401k.tsx](src/components/cms/sign-in/variant-401k.tsx) |
+| Sign-in (Hub) | Field labels, "Sign in" button | Username / Password / Sign in | — | [src/components/cms/sign-in/variant-hub.tsx](src/components/cms/sign-in/variant-hub.tsx) |
+| Sign-in (ShareFile) | Field labels, "Sign in" button | Subdomain / Email / Sign in | — | [src/components/cms/sign-in/variant-sharefile.tsx](src/components/cms/sign-in/variant-sharefile.tsx) |
+| Pay Bill | Field labels, "Pay now" button | Invoice number / Email / Amount / Pay now | — | [src/components/cms/pay-bill.tsx](src/components/cms/pay-bill.tsx) |
+| Portal Applications | "Launch" button label | Launch → | — | [src/components/cms/portal-applications.tsx](src/components/cms/portal-applications.tsx) |
+| Lead Form | Section label | Lead generation | Captura de leads | [src/components/forms/lead-form.tsx](src/components/forms/lead-form.tsx) |
+| Lead Form | Name field label | Name | Nombre | [src/components/forms/lead-form.tsx](src/components/forms/lead-form.tsx) |
+| Lead Form | Email field label | Email | Correo | [src/components/forms/lead-form.tsx](src/components/forms/lead-form.tsx) |
+| Lead Form | Company field label | Company | Empresa | [src/components/forms/lead-form.tsx](src/components/forms/lead-form.tsx) |
+| Lead Form | Message label | What do you want to learn or build? | Que desea aprender o construir? | [src/components/forms/lead-form.tsx](src/components/forms/lead-form.tsx) |
+| Lead Form | Submit button | Submit / Submitting... | Enviar / Enviando... | [src/components/forms/lead-form.tsx](src/components/forms/lead-form.tsx) |
+| Lead Form | Success message | Thanks! We will reach out shortly. | Gracias. Nos pondremos en contacto pronto. | [src/components/forms/lead-form.tsx](src/components/forms/lead-form.tsx) |
+| Lead Form | Validation error | Unable to submit the form. | No fue posible enviar el formulario. | [src/components/forms/lead-form.tsx](src/components/forms/lead-form.tsx) |
+| Lead Form | Network error | Network error. Please try again. | Error de red. Intente de nuevo. | [src/components/forms/lead-form.tsx](src/components/forms/lead-form.tsx) |
+| Lead Form | US states list | (50 states + DC) | — | [src/components/forms/lead-form-helpers.ts](src/components/forms/lead-form-helpers.ts) |
+| Subscription Form | Email / First Name / Last Name / Job Title / Company labels | — | — | [src/app/subscription/subscription-form.tsx](src/app/subscription/subscription-form.tsx) |
+| Subscription Form | Company placeholder | Company or Organization | — | [src/app/subscription/subscription-form.tsx](src/app/subscription/subscription-form.tsx) |
+| Subscription Form | Robot checkbox | I'm not a robot | — | [src/app/subscription/subscription-form.tsx](src/app/subscription/subscription-form.tsx) |
+| Subscription Form | reCAPTCHA label | reCAPTCHA (demo) | — | [src/app/subscription/subscription-form.tsx](src/app/subscription/subscription-form.tsx) |
+| Subscription Form | Submit button (busy) | Submitting... | — | [src/app/subscription/subscription-form.tsx](src/app/subscription/subscription-form.tsx) |
+| Admin Leads | Auth gate heading | Admin access | — | [src/app/admin/leads/page.tsx](src/app/admin/leads/page.tsx) |
+| Admin Leads | Auth gate instruction | Append ?key=YOUR_ADMIN_KEY to the URL | — | [src/app/admin/leads/page.tsx](src/app/admin/leads/page.tsx) |
+| Admin Leads | Page heading | Leads | — | [src/app/admin/leads/page.tsx](src/app/admin/leads/page.tsx) |
+| Admin Leads | Counter / Download button | entries (latest 500) / Download CSV | — | [src/app/admin/leads/page.tsx](src/app/admin/leads/page.tsx) |
+| Admin Leads | Table headers | Submitted, Name, Email, Company, Message | — | [src/app/admin/leads/page.tsx](src/app/admin/leads/page.tsx) |
+| Admin Leads | Empty state | No leads yet. | — | [src/app/admin/leads/page.tsx](src/app/admin/leads/page.tsx) |
+| Admin Subscribers | Auth gate heading / instruction | Admin access / Append ?key=YOUR_ADMIN_KEY to the URL | — | [src/app/admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx) |
+| Admin Subscribers | Page heading / counter / download | Subscribers / entries (latest 500) / Download CSV | — | [src/app/admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx) |
+| Admin Subscribers | Table headers | Submitted, Name, Email, Company, Job Title, Consent, Topics | — | [src/app/admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx) |
+| Admin Subscribers | Consent values / Empty state | Yes / No / No subscribers yet. | — | [src/app/admin/subscribers/page.tsx](src/app/admin/subscribers/page.tsx) |
+| 404 / Not Found | Eyebrow, heading, message, button | 404 / Page not found / The requested route does not exist. / Return home | — | [src/app/not-found.tsx](src/app/not-found.tsx) |
+| Draft Mode Banner | Banner text | Preview mode is enabled. | — | [src/app/[locale]/layout.tsx](src/app/%5Blocale%5D/layout.tsx) |
+| Block — Card Grid | "Explore →" link label | Explore → | — | [src/components/cms/block-renderer-static.tsx](src/components/cms/block-renderer-static.tsx) |
+| Block — Featured Content | Explore link | Explore | — | [src/components/cms/block-renderer-static.tsx](src/components/cms/block-renderer-static.tsx) |
+| Block — Article List | "Showing top" line | Showing top {n} | — | [src/components/cms/block-renderer-static.tsx](src/components/cms/block-renderer-static.tsx) |
+| Block — Form | Submit label | Submit | Enviar | [src/components/cms/block-renderer-static.tsx](src/components/cms/block-renderer-static.tsx) |
