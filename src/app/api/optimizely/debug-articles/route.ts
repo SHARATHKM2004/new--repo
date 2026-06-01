@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireBasicAuth } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,9 @@ function parseKeywords(raw?: string | null): string[] {
 }
 
 export async function GET(request: Request) {
+  const unauthorized = requireBasicAuth(request, "Optimizely Debug — Articles");
+  if (unauthorized) return unauthorized;
+
   const renderUrl = process.env.OPTIMIZELY_RENDER_URL?.trim();
   const renderKey = process.env.OPTIMIZELY_RENDER_KEY?.trim();
 
