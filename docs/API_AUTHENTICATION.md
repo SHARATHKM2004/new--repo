@@ -38,14 +38,15 @@ custom **60-second signed-cookie session**:
 
 ```mermaid
 flowchart LR
-    U[User / Browser] -->|GET /api/articles| G{Guard:<br/>requireApiSession}
-    G -- valid cookie --> H[Route handler<br/>returns JSON]
-    G -- no/expired cookie + HTML client --> L[302 to /auth/login?next=...]
-    G -- no/expired cookie + API client --> E[401 JSON]
-    L --> F[Login form]
-    F -->|POST loginAction| V{Validate creds}
-    V -- ok --> S[Set signed cookie<br/>maxAge=60s] --> R[302 back to next]
-    V -- bad --> L
+    U["User / Browser"] -->|"GET /api/articles"| G{"Guard requireApiSession"}
+    G -->|valid cookie| H["Route handler returns JSON"]
+    G -->|no or expired cookie - HTML client| L["302 to /auth/login"]
+    G -->|no or expired cookie - API client| E["401 JSON"]
+    L --> F["Login form"]
+    F -->|POST loginAction| V{"Validate creds"}
+    V -->|ok| S["Set signed cookie maxAge 60s"]
+    S --> R["302 back to next URL"]
+    V -->|bad| L
     R --> G
 ```
 
@@ -127,19 +128,19 @@ can verify without any database.
 ```mermaid
 sequenceDiagram
     participant B as Browser
-    participant L as /auth/login
-    participant S as Server (HMAC)
+    participant L as Login Page
+    participant S as Server
     participant G as Guard
 
-    B->>L: POST user + password
+    B->>L: POST user and password
     L->>S: validate against env vars
-    S->>S: expiry = now + 60_000
-    S->>S: sig = HMAC_SHA256(expiry, PASSWORD)
-    S->>B: Set-Cookie: api_session=expiry.sig<br/>(HttpOnly, SameSite=Lax, Secure)
-    B->>G: GET /api/articles<br/>Cookie: api_session=expiry.sig
-    G->>G: split token; check expiry > now
-    G->>G: recompute HMAC; timingSafeEqual
-    G-->>B: 200 JSON (cookie valid)
+    S->>S: expiry = now plus 60000 ms
+    S->>S: sig = HMAC_SHA256 of expiry using password
+    S-->>B: Set-Cookie api_session = expiry.sig
+    B->>G: GET /api/articles with cookie
+    G->>G: split token and check expiry
+    G->>G: recompute HMAC and timingSafeEqual
+    G-->>B: 200 JSON
 ```
 
 Properties:
@@ -158,11 +159,11 @@ Properties:
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant API as /api/articles
+    participant API as Articles API
     participant Guard
-    U->>API: GET /api/articles (Accept: text/html)
-    API->>Guard: requireApiSession(request)
-    Guard-->>API: 302 → /auth/login?next=/api/articles
+    U->>API: GET /api/articles with Accept text/html
+    API->>Guard: requireApiSession
+    Guard-->>API: 302 redirect to /auth/login
     API-->>U: 302 redirect
     U->>U: Login form rendered
 ```
@@ -172,14 +173,14 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant LP as /auth/login (page.tsx)
-    participant SA as loginAction (server action)
-    U->>LP: submit user + password
+    participant LP as Login Page
+    participant SA as loginAction
+    U->>LP: submit user and password
     LP->>SA: invoke server action
     SA->>SA: validate credentials
-    SA->>SA: createSessionToken(secret)
-    SA->>U: Set-Cookie: api_session=...; Max-Age=60
-    SA-->>U: 302 → /api/articles
+    SA->>SA: createSessionToken using secret
+    SA-->>U: Set-Cookie api_session with Max-Age 60
+    SA-->>U: 302 redirect to next URL
     U->>U: cookie auto-attached on next request
 ```
 
@@ -188,12 +189,12 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant API as /api/articles
+    participant API as Articles API
     participant Guard
-    U->>API: GET /api/articles<br/>Cookie: api_session=...
-    API->>Guard: requireApiSession(request)
-    Guard->>Guard: verifySessionToken → ok
-    Guard-->>API: null (proceed)
+    U->>API: GET /api/articles with cookie
+    API->>Guard: requireApiSession
+    Guard->>Guard: verifySessionToken returns ok
+    Guard-->>API: null - proceed
     API-->>U: 200 JSON
 ```
 
@@ -202,12 +203,12 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant API as /api/articles
+    participant API as Articles API
     participant Guard
-    U->>API: GET /api/articles<br/>Cookie: api_session=...
+    U->>API: GET /api/articles with cookie
     API->>Guard: requireApiSession
-    Guard->>Guard: expiry < now → false
-    Guard-->>API: 302 → /auth/login?next=...
+    Guard->>Guard: expiry less than now returns false
+    Guard-->>API: 302 redirect to /auth/login
     API-->>U: re-authenticate
 ```
 
