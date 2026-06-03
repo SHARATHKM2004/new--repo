@@ -14,9 +14,20 @@ type RawItem = {
     displayName?: string;
     types?: string[];
     status?: string;
+    published?: string | null;
+    created?: string | null;
+    lastModified?: string | null;
     url?: { default?: string; hierarchical?: string };
   };
 };
+
+const SUPPORTED_LOCALES = ["en", "es"] as const;
+type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+
+function parseLocale(raw: string | null | undefined): SupportedLocale {
+  const v = (raw ?? "").trim().toLowerCase();
+  return (SUPPORTED_LOCALES as readonly string[]).includes(v) ? (v as SupportedLocale) : "en";
+}
 
 function readString(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -53,7 +64,9 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "20", 10) || 20, 100);
   const order = (url.searchParams.get("order") ?? "desc").toLowerCase() === "asc" ? "asc" : "desc";
-  const locale = url.searchParams.get("locale")?.trim() || "en";
+  const localeParam = url.searchParams.get("locale");
+  const locale = parseLocale(localeParam);
+  const localeFellBack = !!localeParam && locale !== localeParam.trim().toLowerCase();
   const sinceMs = parseDate(url.searchParams.get("since"));
   const untilMs = parseDate(url.searchParams.get("until"));
 
@@ -61,11 +74,16 @@ export async function GET(request: Request) {
 
   // Step 1 — list every CMSPage whose URL contains "/article/" (the article
   // landing convention used in this project). We only ask for metadata here
-  // to keep the listing query cheap.
+  // to keep the listing query cheap. _metadata.published gives us the
+  // authoritative publish date even when the article body doesn't include one.
   const listQuery = `query {
     CMSPage(limit: 100, locale: ${locale}) {
       items {
-        _metadata { key locale displayName status url { default hierarchical } }
+        _metadata {
+          key locale displayName status
+          published created lastModified
+          url { default hierarchical }
+        }
       }
     }
   }`;
@@ -112,7 +130,11 @@ export async function GET(request: Request) {
             shortDescription
             keywords
             _json
-            _metadata { key locale displayName status url { default hierarchical } }
+            _metadata {
+              key locale displayName status
+              published created lastModified
+              url { default hierarchical }
+            }
           }
         }
       }`;
@@ -136,20 +158,28 @@ export async function GET(request: Request) {
     })
     .map((it) => {
       const j = it._json ?? {};
-      const path = it._metadata?.url?.default ?? "";
+      const m = it._metadata ?? {};
+      const path = m.url?.default ?? "";
+      // Fallback chain for the date we expose + filter on. Order matters:
+      // explicit article publishedAt first, then Optimizely's metadata
+      // published, then lastModified, then created — so every article ends
+      // up with *some* date and filters return meaningful results.
       const publishedAtRaw =
         readString(j.publishedAt) ??
         readString(j.PublishedAt) ??
         readString(j.publishDate) ??
         readString(j.PublishDate) ??
-        readString(j.startPublish);
+        readString(j.startPublish) ??
+        readString(m.published) ??
+        readString(m.lastModified) ??
+        readString(m.created);
       const publishedAtMs = parseDate(publishedAtRaw);
 
       return {
-        id: it._metadata?.key ?? null,
-        locale: it._metadata?.locale ?? locale,
-        status: it._metadata?.status ?? "Published",
-        header: readString(it.title) ?? readString(j.title) ?? it._metadata?.displayName ?? null,
+        id: m.key ?? null,
+        locale: m.locale ?? locale,
+        status: m.status ?? "Published",
+        header: readString(it.title) ?? readString(j.title) ?? m.displayName ?? null,
         description:
           readString(it.shortDescription) ??
           readString(j.shortDescription) ??
@@ -198,12 +228,15 @@ export async function GET(request: Request) {
     count: items.length,
     total: dateFiltered.length,
     locale,
+    requestedLocale: localeParam ?? null,
+    localeFellBack,
     order,
     limit,
     filter: {
       since: sinceMs !== null ? new Date(sinceMs).toISOString() : null,
       until: untilMs !== null ? new Date(untilMs).toISOString() : null,
     },
+    supportedLocales: SUPPORTED_LOCALES,
     generatedAt: new Date().toISOString(),
     items,
   });
