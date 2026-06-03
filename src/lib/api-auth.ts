@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 
-export const API_ACCESS_QUERY_PARAM = "key";
+export const API_ACCESS_QUERY_PARAM = "sc_apikey";
 
 export function getApiAccessKey(): string {
   return (

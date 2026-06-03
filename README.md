@@ -86,4 +86,4 @@ If `Header` or `Footer` items do not exist in Optimizely yet, the app falls back
 
 ## Optimizely diagnostics
 
-Use `/api/optimizely/health?key=<API_ACCESS_KEY>` to confirm whether the app can reach the Optimizely Graph endpoint with both public and admin credentials. The protected API and Optimizely debug endpoints now expect the shared secret in the `key` query parameter.
+Use `/api/optimizely/health?sc_apikey=<API_ACCESS_KEY>` to confirm whether the app can reach the Optimizely Graph endpoint with both public and admin credentials. The protected API and Optimizely debug endpoints now expect the shared secret in the `sc_apikey` query parameter.

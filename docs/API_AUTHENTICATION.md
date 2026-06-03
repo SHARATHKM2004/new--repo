@@ -1,7 +1,7 @@
 # API Authentication — Implementation Documentation
 
 **Project:** Wipfli-style Next.js CMS
-**Feature:** Short-lived signed-cookie session for protected API endpoints
+**Feature:** Shared query-parameter protection for protected API endpoints
 **Status:** Shipped to production (`https://project-coral-eight.vercel.app`)
 **Author:** Sharath K M
 
@@ -9,28 +9,27 @@
 
 ## 1. Overview
 
-The public API endpoints that expose CMS data (`/api/articles`, `/api/optimizely/*`)
-were originally accessible to anyone with the URL. This document describes the
-authentication layer added on top of those endpoints.
+The data and debug endpoints (`/api/articles`, `/api/optimizely/*`) are protected
+with a shared secret passed directly in the request URL.
 
-Public marketing pages (`/en/*`, `/es/*`) remain completely open. Only data /
+Public marketing pages (`/en/*`, `/es/*`) remain completely open. Only data and
 debug endpoints are protected.
 
-### Why custom cookie session (not HTTP Basic Auth)
+### Why query-parameter auth
 
-We first implemented HTTP Basic Auth (native browser popup), but browsers cache
-the credentials for the entire process lifetime — once entered, every subsequent
-request silently reuses them with no way to force a re-prompt. Demo and review
-required visible, repeatable authentication, so we replaced Basic Auth with a
-custom **60-second signed-cookie session**:
+The earlier cookie/session flow added state, login UI, and a short-lived
+re-authentication cycle just to inspect read-only API responses. For mentor
+review and demo links, the simpler requirement was a single URL that can be
+opened directly in a browser.
 
-| Capability | Basic Auth | Cookie Session (chosen) |
-|---|---|---|
-| Native browser prompt | Yes | Custom login page (better UX) |
-| Force re-prompt without quitting browser | No | Yes (60s TTL) |
-| API-client friendly (curl/fetch) | Yes (header) | Yes (401 JSON for non-HTML) |
-| Tamper-resistant token | N/A | HMAC-SHA256 signed |
-| CSRF / cookie-theft hardening | N/A | HttpOnly, SameSite=Lax, Secure |
+Chosen pattern:
+
+```text
+/api/articles?sc_apikey=<shared-secret>
+```
+
+This keeps the protection lightweight while staying easy to test in a browser,
+curl, Postman, or shared documentation.
 
 ---
 
@@ -38,186 +37,108 @@ custom **60-second signed-cookie session**:
 
 ```mermaid
 flowchart LR
-    U["User / Browser"] -->|"GET /api/articles"| G{"Guard requireApiSession"}
-    G -->|valid cookie| H["Route handler returns JSON"]
-    G -->|no or expired cookie - HTML client| L["302 to /auth/login"]
-    G -->|no or expired cookie - API client| E["401 JSON"]
-    L --> F["Login form"]
-    F -->|POST loginAction| V{"Validate creds"}
-    S --> R["302 back to next URL"]
-    V -->|bad| L
-    R --> G
+  U["User / Browser / API Client"] -->|"GET /api/articles?sc_apikey=..."| G{"Guard requireApiSession"}
+  G -->|valid key| H["Route handler returns JSON"]
+  G -->|missing or wrong key| E["401 JSON"]
+  G -->|server secret missing| F["503 JSON"]
 ```
 
 ---
 
 ## 3. Files added / modified
 
-| File | Purpose | LOC |
-|---|---|---|
-| `src/lib/api-auth.ts` | Guard + token sign/verify + cookie reader | ~115 |
-| `src/app/auth/login/page.tsx` | Login form + server action that issues the cookie | ~140 |
-| `src/app/api/auth/logout/route.ts` | POST endpoint that clears the cookie | ~20 |
-| 6 existing API route handlers | 2 lines each — call the guard before any work | +12 |
-| `.env.example` | Document the two new env vars | +2 |
+| File | Purpose |
+|---|---|
+| `src/lib/api-auth.ts` | Shared guard that validates `?sc_apikey=` against the configured secret |
+| `src/app/auth/login/page.tsx` | Informational page explaining the new URL-based access pattern |
+| `src/app/api/auth/logout/route.ts` | Legacy endpoint retained as a plain redirect; no cookie clearing remains |
+| 6 existing API route handlers | Continue calling the shared guard before any work |
 
-Folder layout:
+Protected routes:
 
-```
-src/
-├── lib/
-│   └── api-auth.ts                       ← auth core
-└── app/
-    ├── auth/
-    └── api/
-        ├── auth/logout/route.ts          ← POST logout
-        ├── articles/route.ts             ← protected
-        └── optimizely/
-            ├── health/route.ts           ← protected
-            ├── debug-articles/route.ts   ← protected
-            ├── debug-page/route.ts       ← protected
-            ├── debug-header/route.ts     ← protected
-            └── debug-startpage/route.ts  ← protected
+```text
+src/app/api/articles/route.ts
+src/app/api/optimizely/health/route.ts
+src/app/api/optimizely/debug-articles/route.ts
+src/app/api/optimizely/debug-page/route.ts
+src/app/api/optimizely/debug-header/route.ts
+src/app/api/optimizely/debug-startpage/route.ts
 ```
 
+---
 
 ## 4. Environment variables
 
-| Name | Required | Default | Purpose |
-|---|---|---|---|
-| `API_BASIC_AUTH_USER` | No | `admin` | Login username |
-| `API_BASIC_AUTH_PASSWORD` | **Yes** | _(none)_ | Login password **and** HMAC secret. If unset, every protected route returns 503 (fail-closed). |
-
-Set in:
-- `.env.local` for local dev
-- Vercel → Settings → Environment Variables (Production, Preview, Development)
+| Name | Required | Purpose |
+|---|---|---|
+| `API_ACCESS_KEY` | Preferred | Shared secret expected in `?sc_apikey=` |
+| `API_BASIC_AUTH_PASSWORD` | Fallback only | Back-compat fallback if `API_ACCESS_KEY` is unset |
 
 Example:
 
-```
-API_BASIC_AUTH_USER=admin
-API_BASIC_AUTH_PASSWORD=summit-api-2026
-```
-
-> After changing env vars on Vercel, redeploy for them to take effect.
-
-
-## 5. The signed cookie
-
-The cookie is **not** a plain password store — it's a signed token the server
-can verify without any database.
-
-**Format:**
-
-```
-<expiryMillis>.<hmacHex>
+```text
+API_ACCESS_KEY=summit-api-2026
 ```
 
-**Example:**
-
-```
-1717267800000.7f3c8b2e1a6d4e0c92...
-
-**Why this works:**
-
-```mermaid
-sequenceDiagram
-    participant B as Browser
-    participant L as Login Page
-    participant S as Server
-    participant G as Guard
-
-    B->>L: POST user and password
-    L->>S: validate against env vars
-    S->>S: expiry = now plus 60000 ms
-    S->>S: sig = HMAC_SHA256 of expiry using password
-    B->>G: GET /api/articles with cookie
-    G->>G: split token and check expiry
-    G->>G: recompute HMAC and timingSafeEqual
-    G-->>B: 200 JSON
-```
-
-Properties:
-
-- **Tamper-proof** — changing the expiry invalidates the signature.
-- **Stateless** — the server stores nothing; verification is pure crypto.
-- **Self-expiring** — once `expiry < Date.now()`, no further verification needed.
-- **Constant-time compare** — `crypto.timingSafeEqual` prevents timing attacks.
----
-
-## 6. Request lifecycle
-sequenceDiagram
-    participant API as Articles API
-    participant Guard
-    U->>API: GET /api/articles with Accept text/html
-    API->>Guard: requireApiSession
-    Guard-->>API: 302 redirect to /auth/login
-    API-->>U: 302 redirect
-    U->>U: Login form rendered
-```
-
-### B. Successful login
-```mermaid
-sequenceDiagram
-    participant U as User
-    SA->>SA: validate credentials
-    SA->>SA: createSessionToken using secret
-    SA-->>U: Set-Cookie api_session with Max-Age 60
-    SA-->>U: 302 redirect to next URL
-    U->>U: cookie auto-attached on next request
-```
-
-### C. Subsequent request within 60 s
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant API as Articles API
-    participant Guard
-    U->>API: GET /api/articles with cookie
-    API->>Guard: requireApiSession
-    Guard->>Guard: verifySessionToken returns ok
-    Guard-->>API: null - proceed
-    API-->>U: 200 JSON
-```
-
-### D. Request after 60 s
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant API as Articles API
-    participant Guard
-    U->>API: GET /api/articles with cookie
-    API->>Guard: requireApiSession
-    Guard->>Guard: expiry less than now returns false
-    Guard-->>API: 302 redirect to /auth/login
-    API-->>U: re-authenticate
-```
+If both are present, `API_ACCESS_KEY` wins.
 
 ---
 
-## 7. Code walkthrough
+## 5. Guard behavior
 
-### 7.1 `src/lib/api-auth.ts` — the guard
+The shared helper reads the query parameter named `sc_apikey` and compares it to the
+configured secret using `crypto.timingSafeEqual`.
 
-```ts
-export function requireApiSession(request: Request): NextResponse | null {
-  const secret = getExpectedPassword();
-  if (!secret) {
-    return NextResponse.json({ error: "Server auth not configured" }, { status: 503 });
-  }
+Request outcomes:
 
-  const token = readCookie(request, SESSION_COOKIE);
-  if (token && verifySessionToken(token, secret)) return null;   // ← request allowed
+| Condition | HTTP | Body |
+|---|---|---|
+| Valid `?sc_apikey=` | 200 | Route-specific JSON payload |
+| Missing or wrong `?sc_apikey=` | 401 | `{ error: "Authentication required", queryParam: "sc_apikey", hint: ... }` |
+| No server secret configured | 503 | `{ error: "Server auth not configured", queryParam: "sc_apikey" }` |
 
-  const accept = request.headers.get("accept") ?? "";
-  if (accept.includes("text/html")) {
-    const reqUrl = new URL(request.url);
-    const next = encodeURIComponent(reqUrl.pathname + reqUrl.search);
-    return NextResponse.redirect(new URL(`/auth/login?next=${next}`, request.url), { status: 302 });
-  }
-  return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+---
+
+## 6. Usage examples
+
+```text
+https://project-coral-eight.vercel.app/api/articles?sc_apikey=YOUR_SECRET
+https://project-coral-eight.vercel.app/api/articles?limit=5&sc_apikey=YOUR_SECRET
+https://project-coral-eight.vercel.app/api/optimizely/health?sc_apikey=YOUR_SECRET
+https://project-coral-eight.vercel.app/api/optimizely/debug-page?slug=Login&sc_apikey=YOUR_SECRET
+```
+
+If a route already has query parameters, append the secret with `&sc_apikey=...`.
+
+---
+
+## 7. Security notes
+
+- This is intentionally simpler than cookie or header-based auth.
+- URLs can appear in browser history, logs, analytics, and shared screenshots.
+- Use a strong random secret and rotate it if the link has been shared too widely.
+- This is appropriate for internal review/demo access, not for high-sensitivity APIs.
+
+---
+
+## 8. Rotation
+
+1. Update `API_ACCESS_KEY` in local and hosted environment variables.
+2. Redeploy if required by the hosting environment.
+3. Replace shared URLs so they include the new `?sc_apikey=` value.
+
+No server-side session invalidation step is needed because the system is
+stateless.
+
+---
+
+## 9. Summary
+
+- Protected API endpoints now use a shared URL secret.
+- Cookie/session-based API login is no longer required.
+- The implementation is stateless and easy to test in a browser.
+- The query parameter name now matches the `sc_apikey` pattern used by the original system.
+- Missing configuration still fails closed.
 }
 ```
 
