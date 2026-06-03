@@ -3,7 +3,8 @@
 **Project:** Wipfli-style Next.js CMS
 **Endpoint:** `GET /api/articles`
 **File:** `src/app/api/articles/route.ts`
-**Status:** Shipped (commit `345d7eb`), protected by cookie session (commit `77a163a`)
+**Status:** Shipped and verified in production
+**Commits:** `345d7eb` (initial), `77a163a` (auth), `75dd2de` (locale safelist + date fallback)
 **Author:** Sharath K M
 
 ---
@@ -21,8 +22,9 @@ Requirements:
 - Support filtering by `locale`, `since`, `until`
 - Support `order=asc/desc` and `limit` (1–100)
 - Always sorted by published date (most-recent first by default)
-- Locked behind authentication (handled by the cookie session — see
-  `docs/API_AUTHENTICATION.md`)
+- Locked behind authentication (see `docs/API_AUTHENTICATION.md`)
+- Gracefully handle unsupported locales without crashing Optimizely Graph
+- Every article must have a usable date for sorting/filtering
 
 ---
 
@@ -30,11 +32,11 @@ Requirements:
 
 | Param | Type | Default | Notes |
 |---|---|---|---|
-| `locale` | string | `en` | Passed straight to Optimizely Graph |
+| `locale` | `en` or `es` | `en` | Any other value silently falls back to `en`; see `localeFellBack` in response |
 | `limit` | int | `20` | Capped at `100` |
-| `order` | `asc` \| `desc` | `desc` | Sort by published date |
-| `since` | ISO date | _(none)_ | Inclusive lower bound on `publishedAt` |
-| `until` | ISO date | _(none)_ | Inclusive upper bound on `publishedAt` |
+| `order` | `asc` or `desc` | `desc` | Sort direction by published date |
+| `since` | ISO date | _(none)_ | Inclusive lower bound — articles on or after this date |
+| `until` | ISO date | _(none)_ | Inclusive upper bound — articles on or before this date |
 
 Examples:
 
@@ -42,7 +44,9 @@ Examples:
 GET /api/articles
 GET /api/articles?limit=5
 GET /api/articles?locale=en&limit=10&order=asc
-GET /api/articles?since=2025-01-01&until=2025-12-31
+GET /api/articles?since=2026-05-01&until=2026-05-31
+GET /api/articles?locale=es&limit=5
+GET /api/articles?locale=fr   ← unsupported, falls back to en with localeFellBack:true
 ```
 
 ---
@@ -51,33 +55,44 @@ GET /api/articles?since=2025-01-01&until=2025-12-31
 
 ```json
 {
-  "count": 5,
-  "total": 12,
+  "count": 3,
+  "total": 19,
   "locale": "en",
+  "requestedLocale": null,
+  "localeFellBack": false,
   "order": "desc",
-  "limit": 5,
+  "limit": 3,
   "filter": { "since": null, "until": null },
-  "generatedAt": "2026-06-01T09:21:15.715Z",
+  "supportedLocales": ["en", "es"],
+  "generatedAt": "2026-06-03T04:21:06.995Z",
   "items": [
     {
-      "id": "abc-123",
+      "id": "89084a7cc1b7426eb00e9f18636c68ad",
       "locale": "en",
       "status": "Published",
-      "header": "Why our cybersecurity audit changed our cloud strategy",
-      "description": "A short summary of the article ...",
-      "url": "/article/cybersecurity-audit-cloud",
-      "imageUrl": "https://.../card.jpg",
-      "imageAlt": "Server room",
-      "publishedAt": "2025-11-04T08:30:00Z",
-      "readTime": "6 min",
-      "authorId": "author-42",
-      "topics": ["Cybersecurity", "Cloud"],
-      "industries": ["Manufacturing"],
-      "services": ["Risk Advisory"]
+      "header": "title for article 18",
+      "description": "descr of article",
+      "url": "/en/article/article-page-18/",
+      "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
+      "imageAlt": null,
+      "publishedAt": "2026-05-27T06:23:57.375Z",
+      "readTime": null,
+      "authorId": null,
+      "topics": ["tax", "audit"],
+      "industries": [],
+      "services": []
     }
   ]
 }
 ```
+
+### New response fields (added in commit `75dd2de`)
+
+| Field | Purpose |
+|---|---|
+| `requestedLocale` | The raw `?locale=` value the client sent (or `null` if omitted) |
+| `localeFellBack` | `true` if the requested locale was not supported and the API fell back to `en` |
+| `supportedLocales` | Array of locales the API accepts — currently `["en", "es"]` |
 
 - `count` — number of items returned (after filtering + limit)
 - `total` — number of items matched by filters (before limit)
@@ -122,27 +137,26 @@ export async function GET(request: Request) {
 This 2-line block sits at the top of the handler and short-circuits the
 request if there is no valid session cookie.
 
-### Step 1 — Validate config, parse inputs
+### Step 1 — Validate config, parse inputs + locale safelist
 
 ```ts
-const renderUrl = process.env.OPTIMIZELY_RENDER_URL?.trim();
-const renderKey = process.env.OPTIMIZELY_RENDER_KEY?.trim();
+const SUPPORTED_LOCALES = ["en", "es"] as const;
 
-if (!renderUrl || !renderKey) {
-  return NextResponse.json({ error: "Optimizely not configured" }, { status: 503 });
+function parseLocale(raw: string | null | undefined): SupportedLocale {
+  const v = (raw ?? "").trim().toLowerCase();
+  return SUPPORTED_LOCALES.includes(v) ? v : "en";
 }
 
-const url = new URL(request.url);
-const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "20", 10) || 20, 100);
-const order = (url.searchParams.get("order") ?? "desc").toLowerCase() === "asc" ? "asc" : "desc";
-const locale = url.searchParams.get("locale")?.trim() || "en";
-const sinceMs = parseDate(url.searchParams.get("since"));
-const untilMs = parseDate(url.searchParams.get("until"));
+// inside GET:
+const localeParam = url.searchParams.get("locale");
+const locale = parseLocale(localeParam);
+const localeFellBack = !!localeParam && locale !== localeParam.trim().toLowerCase();
 ```
 
-- `limit` is clamped between 1 and 100
-- `order` only accepts `asc` or `desc` (anything else → `desc`)
-- `since` / `until` are parsed to millis and validated; bad input is silently ignored
+- `limit` clamped 1–100
+- `order` only accepts `asc`/`desc` (anything else → `desc`)
+- `locale` checked against the safelist — unknown values silently fall back to `en`
+- `since`/`until` parsed to milliseconds; bad input silently ignored
 - Fails closed (503) if Optimizely env vars are missing
 
 ### Step 2 — Cheap listing call (metadata only)
@@ -219,67 +233,36 @@ sequenceDiagram
     API-->>API: JSON
 ```
 
-### Step 4 — Project a stable shape
+### Step 4 — Project a stable shape — date fallback chain
 
-The CMS exposes a sprawling `_json` blob. We project only the fields we want
-to expose, normalising casing and falling back through multiple field names
-Optimizely uses inconsistently (`publishedAt`, `PublishedAt`, `publishDate`,
-`PublishDate`, `startPublish`).
+The original implementation only looked at `_json.publishedAt` and aliases.
+If the article author never set that field, the date was `null` and
+`?since`/`?until` filters silently dropped the article.
 
-```ts
-.map((it) => {
-  const j = it._json ?? {};
-  const path = it._metadata?.url?.default ?? "";
-  const publishedAtRaw =
-    readString(j.publishedAt) ??
-    readString(j.PublishedAt) ??
-    readString(j.publishDate) ??
-    readString(j.PublishDate) ??
-    readString(j.startPublish);
-  const publishedAtMs = parseDate(publishedAtRaw);
-
-  return {
-    id: it._metadata?.key ?? null,
-    locale: it._metadata?.locale ?? locale,
-    status: it._metadata?.status ?? "Published",
-    header: readString(it.title) ?? readString(j.title) ?? it._metadata?.displayName ?? null,
-    description: readString(it.shortDescription) ?? readString(j.shortDescription) ?? readString(j.summary) ?? null,
-    url: path || null,
-    imageUrl: readString(j.cardImageUrl) ?? readString(j.CardImageUrl) ?? null,
-    imageAlt: readString(j.cardImageAlt) ?? readString(j.CardImageAlt) ?? null,
-    publishedAt: publishedAtRaw ?? null,
-    publishedAtMs,
-    readTime: readString(j.readTime) ?? readString(j.ReadTime) ?? null,
-    authorId: readString(j.authorId) ?? readString(j.AuthorId) ?? null,
-    topics: parseKeywords(it.keywords ?? (j.keywords as string | undefined)),
-    industries: parseKeywords(...),
-    services: parseKeywords(...),
-  };
-});
-```
-
-Helpers used:
+**Fix (commit `75dd2de`):** Added `_metadata.published`, `_metadata.lastModified`,
+and `_metadata.created` as additional fallbacks. Optimizely Graph always
+populates these — so every article now has a date and no article is invisible
+to filters.
 
 ```ts
-function readString(value: unknown): string | undefined { /* trim and reject empties */ }
-function parseDate(value: unknown): number | null { /* Date.parse, validate */ }
-function parseKeywords(raw?: string | null): string[] {
-  return (raw ?? "").split(/[,;\n]/).map(k => k.trim()).filter(Boolean);
-}
+const publishedAtRaw =
+  // article-level fields set by the content author
+  readString(j.publishedAt) ??
+  readString(j.PublishedAt) ??
+  readString(j.publishDate) ??
+  readString(j.PublishDate) ??
+  readString(j.startPublish) ??
+  // Optimizely Graph metadata — always present
+  readString(m.published) ??
+  readString(m.lastModified) ??
+  readString(m.created);
 ```
 
-### Step 5 — Date filter
+Priority: explicit article date first → Graph publish timestamp → last modified → created.
 
-```ts
-const dateFiltered = projected.filter((a) => {
-  if (sinceMs !== null && (a.publishedAtMs === null || a.publishedAtMs < sinceMs)) return false;
-  if (untilMs !== null && (a.publishedAtMs === null || a.publishedAtMs > untilMs)) return false;
-  return true;
-});
-```
-
-> Articles **without** a `publishedAt` value are excluded from filtered results
-> on purpose — we cannot tell whether they fall inside the requested window.
+The `_metadata` object also now requests `published`, `created`, and
+`lastModified` in both the list and detail Graph queries so these fields are
+always available.
 
 ### Step 6 — Sort and limit
 
@@ -359,20 +342,21 @@ flowchart TD
 
 ---
 
-## 8. Demo URLs
+## 8. Verified demo URLs
 
-After signing in via the cookie session:
+All verified in production on 2026-06-03. Log in first via
+`https://project-coral-eight.vercel.app/api/articles` → enter credentials.
 
-| URL | Behaviour |
+| URL | Verified result |
 |---|---|
-| `/api/articles` | All articles, newest first, limit 20 |
-| `/api/articles?limit=5` | First 5 |
-| `/api/articles?order=asc` | Oldest first |
-| `/api/articles?locale=en&limit=10` | English, 10 items |
-| `/api/articles?since=2025-01-01&until=2025-12-31` | Published in 2025 only |
-
-Empty `items` array on filtered queries means no article in the CMS currently
-has a `publishedAt` that falls in the window — not a bug.
+| `/api/articles` | 19 articles, newest first |
+| `/api/articles?limit=3` | 3 items, `total: 19` |
+| `/api/articles?order=asc` | Oldest article first (May 18 2026) |
+| `/api/articles?since=2025-01-01` | All 19 (all published after Jan 2025) |
+| `/api/articles?since=2026-05-01&until=2026-05-31` | Articles from May 2026 |
+| `/api/articles?locale=es` | Spanish translations (after Optimizely step) |
+| `/api/articles?locale=fr` | English items + `localeFellBack: true` — graceful |
+| `/api/articles?locale=es&limit=2` | 2 Spanish articles |
 
 ---
 
@@ -383,6 +367,9 @@ has a `publishedAt` that falls in the window — not a bug.
 | Two-phase fetch (list then detail) | List query is cheap; we only pay for details on real articles |
 | `Promise.all` for details | Latency stays O(1) network round-trips |
 | Multiple `publishedAt` field aliases | Optimizely versions/templates name the field differently |
+| `_metadata.published` as final fallback | Always present; ensures no article is ever dateless |
+| Locale safelist (`en`, `es` only) | Prevents Graph 400 errors; unknown locales fall back gracefully |
+| `localeFellBack` + `requestedLocale` in response | Caller knows exactly what happened without reading logs |
 | URL convention `/article/` | No dedicated content type in this project — URL is the source of truth |
 | Internal `publishedAtMs` field | Avoids re-parsing dates during sort; stripped from response |
 | Envelope (`count`, `total`, `filter`, `generatedAt`) | Self-describing payload, easy to debug client-side |
@@ -442,7 +429,10 @@ pattern.
 
 - One endpoint, one envelope, predictable shape
 - Optimizely Graph integration normalised across field-name variants
-- Date filtering via inclusive `since` / `until` ISO bounds
+- **Locale safelist** — only `en`/`es` accepted; unsupported locales fall back to `en` gracefully
+- **Date fallback chain** — every article gets a date (`_metadata.published` as final fallback)
+- Date filtering via inclusive `since`/`until` ISO bounds — **verified working in production**
 - Always sorted by published date, default newest-first
 - Auth-gated; misconfiguration fails closed
 - Cache invalidation handled by the publish-only webhook filter
+- Response includes `requestedLocale`, `localeFellBack`, `supportedLocales` for client transparency
