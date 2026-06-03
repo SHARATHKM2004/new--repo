@@ -86,4 +86,4 @@ If `Header` or `Footer` items do not exist in Optimizely yet, the app falls back
 
 ## Optimizely diagnostics
 
-Use `/api/optimizely/health` to confirm whether the app can reach the Optimizely Graph endpoint with both public and admin credentials. The route returns `200` when the provider is enabled and the public endpoint is reachable, otherwise it returns `503` with a JSON status payload.
+Use `/api/optimizely/health?key=<API_ACCESS_KEY>` to confirm whether the app can reach the Optimizely Graph endpoint with both public and admin credentials. The protected API and Optimizely debug endpoints now expect the shared secret in the `key` query parameter.

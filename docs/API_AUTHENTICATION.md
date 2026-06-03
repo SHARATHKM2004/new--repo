@@ -44,7 +44,6 @@ flowchart LR
     G -->|no or expired cookie - API client| E["401 JSON"]
     L --> F["Login form"]
     F -->|POST loginAction| V{"Validate creds"}
-    V -->|ok| S["Set signed cookie maxAge 60s"]
     S --> R["302 back to next URL"]
     V -->|bad| L
     R --> G
@@ -70,7 +69,6 @@ src/
 │   └── api-auth.ts                       ← auth core
 └── app/
     ├── auth/
-    │   └── login/page.tsx                ← custom login page
     └── api/
         ├── auth/logout/route.ts          ← POST logout
         ├── articles/route.ts             ← protected
@@ -82,7 +80,6 @@ src/
             └── debug-startpage/route.ts  ← protected
 ```
 
----
 
 ## 4. Environment variables
 
@@ -104,7 +101,6 @@ API_BASIC_AUTH_PASSWORD=summit-api-2026
 
 > After changing env vars on Vercel, redeploy for them to take effect.
 
----
 
 ## 5. The signed cookie
 
@@ -121,7 +117,6 @@ can verify without any database.
 
 ```
 1717267800000.7f3c8b2e1a6d4e0c92...
-```
 
 **Why this works:**
 
@@ -136,7 +131,6 @@ sequenceDiagram
     L->>S: validate against env vars
     S->>S: expiry = now plus 60000 ms
     S->>S: sig = HMAC_SHA256 of expiry using password
-    S-->>B: Set-Cookie api_session = expiry.sig
     B->>G: GET /api/articles with cookie
     G->>G: split token and check expiry
     G->>G: recompute HMAC and timingSafeEqual
@@ -149,16 +143,10 @@ Properties:
 - **Stateless** — the server stores nothing; verification is pure crypto.
 - **Self-expiring** — once `expiry < Date.now()`, no further verification needed.
 - **Constant-time compare** — `crypto.timingSafeEqual` prevents timing attacks.
-
 ---
 
 ## 6. Request lifecycle
-
-### A. First request (no cookie)
-
-```mermaid
 sequenceDiagram
-    participant U as User
     participant API as Articles API
     participant Guard
     U->>API: GET /api/articles with Accept text/html
@@ -169,14 +157,9 @@ sequenceDiagram
 ```
 
 ### B. Successful login
-
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant LP as Login Page
-    participant SA as loginAction
-    U->>LP: submit user and password
-    LP->>SA: invoke server action
     SA->>SA: validate credentials
     SA->>SA: createSessionToken using secret
     SA-->>U: Set-Cookie api_session with Max-Age 60

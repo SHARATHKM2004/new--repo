@@ -135,7 +135,7 @@ export async function GET(request: Request) {
 ```
 
 This 2-line block sits at the top of the handler and short-circuits the
-request if there is no valid session cookie.
+request if there is no valid `?key=` query parameter.
 
 ### Step 1 — Validate config, parse inputs + locale safelist
 
@@ -308,7 +308,7 @@ sequenceDiagram
     participant Auth as Auth Guard
     participant G as Optimizely Graph
 
-    U->>API: GET /api/articles with cookie
+    U->>API: GET /api/articles?key=YOUR_SECRET
     API->>Auth: requireBasicAuth
     Auth-->>API: ok
     API->>G: list CMSPage 100 metadata only
@@ -410,8 +410,8 @@ pattern.
 |---|---|---|
 | `OPTIMIZELY_RENDER_URL` | yes | Optimizely Graph endpoint base |
 | `OPTIMIZELY_RENDER_KEY` | yes | Public render key (delivery-only) |
-| `API_BASIC_AUTH_USER` | no | Auth username (default `admin`) |
-| `API_BASIC_AUTH_PASSWORD` | yes | Auth password + HMAC secret |
+| `API_ACCESS_KEY` | preferred | Shared URL secret for protected endpoints |
+| `API_BASIC_AUTH_PASSWORD` | fallback | Back-compat fallback when `API_ACCESS_KEY` is unset |
 
 ---
 
@@ -433,6 +433,6 @@ pattern.
 - **Date fallback chain** — every article gets a date (`_metadata.published` as final fallback)
 - Date filtering via inclusive `since`/`until` ISO bounds — **verified working in production**
 - Always sorted by published date, default newest-first
-- Auth-gated; misconfiguration fails closed
+- Query-parameter gated (`?key=`); misconfiguration fails closed
 - Cache invalidation handled by the publish-only webhook filter
 - Response includes `requestedLocale`, `localeFellBack`, `supportedLocales` for client transparency
