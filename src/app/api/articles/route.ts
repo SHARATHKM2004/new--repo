@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireBasicAuth } from "@/lib/api-auth";
+import { parseCmsKeywordMetadata } from "@/lib/cms/keyword-metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,21 @@ function parseDate(value: unknown): number | null {
   return Number.isFinite(time) ? time : null;
 }
 
+function normalizeFilterValue(value: string | null | undefined): string | null {
+  const normalized = (value ?? "").trim().toLowerCase();
+  return normalized || null;
+}
+
+function matchesFilter(values: string[], filter: string | null) {
+  if (!filter) return true;
+  return values.some((value) => normalizeFilterValue(value) === filter);
+}
+
+function includesText(value: string | null | undefined, query: string | null) {
+  if (!query) return true;
+  return normalizeFilterValue(value)?.includes(query) ?? false;
+}
+
 export async function GET(request: Request) {
   const unauthorized = requireBasicAuth(request, "Articles API");
   if (unauthorized) return unauthorized;
@@ -69,6 +85,12 @@ export async function GET(request: Request) {
   const localeFellBack = !!localeParam && locale !== localeParam.trim().toLowerCase();
   const sinceMs = parseDate(url.searchParams.get("since"));
   const untilMs = parseDate(url.searchParams.get("until"));
+  const industryFilter = normalizeFilterValue(url.searchParams.get("industry"));
+  const topicFilter = normalizeFilterValue(url.searchParams.get("topic"));
+  const serviceFilter = normalizeFilterValue(url.searchParams.get("service"));
+  const authorIdFilter = normalizeFilterValue(url.searchParams.get("authorId"));
+  const authorFilter = normalizeFilterValue(url.searchParams.get("author"));
+  const queryFilter = normalizeFilterValue(url.searchParams.get("q"));
 
   const baseUrl = `${renderUrl.replace(/\/$/, "")}/content/v2`;
 
@@ -159,6 +181,7 @@ export async function GET(request: Request) {
     .map((it) => {
       const j = it._json ?? {};
       const m = it._metadata ?? {};
+      const keywordMetadata = parseCmsKeywordMetadata(it.keywords);
       const path = m.url?.default ?? "";
       // Fallback chain for the date we expose + filter on. Order matters:
       // explicit article publishedAt first, then Optimizely's metadata
@@ -191,7 +214,16 @@ export async function GET(request: Request) {
         publishedAt: publishedAtRaw ?? null,
         publishedAtMs,
         readTime: readString(j.readTime) ?? readString(j.ReadTime) ?? null,
-        authorId: readString(j.authorId) ?? readString(j.AuthorId) ?? null,
+        authorId:
+          readString(j.authorId) ??
+          readString(j.AuthorId) ??
+          keywordMetadata.authorId ??
+          null,
+        authorName:
+          readString(j.authorName) ??
+          readString(j.AuthorName) ??
+          keywordMetadata.authorName ??
+          null,
         topics: parseKeywords(it.keywords ?? (j.keywords as string | undefined)),
         industries: parseKeywords(
           (j.relatedIndustryIds as string | undefined) ??
@@ -204,14 +236,40 @@ export async function GET(request: Request) {
       };
     });
 
-  // Step 4 — date filtering (since/until are inclusive ISO dates).
-  const dateFiltered = projected.filter((a) => {
+  // Step 4 — semantic filters (industry/topic/service/author/q).
+  const contentFiltered = projected.filter((article) => {
+    if (!matchesFilter(article.industries, industryFilter)) return false;
+    if (!matchesFilter(article.topics, topicFilter)) return false;
+    if (!matchesFilter(article.services, serviceFilter)) return false;
+    if (authorIdFilter && normalizeFilterValue(article.authorId) !== authorIdFilter) return false;
+    if (authorFilter && !includesText(article.authorName, authorFilter)) return false;
+
+    if (queryFilter) {
+      const searchableParts = [
+        article.header,
+        article.description,
+        article.authorName,
+        article.authorId,
+        ...article.topics,
+        ...article.industries,
+        ...article.services,
+      ];
+
+      const hasQueryMatch = searchableParts.some((value) => includesText(value, queryFilter));
+      if (!hasQueryMatch) return false;
+    }
+
+    return true;
+  });
+
+  // Step 5 — date filtering (since/until are inclusive ISO dates).
+  const dateFiltered = contentFiltered.filter((a) => {
     if (sinceMs !== null && (a.publishedAtMs === null || a.publishedAtMs < sinceMs)) return false;
     if (untilMs !== null && (a.publishedAtMs === null || a.publishedAtMs > untilMs)) return false;
     return true;
   });
 
-  // Step 5 — sort by published date. Items without a publishedAt sink to the
+  // Step 6 — sort by published date. Items without a publishedAt sink to the
   // end regardless of order.
   const sorted = [...dateFiltered].sort((a, b) => {
     const aMs = a.publishedAtMs;
@@ -222,7 +280,11 @@ export async function GET(request: Request) {
     return order === "asc" ? aMs - bMs : bMs - aMs;
   });
 
-  const items = sorted.slice(0, limit).map(({ publishedAtMs: _ms, ...rest }) => rest);
+  const items = sorted.slice(0, limit).map((article) => {
+    const { publishedAtMs, ...rest } = article;
+    void publishedAtMs;
+    return rest;
+  });
 
   return NextResponse.json({
     count: items.length,
@@ -233,6 +295,12 @@ export async function GET(request: Request) {
     order,
     limit,
     filter: {
+      industry: industryFilter,
+      topic: topicFilter,
+      service: serviceFilter,
+      authorId: authorIdFilter,
+      author: authorFilter,
+      q: queryFilter,
       since: sinceMs !== null ? new Date(sinceMs).toISOString() : null,
       until: untilMs !== null ? new Date(untilMs).toISOString() : null,
     },
