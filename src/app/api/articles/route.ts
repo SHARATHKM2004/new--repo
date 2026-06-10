@@ -160,7 +160,14 @@ export async function GET(request: Request) {
   const orderByGraph = order === "asc" ? "ASC" : "DESC";
   const baseUrl = `${renderUrl.replace(/\/$/, "")}/content/v2`;
 
-  // ─── Single Graph query — full article rows, no metadata scan ────────────
+  // ─── Single filtered Graph query — article rows only, no metadata scan ───
+  //
+  // NOTE: `_json` is only supported inside a single `item` query, NOT inside
+  // an `items` collection. So the list query fetches the indexed fields
+  // (title, shortDescription, keywords, _metadata). Everything the filters
+  // need — topics, services, industries, author, date, readTime — is parsed
+  // from the `keywords` string. The richer `_json` fields (e.g. card image)
+  // are fetched only for the final, already-limited result set below.
   const query = `query {
     CMSPage(
       locale: ${locale}
@@ -174,7 +181,6 @@ export async function GET(request: Request) {
         title
         shortDescription
         keywords
-        _json
         _metadata {
           key locale displayName status
           published created lastModified
@@ -217,7 +223,7 @@ export async function GET(request: Request) {
   const graphItems: RawItem[] = payload?.data?.CMSPage?.items ?? [];
   const graphTotal: number = payload?.data?.CMSPage?.total ?? graphItems.length;
 
-  // Project Optimizely's raw shape into the stable public shape.
+  // Project the list rows into the stable public shape (keywords-driven).
   const projected = graphItems
     .filter((it) => {
       // Drop the article landing pages (/article/, /article/all/) and any
@@ -232,59 +238,39 @@ export async function GET(request: Request) {
       return !status || status === "published";
     })
     .map((it) => {
-      const j = it._json ?? {};
       const m = it._metadata ?? {};
       const keywordMetadata = parseCmsKeywordMetadata(it.keywords);
       const path = m.url?.default ?? "";
 
-      // Date fallback chain — guarantees every article has a usable date even
-      // when the template field is missing.
+      // Date fallback chain — guarantees every article has a usable date.
       const publishedAtRaw =
-        readString(j.publishedAt) ??
-        readString(j.PublishedAt) ??
-        readString(j.publishDate) ??
-        readString(j.PublishDate) ??
-        readString(j.startPublish) ??
+        readString(keywordMetadata.publishedAt) ??
         readString(m.published) ??
         readString(m.lastModified) ??
         readString(m.created);
       const publishedAtMs = parseDate(publishedAtRaw);
 
+      // Topics = bare keyword entries (no "key:" prefix) plus any topic: tags.
+      const bareTopics = parseKeywords(it.keywords).filter((k) => !k.includes(":"));
+      const topics = Array.from(new Set([...bareTopics, ...keywordMetadata.topics]));
+
       return {
         id: m.key ?? null,
         locale: m.locale ?? locale,
         status: m.status ?? "Published",
-        header: readString(it.title) ?? readString(j.title) ?? m.displayName ?? null,
-        description:
-          readString(it.shortDescription) ??
-          readString(j.shortDescription) ??
-          readString(j.summary) ??
-          null,
+        header: readString(it.title) ?? m.displayName ?? null,
+        description: readString(it.shortDescription) ?? null,
         url: path || null,
-        imageUrl: readString(j.cardImageUrl) ?? readString(j.CardImageUrl) ?? null,
-        imageAlt: readString(j.cardImageAlt) ?? readString(j.CardImageAlt) ?? null,
+        imageUrl: null as string | null,
+        imageAlt: null as string | null,
         publishedAt: publishedAtRaw ?? null,
         publishedAtMs,
-        readTime: readString(j.readTime) ?? readString(j.ReadTime) ?? null,
-        authorId:
-          readString(j.authorId) ??
-          readString(j.AuthorId) ??
-          keywordMetadata.authorId ??
-          null,
-        authorName:
-          readString(j.authorName) ??
-          readString(j.AuthorName) ??
-          keywordMetadata.authorName ??
-          null,
-        topics: parseKeywords(it.keywords ?? (j.keywords as string | undefined)),
-        industries: parseKeywords(
-          (j.relatedIndustryIds as string | undefined) ??
-            (j.RelatedIndustryIds as string | undefined),
-        ),
-        services: parseKeywords(
-          (j.relatedServiceIds as string | undefined) ??
-            (j.RelatedServiceIds as string | undefined),
-        ),
+        readTime: keywordMetadata.readTime ?? null,
+        authorId: keywordMetadata.authorId ?? null,
+        authorName: keywordMetadata.authorName ?? null,
+        topics,
+        industries: keywordMetadata.relatedIndustryIds ?? [],
+        services: keywordMetadata.relatedServiceIds ?? [],
       };
     });
 
@@ -310,9 +296,7 @@ export async function GET(request: Request) {
       if (!hasQueryMatch) return false;
     }
 
-    // Belt-and-braces date filter — Graph already applied since/until but
-    // re-apply against the projected fallback date in case the article's
-    // _json.publishedAt differs from _metadata.published.
+    // Belt-and-braces date filter — Graph already applied since/until.
     if (sinceMs !== null && (article.publishedAtMs === null || article.publishedAtMs < sinceMs)) {
       return false;
     }
@@ -323,7 +307,46 @@ export async function GET(request: Request) {
     return true;
   });
 
-  const items = filtered.slice(0, limit).map((article) => {
+  const limited = filtered.slice(0, limit);
+
+  // ─── Enrich ONLY the final limited set with `_json` (card image etc.) ────
+  // Per-item `item { _json }` queries are allowed; we run them in parallel,
+  // so this costs one extra round-trip regardless of how many we enrich.
+  await Promise.all(
+    limited.map(async (article) => {
+      if (!article.id) return;
+      const detailQuery = `query {
+        CMSPage(locale: ${locale}, ids: ["${article.id}"]) {
+          item { _json }
+        }
+      }`;
+      try {
+        const r = await fetch(`${baseUrl}?auth=${encodeURIComponent(renderKey)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: detailQuery }),
+          cache: "no-store",
+        });
+        const p = await r.json();
+        const j = (p?.data?.CMSPage?.item?._json ?? {}) as Record<string, unknown>;
+        article.imageUrl = readString(j.cardImageUrl) ?? readString(j.CardImageUrl) ?? article.imageUrl;
+        article.imageAlt = readString(j.cardImageAlt) ?? readString(j.CardImageAlt) ?? article.imageAlt;
+        // _json is authoritative for industries/services when present.
+        const jsonIndustries = parseKeywords(
+          (j.relatedIndustryIds as string | undefined) ?? (j.RelatedIndustryIds as string | undefined),
+        );
+        const jsonServices = parseKeywords(
+          (j.relatedServiceIds as string | undefined) ?? (j.RelatedServiceIds as string | undefined),
+        );
+        if (jsonIndustries.length) article.industries = jsonIndustries;
+        if (jsonServices.length) article.services = jsonServices;
+      } catch {
+        // Non-fatal — keep the keywords-derived values.
+      }
+    }),
+  );
+
+  const items = limited.map((article) => {
     const { publishedAtMs, ...rest } = article;
     void publishedAtMs;
     return rest;
