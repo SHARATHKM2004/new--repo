@@ -66,11 +66,6 @@ function includesText(value: string | null | undefined, query: string | null) {
   return normalizeFilterValue(value)?.includes(query) ?? false;
 }
 
-// Escape a string for safe embedding inside a GraphQL string literal.
-function gqlString(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
-
 export async function GET(request: Request) {
   const unauthorized = requireBasicAuth(request, "Articles API");
   if (unauthorized) return unauthorized;
@@ -114,10 +109,24 @@ export async function GET(request: Request) {
   //   - q extended match across header + description + author
   //   (these fields live inside _json and aren't first-class Graph index fields)
   //
+  // ─── Build the Graph `where` clause from filters we can push down ────────
+  //
+  // Pushed to Optimizely Graph (the index does the work — fast at 10k+ pages):
+  //   - URL convention: page URL must MATCH "/article/" (substring)
+  //   - locale → query argument
+  //   - since  → _metadata.published >= <since ISO>
+  //   - until  → _metadata.published <= <until ISO>
+  //   - order  → orderBy _metadata.published ASC|DESC
+  //
+  // Applied in-memory on the (much smaller) result set:
+  //   - topic / industry / service / authorId / author / q
+  //   (`keywords` and the `_json` fields are not first-class Graph index
+  //    filters in this schema, so we cannot push them down.)
+  //
   // GraphQL forbids duplicate keys at the same level, so all `_metadata`
   // sub-filters are merged into a single object.
   const metadataParts: string[] = [
-    `url: { default: { contains: "/article/" } }`,
+    `url: { default: { match: "/article/" } }`,
   ];
 
   if (sinceMs !== null || untilMs !== null) {
@@ -129,16 +138,15 @@ export async function GET(request: Request) {
 
   const whereClauses: string[] = [`_metadata: { ${metadataParts.join(", ")} }`];
 
-  if (topicFilter) {
-    whereClauses.push(`keywords: { contains: "${gqlString(topicFilter)}" }`);
-  } else if (queryFilter) {
-    whereClauses.push(`keywords: { contains: "${gqlString(queryFilter)}" }`);
-  }
-
   // When secondary in-memory filters are active we fetch a larger window so
   // the post-filter still has enough rows to satisfy `limit`.
   const hasInMemoryFilter =
-    !!industryFilter || !!serviceFilter || !!authorIdFilter || !!authorFilter || !!queryFilter;
+    !!topicFilter ||
+    !!industryFilter ||
+    !!serviceFilter ||
+    !!authorIdFilter ||
+    !!authorFilter ||
+    !!queryFilter;
   const graphLimit = hasInMemoryFilter
     ? Math.min(Math.max(limit * 4, 50), 100)
     : Math.min(Math.max(limit, 1), 100);
@@ -270,15 +278,14 @@ export async function GET(request: Request) {
       };
     });
 
-  // In-memory pass for filters that don't have a first-class Graph index field.
+  // In-memory pass for filters that aren't first-class Graph index fields.
   const filtered = projected.filter((article) => {
+    if (!matchesFilter(article.topics, topicFilter)) return false;
     if (!matchesFilter(article.industries, industryFilter)) return false;
     if (!matchesFilter(article.services, serviceFilter)) return false;
     if (authorIdFilter && normalizeFilterValue(article.authorId) !== authorIdFilter) return false;
     if (authorFilter && !includesText(article.authorName, authorFilter)) return false;
 
-    // Refine `q` to also match header/description/author (Graph already
-    // pre-filtered by keywords — this catches matches in other fields too).
     if (queryFilter) {
       const searchableParts = [
         article.header,
@@ -334,18 +341,17 @@ export async function GET(request: Request) {
     pushedToGraph: {
       urlConvention: "/article/",
       locale: true,
-      topic: !!topicFilter,
-      q: !!queryFilter && !topicFilter,
       since: sinceMs !== null,
       until: untilMs !== null,
       order: true,
     },
     appliedInMemory: {
+      topic: !!topicFilter,
       industry: !!industryFilter,
       service: !!serviceFilter,
       authorId: !!authorIdFilter,
       author: !!authorFilter,
-      qExtraFields: !!queryFilter,
+      q: !!queryFilter,
     },
     supportedLocales: SUPPORTED_LOCALES,
     generatedAt: new Date().toISOString(),
