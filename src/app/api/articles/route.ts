@@ -66,6 +66,11 @@ function includesText(value: string | null | undefined, query: string | null) {
   return normalizeFilterValue(value)?.includes(query) ?? false;
 }
 
+// Escape a string for safe embedding inside a GraphQL string literal.
+function gqlString(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 export async function GET(request: Request) {
   const unauthorized = requireBasicAuth(request, "Articles API");
   if (unauthorized) return unauthorized;
@@ -79,6 +84,7 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "20", 10) || 20, 100);
+  const skip = Math.max(parseInt(url.searchParams.get("skip") ?? "0", 10) || 0, 0);
   const order = (url.searchParams.get("order") ?? "desc").toLowerCase() === "asc" ? "asc" : "desc";
   const localeParam = url.searchParams.get("locale");
   const locale = parseLocale(localeParam);
@@ -92,15 +98,65 @@ export async function GET(request: Request) {
   const authorFilter = normalizeFilterValue(url.searchParams.get("author"));
   const queryFilter = normalizeFilterValue(url.searchParams.get("q"));
 
+  // ─── Build the Graph `where` clause from filters we can push down ────────
+  //
+  // Pushed to Optimizely Graph (the index does the work — fast at 10k+ pages):
+  //   - URL convention: page URL must contain "/article/"
+  //   - locale → query argument
+  //   - topic  → keywords contains <topic>
+  //   - q      → keywords contains <q>  (best-effort; in-memory pass refines)
+  //   - since  → _metadata.published >= <since ISO>
+  //   - until  → _metadata.published <= <until ISO>
+  //   - order  → orderBy _metadata.published ASC|DESC
+  //
+  // Still applied in-memory on the (much smaller) result set:
+  //   - industry / service / authorId / author
+  //   - q extended match across header + description + author
+  //   (these fields live inside _json and aren't first-class Graph index fields)
+  //
+  const whereClauses: string[] = [
+    `_metadata: { url: { default: { contains: "/article/" } } }`,
+  ];
+
+  if (topicFilter) {
+    whereClauses.push(`keywords: { contains: "${gqlString(topicFilter)}" }`);
+  } else if (queryFilter) {
+    whereClauses.push(`keywords: { contains: "${gqlString(queryFilter)}" }`);
+  }
+
+  if (sinceMs !== null || untilMs !== null) {
+    const bounds: string[] = [];
+    if (sinceMs !== null) bounds.push(`gte: "${new Date(sinceMs).toISOString()}"`);
+    if (untilMs !== null) bounds.push(`lte: "${new Date(untilMs).toISOString()}"`);
+    whereClauses.push(`_metadata: { published: { ${bounds.join(", ")} } }`);
+  }
+
+  // When secondary in-memory filters are active we fetch a larger window so
+  // the post-filter still has enough rows to satisfy `limit`.
+  const hasInMemoryFilter =
+    !!industryFilter || !!serviceFilter || !!authorIdFilter || !!authorFilter || !!queryFilter;
+  const graphLimit = hasInMemoryFilter
+    ? Math.min(Math.max(limit * 4, 50), 100)
+    : Math.min(Math.max(limit, 1), 100);
+
+  const orderByGraph = order === "asc" ? "ASC" : "DESC";
   const baseUrl = `${renderUrl.replace(/\/$/, "")}/content/v2`;
 
-  // Step 1 — list every CMSPage whose URL contains "/article/" (the article
-  // landing convention used in this project). We only ask for metadata here
-  // to keep the listing query cheap. _metadata.published gives us the
-  // authoritative publish date even when the article body doesn't include one.
-  const listQuery = `query {
-    CMSPage(limit: 100, locale: ${locale}) {
+  // ─── Single Graph query — full article rows, no metadata scan ────────────
+  const query = `query {
+    CMSPage(
+      locale: ${locale}
+      limit: ${graphLimit}
+      skip: ${skip}
+      orderBy: { _metadata: { published: ${orderByGraph} } }
+      where: { ${whereClauses.join(", ")} }
+    ) {
+      total
       items {
+        title
+        shortDescription
+        keywords
+        _json
         _metadata {
           key locale displayName status
           published created lastModified
@@ -110,71 +166,31 @@ export async function GET(request: Request) {
     }
   }`;
 
-  const listResp = await fetch(`${baseUrl}?auth=${encodeURIComponent(renderKey)}`, {
+  const resp = await fetch(`${baseUrl}?auth=${encodeURIComponent(renderKey)}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query: listQuery }),
+    body: JSON.stringify({ query }),
     cache: "no-store",
   });
 
-  if (!listResp.ok) {
+  if (!resp.ok) {
     return NextResponse.json(
-      { error: "Optimizely Graph request failed", status: listResp.status },
+      { error: "Optimizely Graph request failed", status: resp.status },
       { status: 502 },
     );
   }
 
-  const listPayload = await listResp.json();
-  const listItems: RawItem[] = listPayload?.data?.CMSPage?.items ?? [];
+  const payload = await resp.json();
+  const graphItems: RawItem[] = payload?.data?.CMSPage?.items ?? [];
+  const graphTotal: number = payload?.data?.CMSPage?.total ?? graphItems.length;
 
-  const articleStubs = listItems.filter((it) => {
-    const path = it._metadata?.url?.default ?? it._metadata?.url?.hierarchical ?? "";
-    const isArticleUrl = /\/article\//i.test(path) && !/\/article\/all\b/i.test(path);
-    if (!isArticleUrl) return false;
-    // Only keep Published items. Some Optimizely Graph deployments expose a
-    // status field; when absent we trust that the public render key only
-    // returns Published content.
-    const status = (it._metadata?.status ?? "").toLowerCase();
-    if (status && status !== "published") return false;
-    return true;
-  });
-
-  // Step 2 — fetch the full detail for every article (parallel) so we have
-  // the published date, summary, image, topics and the rest of the fields.
-  const detailed = await Promise.all(
-    articleStubs.map(async (stub) => {
-      const key = stub._metadata?.key;
-      if (!key) return null;
-      const detailQuery = `query {
-        CMSPage(locale: ${locale}, ids: ["${key}"]) {
-          item {
-            title
-            shortDescription
-            keywords
-            _json
-            _metadata {
-              key locale displayName status
-              published created lastModified
-              url { default hierarchical }
-            }
-          }
-        }
-      }`;
-      const r = await fetch(`${baseUrl}?auth=${encodeURIComponent(renderKey)}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: detailQuery }),
-        cache: "no-store",
-      });
-      const p = await r.json();
-      return (p?.data?.CMSPage?.item ?? null) as RawItem | null;
-    }),
-  );
-
-  // Step 3 — normalise and project the fields we want to expose.
-  const projected = detailed
-    .filter((it): it is RawItem => Boolean(it))
+  // Project Optimizely's raw shape into the stable public shape.
+  const projected = graphItems
     .filter((it) => {
+      // Belt-and-braces: drop the /article/all index page and any non-Published items
+      // (Graph already filtered to /article/ but the index page sneaks through).
+      const path = it._metadata?.url?.default ?? it._metadata?.url?.hierarchical ?? "";
+      if (/\/article\/all\b/i.test(path)) return false;
       const status = (it._metadata?.status ?? "").toLowerCase();
       return !status || status === "published";
     })
@@ -183,10 +199,9 @@ export async function GET(request: Request) {
       const m = it._metadata ?? {};
       const keywordMetadata = parseCmsKeywordMetadata(it.keywords);
       const path = m.url?.default ?? "";
-      // Fallback chain for the date we expose + filter on. Order matters:
-      // explicit article publishedAt first, then Optimizely's metadata
-      // published, then lastModified, then created — so every article ends
-      // up with *some* date and filters return meaningful results.
+
+      // Date fallback chain — guarantees every article has a usable date even
+      // when the template field is missing.
       const publishedAtRaw =
         readString(j.publishedAt) ??
         readString(j.PublishedAt) ??
@@ -236,14 +251,15 @@ export async function GET(request: Request) {
       };
     });
 
-  // Step 4 — semantic filters (industry/topic/service/author/q).
-  const contentFiltered = projected.filter((article) => {
+  // In-memory pass for filters that don't have a first-class Graph index field.
+  const filtered = projected.filter((article) => {
     if (!matchesFilter(article.industries, industryFilter)) return false;
-    if (!matchesFilter(article.topics, topicFilter)) return false;
     if (!matchesFilter(article.services, serviceFilter)) return false;
     if (authorIdFilter && normalizeFilterValue(article.authorId) !== authorIdFilter) return false;
     if (authorFilter && !includesText(article.authorName, authorFilter)) return false;
 
+    // Refine `q` to also match header/description/author (Graph already
+    // pre-filtered by keywords — this catches matches in other fields too).
     if (queryFilter) {
       const searchableParts = [
         article.header,
@@ -254,33 +270,24 @@ export async function GET(request: Request) {
         ...article.industries,
         ...article.services,
       ];
-
       const hasQueryMatch = searchableParts.some((value) => includesText(value, queryFilter));
       if (!hasQueryMatch) return false;
+    }
+
+    // Belt-and-braces date filter — Graph already applied since/until but
+    // re-apply against the projected fallback date in case the article's
+    // _json.publishedAt differs from _metadata.published.
+    if (sinceMs !== null && (article.publishedAtMs === null || article.publishedAtMs < sinceMs)) {
+      return false;
+    }
+    if (untilMs !== null && (article.publishedAtMs === null || article.publishedAtMs > untilMs)) {
+      return false;
     }
 
     return true;
   });
 
-  // Step 5 — date filtering (since/until are inclusive ISO dates).
-  const dateFiltered = contentFiltered.filter((a) => {
-    if (sinceMs !== null && (a.publishedAtMs === null || a.publishedAtMs < sinceMs)) return false;
-    if (untilMs !== null && (a.publishedAtMs === null || a.publishedAtMs > untilMs)) return false;
-    return true;
-  });
-
-  // Step 6 — sort by published date. Items without a publishedAt sink to the
-  // end regardless of order.
-  const sorted = [...dateFiltered].sort((a, b) => {
-    const aMs = a.publishedAtMs;
-    const bMs = b.publishedAtMs;
-    if (aMs === null && bMs === null) return 0;
-    if (aMs === null) return 1;
-    if (bMs === null) return -1;
-    return order === "asc" ? aMs - bMs : bMs - aMs;
-  });
-
-  const items = sorted.slice(0, limit).map((article) => {
+  const items = filtered.slice(0, limit).map((article) => {
     const { publishedAtMs, ...rest } = article;
     void publishedAtMs;
     return rest;
@@ -288,12 +295,13 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     count: items.length,
-    total: dateFiltered.length,
+    total: graphTotal,
     locale,
     requestedLocale: localeParam ?? null,
     localeFellBack,
     order,
     limit,
+    skip,
     filter: {
       industry: industryFilter,
       topic: topicFilter,
@@ -303,6 +311,22 @@ export async function GET(request: Request) {
       q: queryFilter,
       since: sinceMs !== null ? new Date(sinceMs).toISOString() : null,
       until: untilMs !== null ? new Date(untilMs).toISOString() : null,
+    },
+    pushedToGraph: {
+      urlConvention: "/article/",
+      locale: true,
+      topic: !!topicFilter,
+      q: !!queryFilter && !topicFilter,
+      since: sinceMs !== null,
+      until: untilMs !== null,
+      order: true,
+    },
+    appliedInMemory: {
+      industry: !!industryFilter,
+      service: !!serviceFilter,
+      authorId: !!authorIdFilter,
+      author: !!authorFilter,
+      qExtraFields: !!queryFilter,
     },
     supportedLocales: SUPPORTED_LOCALES,
     generatedAt: new Date().toISOString(),
