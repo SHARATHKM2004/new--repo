@@ -112,21 +112,27 @@ export async function GET(request: Request) {
   // ─── Build the Graph `where` clause from filters we can push down ────────
   //
   // Pushed to Optimizely Graph (the index does the work — fast at 10k+ pages):
-  //   - URL convention: page URL must MATCH "/article/" (substring)
+  //   - URL convention: page URL must startsWith "/<locale>/article/"
+  //     (Optimizely Graph's StringFilterInput supports eq, notEq, like,
+  //      startsWith, endsWith, in, notIn — `contains`/`match` are only on
+  //      SearchableStringFilterInput. `startsWith` matches the article
+  //      subtree precisely for the requested locale.)
   //   - locale → query argument
   //   - since  → _metadata.published >= <since ISO>
   //   - until  → _metadata.published <= <until ISO>
   //   - order  → orderBy _metadata.published ASC|DESC
   //
   // Applied in-memory on the (much smaller) result set:
+  //   - drop the /article/ index page and /article/all listing
   //   - topic / industry / service / authorId / author / q
   //   (`keywords` and the `_json` fields are not first-class Graph index
   //    filters in this schema, so we cannot push them down.)
   //
   // GraphQL forbids duplicate keys at the same level, so all `_metadata`
   // sub-filters are merged into a single object.
+  const articlePrefix = `/${locale}/article/`;
   const metadataParts: string[] = [
-    `url: { default: { match: "/article/" } }`,
+    `url: { default: { startsWith: "${articlePrefix}" } }`,
   ];
 
   if (sinceMs !== null || untilMs !== null) {
@@ -214,10 +220,14 @@ export async function GET(request: Request) {
   // Project Optimizely's raw shape into the stable public shape.
   const projected = graphItems
     .filter((it) => {
-      // Belt-and-braces: drop the /article/all index page and any non-Published items
-      // (Graph already filtered to /article/ but the index page sneaks through).
+      // Drop the article landing pages (/article/, /article/all/) and any
+      // non-Published items. Graph already restricted to the article subtree
+      // via the startsWith filter — this just trims the listing pages.
       const path = it._metadata?.url?.default ?? it._metadata?.url?.hierarchical ?? "";
-      if (/\/article\/all\b/i.test(path)) return false;
+      const normalised = path.replace(/\/+$/, "");
+      if (normalised === `/${locale}/article` || normalised === `/${locale}/article/all`) {
+        return false;
+      }
       const status = (it._metadata?.status ?? "").toLowerCase();
       return !status || status === "published";
     })
