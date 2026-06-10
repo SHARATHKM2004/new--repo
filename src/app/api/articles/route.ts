@@ -114,21 +114,25 @@ export async function GET(request: Request) {
   //   - q extended match across header + description + author
   //   (these fields live inside _json and aren't first-class Graph index fields)
   //
-  const whereClauses: string[] = [
-    `_metadata: { url: { default: { contains: "/article/" } } }`,
+  // GraphQL forbids duplicate keys at the same level, so all `_metadata`
+  // sub-filters are merged into a single object.
+  const metadataParts: string[] = [
+    `url: { default: { contains: "/article/" } }`,
   ];
-
-  if (topicFilter) {
-    whereClauses.push(`keywords: { contains: "${gqlString(topicFilter)}" }`);
-  } else if (queryFilter) {
-    whereClauses.push(`keywords: { contains: "${gqlString(queryFilter)}" }`);
-  }
 
   if (sinceMs !== null || untilMs !== null) {
     const bounds: string[] = [];
     if (sinceMs !== null) bounds.push(`gte: "${new Date(sinceMs).toISOString()}"`);
     if (untilMs !== null) bounds.push(`lte: "${new Date(untilMs).toISOString()}"`);
-    whereClauses.push(`_metadata: { published: { ${bounds.join(", ")} } }`);
+    metadataParts.push(`published: { ${bounds.join(", ")} }`);
+  }
+
+  const whereClauses: string[] = [`_metadata: { ${metadataParts.join(", ")} }`];
+
+  if (topicFilter) {
+    whereClauses.push(`keywords: { contains: "${gqlString(topicFilter)}" }`);
+  } else if (queryFilter) {
+    whereClauses.push(`keywords: { contains: "${gqlString(queryFilter)}" }`);
   }
 
   // When secondary in-memory filters are active we fetch a larger window so
@@ -173,14 +177,29 @@ export async function GET(request: Request) {
     cache: "no-store",
   });
 
-  if (!resp.ok) {
+  const rawBody = await resp.text();
+  let payload: { data?: { CMSPage?: { items?: RawItem[]; total?: number } }; errors?: unknown } = {};
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
     return NextResponse.json(
-      { error: "Optimizely Graph request failed", status: resp.status },
+      { error: "Optimizely Graph returned non-JSON", status: resp.status, body: rawBody.slice(0, 2000) },
       { status: 502 },
     );
   }
 
-  const payload = await resp.json();
+  if (!resp.ok || payload?.errors) {
+    return NextResponse.json(
+      {
+        error: "Optimizely Graph request failed",
+        status: resp.status,
+        graphErrors: payload?.errors ?? null,
+        sentQuery: query,
+      },
+      { status: 502 },
+    );
+  }
+
   const graphItems: RawItem[] = payload?.data?.CMSPage?.items ?? [];
   const graphTotal: number = payload?.data?.CMSPage?.total ?? graphItems.length;
 
