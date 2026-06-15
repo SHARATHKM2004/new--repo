@@ -127,7 +127,7 @@ export function ChatbotWidget({ locale = "en" }: Props) {
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Open Summit Assistant"
-          className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#0a2a4d] text-white shadow-lg transition hover:scale-105 hover:bg-[#0d3563] focus:outline-none focus:ring-4 focus:ring-[#0a2a4d]/30"
+          className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#1247ff] text-white shadow-lg transition hover:scale-105 hover:bg-[#0a39d6] focus:outline-none focus:ring-4 focus:ring-[#1247ff]/30"
         >
           <ChatBubbleIcon />
         </button>
@@ -141,7 +141,7 @@ export function ChatbotWidget({ locale = "en" }: Props) {
           className="fixed bottom-5 right-5 z-50 flex h-[600px] max-h-[85vh] w-[380px] max-w-[95vw] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl sm:bottom-5 sm:right-5"
         >
           {/* Header */}
-          <div className="flex items-center justify-between gap-2 bg-[#0a2a4d] px-4 py-3 text-white">
+          <div className="flex items-center justify-between gap-2 bg-[#1247ff] px-4 py-3 text-white">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15">
                 <ChatBubbleIcon />
@@ -194,7 +194,7 @@ export function ChatbotWidget({ locale = "en" }: Props) {
                       key={q}
                       type="button"
                       onClick={() => void sendMessage(q)}
-                      className="rounded-full border border-[#0a2a4d]/20 bg-white px-3 py-1.5 text-xs text-[#0a2a4d] transition hover:border-[#0a2a4d] hover:bg-[#0a2a4d] hover:text-white"
+                      className="rounded-full border border-[#1247ff]/20 bg-white px-3 py-1.5 text-xs text-[#1247ff] transition hover:border-[#1247ff] hover:bg-[#1247ff] hover:text-white"
                     >
                       {q}
                     </button>
@@ -217,13 +217,13 @@ export function ChatbotWidget({ locale = "en" }: Props) {
               placeholder="Ask about Summit…"
               rows={1}
               disabled={pending}
-              className="max-h-24 min-h-[40px] flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-[#0a2a4d] focus:outline-none focus:ring-1 focus:ring-[#0a2a4d] disabled:bg-gray-50"
+              className="max-h-24 min-h-[40px] flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-[#1247ff] focus:outline-none focus:ring-1 focus:ring-[#1247ff] disabled:bg-gray-50"
             />
             <button
               type="submit"
               disabled={pending || !input.trim()}
               aria-label="Send"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0a2a4d] text-white transition hover:bg-[#0d3563] disabled:cursor-not-allowed disabled:bg-gray-300"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#1247ff] text-white transition hover:bg-[#0a39d6] disabled:cursor-not-allowed disabled:bg-gray-300"
             >
               <SendIcon />
             </button>
@@ -241,7 +241,7 @@ function MessageBubble({ message }: { message: Message }) {
       <div
         className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm ${
           isUser
-            ? "bg-[#0a2a4d] text-white"
+            ? "bg-[#1247ff] text-white"
             : "bg-white text-gray-800 ring-1 ring-gray-200"
         }`}
       >
@@ -255,7 +255,7 @@ function MessageBubble({ message }: { message: Message }) {
               <a
                 key={`${s.url}-${i}`}
                 href={s.url}
-                className="block truncate text-xs text-[#0a2a4d] hover:underline"
+                className="block truncate text-xs text-[#1247ff] hover:underline"
                 title={s.title}
               >
                 {s.type}: {s.title}
@@ -299,7 +299,7 @@ function renderInline(line: string): React.ReactNode[] {
       <a
         key={`l-${key++}`}
         href={href}
-        className="text-[#0a2a4d] underline underline-offset-2 hover:opacity-80"
+        className="text-[#1247ff] underline underline-offset-2 hover:opacity-80"
       >
         {label}
       </a>,
