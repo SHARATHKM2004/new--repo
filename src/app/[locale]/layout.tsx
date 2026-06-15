@@ -1,5 +1,6 @@
 import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
+import { ChatbotWidget } from "@/components/chatbot/chatbot-widget";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { getNavigation, getSiteFooterContent, getSiteHeaderContent } from "@/lib/cms";
@@ -33,6 +34,7 @@ export default async function LocaleLayout({
       <SiteHeader locale={locale} navigation={navigation} content={headerContent} />
       {children}
       <SiteFooter locale={locale} content={footerContent} />
+      <ChatbotWidget locale={locale} />
     </div>
   );
 }
