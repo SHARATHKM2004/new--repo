@@ -34,18 +34,20 @@ That is the entire integration. Everything else (preview mode, webhooks, caching
 
 ## 1. Get the four secrets out of Optimizely
 
-In the Optimizely CMS UI, open **Settings → API Keys** (or **Render API**, depending on your tenant). You need:
+The Graph keys live in the **Optimizely Graph admin**, which on most tenants is reached from the CMS UI under **Settings → API Keys** (sometimes labelled **Render API** or surfaced in a separate Optimizely Graph console). The exact menu path varies by tenant version — your PDF should show the screenshot. You need:
 
 | Value | Used for | Sensitivity |
 |---|---|---|
-| **Graph Gateway URL** | Base URL for all GraphQL calls. Usually `https://cg.optimizely.com`. | Public |
-| **Single key (Render key)** | Read-only key for **published** content. Sent as `?auth=<key>`. | Semi-public (it ends up in server fetches; do not commit it). |
+| **Graph Gateway URL** | Base URL for all GraphQL calls. For this repo's tenant it is `https://cg.optimizely.com`. **Confirm yours in the Graph admin** before assuming. | Public |
+| **Single key (Render key)** | Read-only key for **published** content. Sent as `?auth=<key>` on the URL. | Semi-public (only used server-side; do not commit it). |
 | **App key** | First half of HTTP Basic auth for **draft / preview** reads. | Secret |
 | **Secret** | Second half of HTTP Basic auth. | Secret |
 
 You also need your **CMS authoring URL** (e.g. `https://<your-tenant>.cms.optimizely.com`) — only used so you can link "Edit in CMS" buttons later.
 
-> If you can only see one key, that is the Single/Render key. You can still complete Steps 2–4 — preview (Step 6) just won't work until you get the App key + Secret.
+> The env-var names (`OPTIMIZELY_RENDER_URL`, `OPTIMIZELY_RENDER_KEY`, `OPTIMIZELY_GRAPH_APP_KEY`, `OPTIMIZELY_GRAPH_SECRET`) are **this repo's convention**, not Optimizely's. Use whatever names you like — they only need to match what your code reads.
+
+> If you can only see one key, that is the Single/Render key. You can still complete Steps 2–5 — preview (Step 6) just won't work until you get the App key + Secret.
 
 ---
 
@@ -154,6 +156,8 @@ export async function GET() {
 }
 ```
 
+> **Don't know your Content Type's exact system name?** Use the schema introspection helper in this repo at [scripts/introspect-graph.ps1](scripts/introspect-graph.ps1). It reads `.env.local` and dumps the type names and available URL filters your tenant accepts. Run `pwsh scripts/introspect-graph.ps1` from the repo root.
+
 Run `npm run dev`, then open `http://localhost:3000/api/cms-ping`.
 
 | What you see | What it means | Fix |
@@ -171,6 +175,8 @@ Run `npm run dev`, then open `http://localhost:3000/api/cms-ping`.
 
 The simplest model: one Next.js catch-all route serves every CMS page.
 
+> **Locale prefix warning — read this before you write the code.** Optimizely stores URLs as `_metadata.url.default`. Most tenants (this one included) include the locale: a page in the `en` site appears as `/en/about`, **not** `/about`. The route below mirrors whatever path appears in the browser into the Graph filter, so if your CMS uses `/en/about` you must visit `http://localhost:3000/en/about`, not `/about`. Use the introspection script from Step 4 (`showAllUrls` query) to see exactly what your tenant returns.
+
 Create `src/app/[[...slug]]/page.tsx`:
 
 ```tsx
@@ -180,19 +186,26 @@ import { fetchGraph } from "@/lib/optimizely";
 
 type PageItem = {
   title: string | null;
+  // Replace shortDescription with whichever field your Content Type actually defines.
   shortDescription: string | null;
   _metadata: { key: string; displayName: string } | null;
   // _json contains the full content tree (blocks, fields, etc.)
   _json: Record<string, unknown> | null;
 };
 
-async function getPage(slug: string[]) {
-  const url = "/" + slug.join("/");          // "/about", "/", etc.
-  const path = url === "/" ? "/" : url;
+// Crude allow-list so a malicious URL can't inject GraphQL.
+// Production code: parametrise the query or escape properly. For a sample, this is fine.
+function safePath(slug: string[]) {
+  const joined = "/" + slug.filter((s) => /^[a-z0-9\-_]+$/i.test(s)).join("/");
+  return joined === "/" ? "/" : joined;
+}
 
+async function getPage(slug: string[]) {
+  const path = safePath(slug);
   const draft = (await draftMode()).isEnabled;
 
-  // Use startsWith for safety — exact-match string filters can be picky.
+  // `eq` is the strict match. If your CMS URLs include trailing slashes, try `startsWith`.
+  // `like` / `contains` are NOT supported on the default StringFilterInput in Optimizely Graph.
   const data = await fetchGraph<{ CMSPage: { items: PageItem[] } }>(
     `query {
       CMSPage(
@@ -237,14 +250,14 @@ export default async function CatchAll({
 
 ### Verify
 
-1. In Optimizely, create a `CMSPage` with URL `/about`, fill in `Title` and `Short description`, and **Publish**.
-2. Open `http://localhost:3000/about`.
+1. In Optimizely, create a page (in whatever Content Type you have) with URL `/en/about` (or `/about` if your tenant is not locale-prefixed), fill in the fields, and **Publish**.
+2. Open `http://localhost:3000/en/about` (use the **exact** URL from Step 1).
 3. You should see the title and a JSON dump of the page.
 
 If the page is 404:
-- Check the URL in Optimizely matches *exactly* (leading slash, trailing slash, locale prefix).
-- Run the smoke test from Step 4 with `where: { _metadata: { url: { default: { eq: "/about" } } } }` to confirm Graph returns it.
-- If your site uses locales (`/en/about`), include the locale prefix in the URL filter.
+- Open `/api/cms-ping` from Step 4 — does Graph see *any* pages? If not, the issue is auth, not the renderer.
+- Hard-code a smoke query and check the response: `CMSPage(limit: 5) { items { _metadata { url { default } } } }`. Compare those strings to the URL bar of your browser. They must match character-for-character.
+- If your fields are different (e.g. `title` doesn't exist on your type), Graph will return `null` for the field but `items[0]` itself will still be present. Adjust the query to your type's fields.
 
 ---
 
@@ -285,15 +298,55 @@ export async function GET(req: Request) {
 
 ### b. Configure the Preview URL in Optimizely
 
-In CMS → Settings → Preview (or your Content Type's Preview tab), set:
+In CMS → Settings → Preview (or your Content Type's Preview tab), set the preview URL to point at your draft endpoint. The exact templating token differs by tenant — common ones are `{path}`, `{slug}`, `{ContentURL}`, or `{url}`. **Use whichever token your PDF / CMS settings page shows.** Example:
 
 ```
 http://localhost:3000/api/draft?secret=local-preview-secret&slug={path}
 ```
 
-`{path}` is the Optimizely token that becomes the page's URL at preview time. Check the exact token name in the PDF you were sent — it differs slightly between CMS versions.
+When you click **Preview** in CMS, Optimizely calls that URL, your route enables draft mode (which sets a cookie), then redirects to the actual page. The page renderer in Step 5 already passes `draft: true` to `fetchGraph`, which switches to the Basic-auth endpoint and `cache: "no-store"`. So drafts now appear.
 
-When you click **Preview** in CMS, Optimizely calls that URL, your route enables draft mode, then redirects to the actual page. The page renderer in Step 5 already passes `draft: true` to `fetchGraph`, which switches to the Basic-auth endpoint and `cache: "no-store"`. So drafts now appear.
+### c. Iframe preview blocker — fix this **before** testing
+
+Optimizely's preview UI embeds your Next.js page inside an iframe on the CMS domain. By default, Next.js sets the draft-mode cookie as `SameSite=Lax`, which **browsers will not send in a cross-origin iframe**. You will hit draft mode, the cookie will be set, you'll be redirected to your page, and the page will silently render the *published* version (or 404) because the cookie was dropped.
+
+Fix: when you call `draft.enable()`, set the cookie attributes explicitly so it survives the iframe context. In Next.js 16 you do this by writing the `__prerender_bypass` cookie yourself after enabling draft mode, or by using middleware. Minimum patch to `src/app/api/draft/route.ts`:
+
+```ts
+import { cookies, draftMode } from "next/headers";
+
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  if (url.searchParams.get("secret") !== process.env.PREVIEW_SECRET) {
+    return new Response("Invalid preview secret", { status: 401 });
+  }
+
+  (await draftMode()).enable();
+
+  // Re-write the cookies Next.js just set so they survive cross-origin iframes.
+  const store = await cookies();
+  for (const name of ["__prerender_bypass", "__next_preview_data"]) {
+    const c = store.get(name);
+    if (c) {
+      store.set({
+        name,
+        value: c.value,
+        httpOnly: true,
+        secure: true,        // required when SameSite=None
+        sameSite: "none",
+        path: "/",
+      });
+    }
+  }
+
+  return Response.redirect(new URL(url.searchParams.get("slug") ?? "/", req.url));
+}
+```
+
+Because `Secure` is required, **iframe preview will not work over plain `http://localhost`**. Use one of:
+- `ngrok http 3000` → use the HTTPS ngrok URL as your preview origin, or
+- run Next.js with HTTPS locally (`next dev --experimental-https`), or
+- test preview against a deployed Vercel/Netlify preview URL.
 
 ---
 
@@ -379,6 +432,8 @@ sequenceDiagram
 | Draft preview shows the old version | You forgot `cache: "no-store"` on the draft branch, or you wired preview to the wrong endpoint. | Re-check the `useAdmin` branch in `fetchGraph`. |
 | Webhook returns 200 but page doesn't update | You revalidated a tag your page query didn't subscribe to. | Pass the same string in `fetchGraph(..., { tags: ["cms-page"] })` **and** `revalidateTag("cms-page")`. |
 | Works locally, fails on Vercel | Vercel Deployment Protection blocks the webhook. | Disable it, or generate a Protection Bypass token and append it to the webhook URL. |
+| Preview button in CMS shows the published page, not your draft | Draft-mode cookie was dropped because Next.js set it as `SameSite=Lax` and the CMS loaded your page in a cross-origin iframe. | Apply the cookie rewrite from Step 6c, and serve preview over HTTPS (`ngrok` or `next dev --experimental-https`). |
+| Page renders but every field is `null` | Field names in your query don't match your Content Type. | Run `pwsh scripts/introspect-graph.ps1` and adjust the query. |
 
 ---
 
