@@ -79,6 +79,12 @@ function getAiConfig() {
       process.env.AI_MODEL?.trim() ||
       process.env.OPENAI_MODEL?.trim() ||
       "gpt-4o-mini",
+    // Optional comma-separated fallback models tried when the primary model
+    // is rate-limited (429). Lets the bot stay responsive on free tiers.
+    fallbackModels: (process.env.AI_FALLBACK_MODELS?.trim() || "")
+      .split(",")
+      .map((m) => m.trim())
+      .filter(Boolean),
   };
 }
 
@@ -148,56 +154,69 @@ export async function POST(request: Request) {
   // ── Chat completion ───────────────────────────────────────────────────
   const systemPrompt = buildSystemPrompt(snippets, locale);
 
-  const requestBody = JSON.stringify({
-    model: config.model,
-    temperature: 0.3,
-    max_tokens: 400,
-    messages: [{ role: "system", content: systemPrompt }, ...messages],
-  });
+  const buildBody = (model: string) =>
+    JSON.stringify({
+      model,
+      temperature: 0.3,
+      max_tokens: 400,
+      messages: [{ role: "system", content: systemPrompt }, ...messages],
+    });
+
+  // Models to try in order: the primary, then any configured fallbacks. On a
+  // 429 (free-tier rate limit) we move to the next model so the assistant
+  // stays responsive instead of flashing "busy".
+  const modelChain = [config.model, ...config.fallbackModels];
 
   // Retry on transient errors (429 rate limit / 5xx overloaded). The free
-  // tiers of hosted models occasionally return these; a short backoff makes
-  // the assistant feel reliable instead of flashing "temporarily unavailable".
-  const MAX_ATTEMPTS = 3;
+  // tiers of hosted models occasionally return these; cycling models with a
+  // short backoff makes the assistant feel reliable.
+  const ATTEMPTS_PER_MODEL = 2;
   let aiResponse: Response | null = null;
 
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    try {
-      const resp = await fetch(`${config.baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${config.apiKey}`,
-        },
-        body: requestBody,
-        cache: "no-store",
-      });
-
-      if (resp.ok) {
-        aiResponse = resp;
-        break;
-      }
-
-      // Only retry transient statuses; bail immediately on 4xx auth/validation.
-      const transient = resp.status === 429 || resp.status >= 500;
-      if (!transient || attempt === MAX_ATTEMPTS - 1) {
-        aiResponse = resp;
-        break;
-      }
-    } catch {
-      if (attempt === MAX_ATTEMPTS - 1) {
-        return NextResponse.json(
-          {
-            reply: "I couldn't reach the assistant right now. Please try again shortly.",
-            sources: [],
+  outer: for (const model of modelChain) {
+    for (let attempt = 0; attempt < ATTEMPTS_PER_MODEL; attempt++) {
+      try {
+        const resp = await fetch(`${config.baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${config.apiKey}`,
           },
-          { status: 502 },
-        );
-      }
-    }
+          body: buildBody(model),
+          cache: "no-store",
+        });
 
-    // Exponential-ish backoff: 400ms, 800ms.
-    await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+        if (resp.ok) {
+          aiResponse = resp;
+          break outer;
+        }
+
+        // Only retry/fallback on transient statuses; bail on 4xx auth errors.
+        const transient = resp.status === 429 || resp.status >= 500;
+        if (!transient) {
+          aiResponse = resp;
+          break outer;
+        }
+        // Last attempt on the last model: keep the response for error handling.
+        if (model === modelChain[modelChain.length - 1] && attempt === ATTEMPTS_PER_MODEL - 1) {
+          aiResponse = resp;
+          break outer;
+        }
+      } catch {
+        if (model === modelChain[modelChain.length - 1] && attempt === ATTEMPTS_PER_MODEL - 1) {
+          return NextResponse.json(
+            {
+              reply: "I couldn't reach the assistant right now. Please try again shortly.",
+              sources: [],
+            },
+            { status: 502 },
+          );
+        }
+      }
+
+      // Short backoff before the next attempt.
+      await new Promise((r) => setTimeout(r, 350 * (attempt + 1)));
+    }
   }
 
   if (!aiResponse || !aiResponse.ok) {
