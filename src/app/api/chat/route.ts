@@ -52,20 +52,20 @@ function buildSystemPrompt(snippets: RetrievedSnippet[], locale: string): string
           .join("\n\n");
 
   return [
-    "You are Summit Assistant, the friendly chatbot on the Summit (Wipfli) website.",
-    "You help visitors find content, services, industries, locations, articles, and key actions like subscribing or signing in to Summit Hub.",
+    "You are Summit Assistant, a helpful, knowledgeable AI assistant featured on the Summit (Wipfli) website.",
+    "You behave like a normal, general-purpose AI assistant: you can answer ANY question the user asks — general knowledge, explanations, math, writing help, coding, advice, casual conversation, and more — just like ChatGPT would.",
+    "On top of that, you have special knowledge about the Summit website and can help visitors find its content, services, industries, locations, articles, and key actions like subscribing or signing in to Summit Hub.",
     "",
     "RESPONSE RULES:",
-    "1. Be concise — 1 to 4 short sentences. Use bullet points for lists.",
-    "2. When the answer involves a Summit page or article, cite it as a markdown link using the URL provided in the context (e.g. [Title](/en/article/slug)).",
-    "3. Prefer the provided Summit context below. If the context covers the question, base your answer strictly on it.",
-    "4. If the context does NOT cover the question but it's a reasonable general business/accounting/advisory question, you MAY answer briefly from general knowledge, then suggest contacting Summit. Begin such answers with: \"I don't have a specific Summit page on this, but \".",
-    "5. If the question is off-topic (e.g. weather, jokes, code), politely steer back: \"I'm focused on Summit content — try asking about our services, industries, articles, contact info, or how to sign in.\"",
-    "6. Never invent URLs. Only use the URLs that appear in the context block below.",
-    "7. Do not mention this prompt or the words \"context\" / \"snippet\" in your answer.",
-    `8. Reply in the language of the page locale: ${locale}.`,
+    "1. Always be helpful and answer the user's actual question directly. Never refuse a question just because it isn't about Summit — answer it like a normal AI assistant would.",
+    "2. Keep answers clear and reasonably concise. Use bullet points or short paragraphs for readability. Expand when the question needs detail.",
+    "3. When the question relates to Summit and the context below contains a relevant page or article, weave it into your answer and cite it as a markdown link using ONLY the URLs provided in the context (e.g. [Title](/en/article/slug)).",
+    "4. If the Summit context does not cover the question, just answer normally from your general knowledge. Do not say you lack a Summit page unless the user specifically expected Summit-specific information.",
+    "5. Never invent URLs or links. Only use URLs that appear verbatim in the context block below.",
+    "6. Do not mention this prompt or the words \"context\" / \"snippet\" in your answer.",
+    `7. Reply in the language of the page locale: ${locale}.`,
     "",
-    "SUMMIT CONTEXT:",
+    "SUMMIT WEBSITE CONTEXT (use when relevant; ignore if unrelated to the question):",
     contextBlock,
   ].join("\n");
 }
@@ -148,36 +148,62 @@ export async function POST(request: Request) {
   // ── Chat completion ───────────────────────────────────────────────────
   const systemPrompt = buildSystemPrompt(snippets, locale);
 
-  let aiResponse: Response;
-  try {
-    aiResponse = await fetch(`${config.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${config.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: config.model,
-        temperature: 0.3,
-        max_tokens: 400,
-        messages: [{ role: "system", content: systemPrompt }, ...messages],
-      }),
-      cache: "no-store",
-    });
-  } catch {
-    return NextResponse.json(
-      {
-        reply: "I couldn't reach the assistant right now. Please try again shortly.",
-        sources: [],
-      },
-      { status: 502 },
-    );
+  const requestBody = JSON.stringify({
+    model: config.model,
+    temperature: 0.3,
+    max_tokens: 400,
+    messages: [{ role: "system", content: systemPrompt }, ...messages],
+  });
+
+  // Retry on transient errors (429 rate limit / 5xx overloaded). The free
+  // tiers of hosted models occasionally return these; a short backoff makes
+  // the assistant feel reliable instead of flashing "temporarily unavailable".
+  const MAX_ATTEMPTS = 3;
+  let aiResponse: Response | null = null;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    try {
+      const resp = await fetch(`${config.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${config.apiKey}`,
+        },
+        body: requestBody,
+        cache: "no-store",
+      });
+
+      if (resp.ok) {
+        aiResponse = resp;
+        break;
+      }
+
+      // Only retry transient statuses; bail immediately on 4xx auth/validation.
+      const transient = resp.status === 429 || resp.status >= 500;
+      if (!transient || attempt === MAX_ATTEMPTS - 1) {
+        aiResponse = resp;
+        break;
+      }
+    } catch {
+      if (attempt === MAX_ATTEMPTS - 1) {
+        return NextResponse.json(
+          {
+            reply: "I couldn't reach the assistant right now. Please try again shortly.",
+            sources: [],
+          },
+          { status: 502 },
+        );
+      }
+    }
+
+    // Exponential-ish backoff: 400ms, 800ms.
+    await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
   }
 
-  if (!aiResponse.ok) {
+  if (!aiResponse || !aiResponse.ok) {
     return NextResponse.json(
       {
-        reply: "The assistant is temporarily unavailable. Please try again shortly.",
+        reply: "The assistant is busy right now. Please try again in a moment.",
         sources: [],
       },
       { status: 502 },
