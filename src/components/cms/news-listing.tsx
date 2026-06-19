@@ -126,13 +126,14 @@ export function NewsListing({ locale, items }: Props) {
         {filtered.map((item) => (
           <li key={item.id} className="space-y-2">
             <h3 className="text-[1.35rem] font-semibold leading-snug text-[#1554ff]">
-              <Link href={`/${locale}/${item.slug.join("/")}`} className="hover:underline">
+              <Link href={`/${locale}/${item.slug.join("/")}`} prefetch={false} className="hover:underline">
                 {item.title}
               </Link>
             </h3>
             <p className="text-sm text-[#4b5563]">{formatDate(item.publishedAt, locale)}</p>
             <Link
               href={`/${locale}/${item.slug.join("/")}`}
+              prefetch={false}
               className="inline-flex text-sm text-[#1554ff] hover:underline"
             >
               {locale === "en" ? "View More" : "Ver mas"}

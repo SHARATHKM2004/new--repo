@@ -147,7 +147,7 @@ export function ArticleListing({
                 className="flex h-full flex-col bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
               >
                 {imgSrc ? (
-                  <Link href={href} className="block overflow-hidden bg-slate-100">
+                  <Link href={href} prefetch={false} className="block overflow-hidden bg-slate-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={imgSrc}
@@ -178,6 +178,7 @@ export function ArticleListing({
                   </div>
                   <Link
                     href={href}
+                    prefetch={false}
                     className="text-[20px] font-semibold leading-snug text-[#1247ff] hover:underline"
                   >
                     {article.title}
@@ -196,6 +197,7 @@ export function ArticleListing({
                   ) : null}
                   <Link
                     href={href}
+                    prefetch={false}
                     className="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-semibold text-[#0f172a] hover:text-[#1247ff]"
                   >
                     {readMoreLabel}
