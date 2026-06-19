@@ -123,6 +123,7 @@ export function SiteHeader({
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={false}
                   onClick={() => setActivePanel(null)}
                   className="relative pb-1 text-[#101828] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-[#101828] after:transition-transform after:duration-200 after:content-[''] hover:after:scale-x-100 focus-visible:after:scale-x-100"
                 >
@@ -145,6 +146,7 @@ export function SiteHeader({
                       <Link
                         key={item.href}
                         href={item.href}
+                        prefetch={false}
                         onClick={() => setActivePanel(null)}
                         className="px-2 py-1 text-[#1247ff] hover:bg-[#1247ff] hover:!text-white focus:bg-[#1247ff] focus:!text-white"
                       >

@@ -28,6 +28,7 @@ export function SiteHeaderPanel({
             <Link
               key={link.href}
               href={link.href}
+              prefetch={false}
               onClick={onClose}
               style={{ color: "#4f84ff" }}
               className="block text-[18px] font-semibold !text-[#4f84ff] hover:underline"
@@ -54,6 +55,7 @@ export function SiteHeaderPanel({
                   <li key={`${group.title}-${link.href}`}>
                     <Link
                       href={link.href}
+                      prefetch={false}
                       onClick={onClose}
                       className="block text-[14px] leading-snug text-white/85 hover:text-white hover:underline"
                     >
@@ -77,6 +79,7 @@ export function SiteHeaderPanel({
                         <li key={`${sub.title}-${link.href}`}>
                           <Link
                             href={link.href}
+                            prefetch={false}
                             onClick={onClose}
                             className="block text-[14px] leading-snug text-white/85 hover:text-white hover:underline"
                           >
@@ -110,6 +113,7 @@ export function SiteHeaderPanel({
           <Link
             key={item.href}
             href={item.href}
+            prefetch={false}
             className="block text-[17px] text-[#4f84ff] hover:underline"
           >
             {item.label}
@@ -121,6 +125,7 @@ export function SiteHeaderPanel({
           <Link
             key={item.href}
             href={item.href}
+            prefetch={false}
             className="block text-[17px] text-[#4f84ff] hover:underline"
           >
             {item.label}
@@ -132,6 +137,7 @@ export function SiteHeaderPanel({
           <Link
             key={item.href}
             href={item.href}
+            prefetch={false}
             className="block text-[17px] text-[#4f84ff] hover:underline"
           >
             {item.label}

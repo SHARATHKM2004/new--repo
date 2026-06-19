@@ -72,6 +72,7 @@ export function SiteFooter({ locale, content, hideCallout = false }: { locale: L
                     <Link
                       key={`${column.title}-${link.href}`}
                       href={link.href}
+                      prefetch={false}
                       className="block text-sm font-normal text-white hover:underline"
                     >
                       {link.label}
