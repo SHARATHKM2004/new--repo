@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect } from "react";
 import type { EventsListingBlock, Locale } from "@/lib/cms/types";
 
 function resolveHref(href: string, locale: Locale) {
@@ -19,18 +18,6 @@ export function EventsListing({
   block: EventsListingBlock;
   locale: Locale;
 }) {
-  useEffect(() => {
-    // eslint-disable-next-line no-unsanitized/method
-    const script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src =
-      "https://web.bigmarker.com/conferences/7953291e9866/widget/live.js?width=720&height=405&full_experience=false";
-    document.body.appendChild(script);
-    return () => {
-      script.remove();
-    };
-  }, []);
-
   return (
     <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-white">
       {block.hero ? (
@@ -72,13 +59,11 @@ export function EventsListing({
       <div className="mx-auto w-full max-w-[1200px] px-6 py-12 lg:px-10 lg:py-16">
         <div className="flex justify-center">
           <iframe
-            id="bigmarker_embed_conference_room_7953291e9866"
-            title="BigMarker Live Event"
-            width={720}
-            height={405}
-            allowFullScreen
-            style={{ border: 0 }}
-            className="max-w-full"
+            src="https://gfponline.wipfli.com/Shared_Content/Events/Event_Display.aspx?EventKey=NV071326"
+            title="2026 Stronger to Serve Conference"
+            width="100%"
+            height="900"
+            style={{ border: 0, minHeight: 900 }}
           />
         </div>
       </div>
