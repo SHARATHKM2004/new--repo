@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import type { EventsListingBlock, Locale } from "@/lib/cms/types";
 
 function resolveHref(href: string, locale: Locale) {
