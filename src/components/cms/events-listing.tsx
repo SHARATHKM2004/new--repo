@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import type { EventsListingBlock, Locale } from "@/lib/cms/types";
 
 function resolveHref(href: string, locale: Locale) {
@@ -19,15 +19,17 @@ export function EventsListing({
   block: EventsListingBlock;
   locale: Locale;
 }) {
-  const initial = Math.max(1, block.initialVisible ?? 6);
-  const step = Math.max(1, block.loadMoreStep ?? 5);
-  const [visible, setVisible] = useState(initial);
-
-  const events = block.events ?? [];
-  const total = events.length;
-  const shown = Math.min(visible, total);
-  const visibleEvents = events.slice(0, shown);
-  const learnMoreLabel = block.learnMoreLabel ?? (locale === "es" ? "Mas informacion" : "Learn more");
+  useEffect(() => {
+    // eslint-disable-next-line no-unsanitized/method
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src =
+      "https://web.bigmarker.com/conferences/7953291e9866/widget/live.js?width=720&height=405&full_experience=false";
+    document.body.appendChild(script);
+    return () => {
+      script.remove();
+    };
+  }, []);
 
   return (
     <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-white">
@@ -68,102 +70,18 @@ export function EventsListing({
       ) : null}
 
       <div className="mx-auto w-full max-w-[1200px] px-6 py-12 lg:px-10 lg:py-16">
-        {block.introHeading ? (
-          <h2 className="text-3xl font-semibold text-[#1247ff] lg:text-4xl">
-            {block.introHeading}
-          </h2>
-        ) : null}
-        {block.introBody?.length ? (
-          <div className="mt-4 max-w-4xl space-y-3 text-[15px] leading-7 text-[#374151]">
-            {block.introBody.map((paragraph, index) => (
-              <p key={`intro-${index}`}>{paragraph}</p>
-            ))}
-          </div>
-        ) : null}
-
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleEvents.map((event, index) => (
-            <EventCard
-              key={`${event.title}-${index}`}
-              event={event}
-              locale={locale}
-              learnMoreLabel={learnMoreLabel}
-            />
-          ))}
+        <div className="flex justify-center">
+          <iframe
+            id="bigmarker_embed_conference_room_7953291e9866"
+            title="BigMarker Live Event"
+            width={720}
+            height={405}
+            allowFullScreen
+            style={{ border: 0 }}
+            className="max-w-full"
+          />
         </div>
-
-        {total > 0 && shown < total ? (
-          <div className="mt-10 flex justify-center border-t border-[#e5e7eb] pt-6">
-            <button
-              type="button"
-              onClick={() => setVisible((current) => Math.min(current + step, total))}
-              className="inline-flex items-center justify-center border border-[#1247ff] px-8 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-[#1247ff] transition hover:bg-[#1247ff] hover:text-white"
-            >
-              {block.loadMoreLabel ?? (locale === "es" ? "Cargar mas" : "Load more")}
-            </button>
-          </div>
-        ) : null}
       </div>
     </section>
-  );
-}
-
-function EventCard({
-  event,
-  locale,
-  learnMoreLabel,
-}: {
-  event: EventsListingBlock["events"][number];
-  locale: Locale;
-  learnMoreLabel: string;
-}) {
-  const href = resolveHref(event.href, locale);
-  return (
-    <article className="flex h-full flex-col bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-      <Link href={href} className="block overflow-hidden bg-slate-100">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={event.imageUrl}
-          alt={event.imageAlt ?? event.title}
-          loading="lazy"
-          decoding="async"
-          className="h-52 w-full object-cover"
-        />
-      </Link>
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <p className="text-[13px] text-[#374151]">
-          <span>{event.dateLine}</span>
-          <span className="mx-2 text-[#c2410c]">|</span>
-          <span>{event.typeLabel}</span>
-          <span className="mx-2 text-[#c2410c]">|</span>
-          <span>{event.costLabel}</span>
-        </p>
-        <Link
-          href={href}
-          className="text-[20px] font-semibold leading-snug text-[#1247ff] hover:underline"
-        >
-          {event.title}
-        </Link>
-        {event.tags?.length ? (
-          <div className="flex flex-wrap gap-2">
-            {event.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-[#f3f4f6] px-3 py-1 text-[12px] text-[#374151]"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        ) : null}
-        <Link
-          href={href}
-          className="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-semibold text-[#0f172a] hover:text-[#1247ff]"
-        >
-          {learnMoreLabel}
-          <span className="text-[#1247ff]">&rarr;</span>
-        </Link>
-      </div>
-    </article>
   );
 }
