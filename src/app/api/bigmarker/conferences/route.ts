@@ -10,7 +10,7 @@ export async function GET() {
     "https://web.bigmarker.com/api/v1/conferences/?type=future&per_page=20",
     {
       headers: { "API-KEY": apiKey },
-      next: { revalidate: 300 },
+      next: { revalidate: 0 },
     }
   );
 
