@@ -58,7 +58,7 @@ export function EventsListing({
       ) : null}
 
       <div className="mx-auto w-full max-w-[1200px] px-6 py-12 lg:px-10 lg:py-16">
-        <BigMarkerConferences locale={locale} />
+        <BigMarkerConferences />
       </div>
     </section>
   );
