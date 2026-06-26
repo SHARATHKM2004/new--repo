@@ -38,18 +38,17 @@ function formatDateLine(start?: string, end?: string) {
   return `${dateStr} | ${startTime} – ${endTime}`;
 }
 
-function ConferenceCard({ conf }: { conf: BMConference }) {
+function ConferenceCard({ conf, locale }: { conf: BMConference; locale: string }) {
   const imageUrl = conf.banner_image?.url;
   const dateLine = formatDateLine(conf.start_time, conf.end_time);
   const typeLabel = conf.conference_type ?? "Webinar";
   const costLabel = conf.cost ? `Cost $${conf.cost}` : "Cost Free";
+  const href = `/${locale}/events/${conf.id}`;
 
   return (
     <article className="flex h-full flex-col bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
       <a
-        href={conf.conference_address}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={href}
         className="block overflow-hidden bg-slate-100"
       >
         {imageUrl ? (
@@ -93,9 +92,7 @@ function ConferenceCard({ conf }: { conf: BMConference }) {
         )}
 
         <a
-          href={conf.conference_address}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={href}
           className="text-[20px] font-semibold leading-snug text-[#1247ff] hover:underline"
         >
           {conf.title}
@@ -108,9 +105,7 @@ function ConferenceCard({ conf }: { conf: BMConference }) {
         )}
 
         <a
-          href={conf.conference_address}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={href}
           className="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-semibold text-[#0f172a] hover:text-[#1247ff]"
         >
           Learn more <span className="text-[#1247ff]">&rarr;</span>
@@ -134,7 +129,7 @@ function SkeletonCard() {
   );
 }
 
-export function BigMarkerConferences() {
+export function BigMarkerConferences({ locale = "en" }: { locale?: string }) {
   const [conferences, setConferences] = useState<BMConference[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -184,7 +179,7 @@ export function BigMarkerConferences() {
   return (
     <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {conferences.map((conf) => (
-        <ConferenceCard key={conf.id} conf={conf} />
+        <ConferenceCard key={conf.id} conf={conf} locale={locale} />
       ))}
     </div>
   );
