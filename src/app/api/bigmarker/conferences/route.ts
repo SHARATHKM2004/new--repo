@@ -7,7 +7,7 @@ export async function GET() {
   }
 
   const res = await fetch(
-    "https://www.bigmarker.com/api/v1/conferences/?type=future&per_page=20",
+    "https://web.bigmarker.com/api/v1/conferences/?type=future&per_page=20",
     {
       headers: { "API-KEY": apiKey },
       next: { revalidate: 300 },
