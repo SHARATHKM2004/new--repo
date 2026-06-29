@@ -3,6 +3,7 @@ import { ChatbotWidget } from "@/components/chatbot/chatbot-widget";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { getNavigation, getSiteFooterContent, getSiteHeaderContent } from "@/lib/cms";
+import { type Locale } from "@/lib/cms/types";
 
 export default async function SiteShellLayout({
   children,
@@ -11,7 +12,8 @@ export default async function SiteShellLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }>) {
-  const { locale } = await params;
+  const { locale: localeStr } = await params;
+  const locale = localeStr as Locale;
   const draft = await draftMode();
   const navigation = await getNavigation(locale, draft.isEnabled);
   const headerContent = await getSiteHeaderContent(locale, draft.isEnabled);
