@@ -19,7 +19,7 @@ export function BigMarkerRegistrationWidget({ conferenceId }: { conferenceId: st
   return (
     <div
       id={containerId}
-      className="[&_iframe]:!w-full [&_iframe]:!min-h-[540px] [&_iframe]:block"
+      className="[&_iframe]:w-full! [&_iframe]:min-h-135! [&_iframe]:block"
     />
   );
 }
