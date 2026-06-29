@@ -8,7 +8,7 @@ export function BigMarkerRegistrationWidget({ conferenceId }: { conferenceId: st
 
   return (
     <>
-      <div id={containerId} className="[&_iframe]:w-full! [&_iframe]:min-h-135! [&_iframe]:block" />
+      <div id={containerId} />
       <Script src={scriptSrc} strategy="afterInteractive" />
     </>
   );

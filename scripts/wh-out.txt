@@ -1,0 +1,11 @@
+
+=== Deleting webhook 8bdade6c-baca-4f68-aaf8-e56a51c0e3fb ===
+
+DELETE /api/webhooks/8bdade6c-baca-4f68-aaf8-e56a51c0e3fb → HTTP 200
+""
+
+=== Registering Optimizely Graph Webhook ===
+
+Target URL: https://new-repo-theta-lovat.vercel.app/api/optimizely/webhook?secret=local-revalidate-secret
+POST /api/webhooks → HTTP 200
+""

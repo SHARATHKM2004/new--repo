@@ -1,4 +1,4 @@
-import { draftMode } from "next/headers";
+import { draftMode, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { ChatbotWidget } from "@/components/chatbot/chatbot-widget";
 import { SiteFooter } from "@/components/site/site-footer";
@@ -17,6 +17,14 @@ export default async function LocaleLayout({
 
   if (!isLocale(locale)) {
     notFound();
+  }
+
+  // Event detail pages (/[locale]/events/[id]) render without site shell
+  const headersList = await headers();
+  const nextUrl = headersList.get("next-url") ?? headersList.get("x-invoke-path") ?? "";
+  const isEventDetail = /\/events\/[^/]+\/?$/.test(nextUrl);
+  if (isEventDetail) {
+    return <>{children}</>;
   }
 
   const draft = await draftMode();

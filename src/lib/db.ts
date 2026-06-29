@@ -50,3 +50,39 @@ export async function ensureLeadsTable() {
   await sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS phone TEXT`;
   leadsInitialized = true;
 }
+
+let webhookDedupInitialized = false;
+
+export async function ensureWebhookDedupTable() {
+  if (webhookDedupInitialized) return;
+  await sql`
+    CREATE TABLE IF NOT EXISTS webhook_dedup (
+      doc_id     TEXT PRIMARY KEY,
+      expires_at TIMESTAMPTZ NOT NULL
+    )
+  `;
+  webhookDedupInitialized = true;
+}
+
+/**
+ * Returns true if this docId was already processed within the TTL window.
+ * Uses an atomic INSERT … ON CONFLICT DO NOTHING so it is safe across
+ * concurrent serverless invocations.
+ */
+export async function isWebhookDuplicate(docId: string, ttlSeconds = 60): Promise<boolean> {
+  try {
+    await ensureWebhookDedupTable();
+    // Remove an expired record for this docId so we can reuse the key
+    await sql`DELETE FROM webhook_dedup WHERE doc_id = ${docId} AND expires_at < NOW()`;
+    const rows = await sql`
+      INSERT INTO webhook_dedup (doc_id, expires_at)
+      VALUES (${docId}, NOW() + (${ttlSeconds} || ' seconds')::interval)
+      ON CONFLICT (doc_id) DO NOTHING
+      RETURNING doc_id
+    `;
+    return rows.length === 0; // nothing inserted → duplicate
+  } catch (err) {
+    console.error("[webhook-dedup] DB check failed, allowing through:", err);
+    return false; // fail open — process the event
+  }
+}
