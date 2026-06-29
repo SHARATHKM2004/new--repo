@@ -39,15 +39,28 @@ async function getConference(id: string): Promise<BMConferenceDetail | null> {
 function formatDateTime(dt?: string, tz?: string) {
   if (!dt) return null;
   const d = new Date(dt);
-  return d.toLocaleString("en-US", {
+  if (isNaN(d.getTime())) return dt;
+  const opts: Intl.DateTimeFormatOptions = {
     month: "long",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
     timeZoneName: "short",
-    ...(tz ? { timeZone: tz } : {}),
-  });
+  };
+  // Only apply tz if it's a valid IANA identifier — BigMarker may return
+  // non-standard names like "IST" or "Eastern Time" that throw RangeError
+  if (tz) {
+    try {
+      Intl.DateTimeFormat("en-US", { timeZone: tz }).format(d);
+      opts.timeZone = tz;
+    } catch {
+      // invalid tz — render in local/UTC time, append raw tz label
+    }
+  }
+  const formatted = d.toLocaleString("en-US", opts);
+  // Append raw timezone label when we couldn't use it as IANA zone
+  return tz && !opts.timeZone ? `${formatted} (${tz})` : formatted;
 }
 
 export default async function EventDetailPage({
