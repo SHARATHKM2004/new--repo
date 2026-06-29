@@ -17,7 +17,7 @@ interface BMConferenceDetail {
   duration?: number;
   time_zone?: string;
   conference_address?: string;
-  banner_image_url?: string;
+  banner_image?: { url?: string };
   presenters?: Presenter[];
   tags?: { name?: string }[];
   privacy?: string;
@@ -31,7 +31,9 @@ async function getConference(id: string): Promise<BMConferenceDetail | null> {
     cache: "no-store",
   });
   if (!res.ok) return null;
-  return res.json();
+  const data = await res.json();
+  // BigMarker may wrap the response as { conference: {...} }
+  return (data.conference ?? data) as BMConferenceDetail;
 }
 
 function formatDateTime(dt?: string, tz?: string) {
@@ -66,9 +68,9 @@ export default async function EventDetailPage({
       {/* Hero banner */}
       <div className="relative w-full">
         <div className="relative h-[280px] w-full overflow-hidden lg:h-[360px] bg-[#1247ff]">
-          {conf.banner_image_url ? (
+          {conf.banner_image?.url ? (
             <Image
-              src={conf.banner_image_url}
+              src={conf.banner_image.url}
               alt={conf.title}
               fill
               priority
