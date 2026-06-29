@@ -4,8 +4,14 @@ import Link from "next/link";
 import { BigMarkerRegistrationWidget } from "@/components/cms/bigmarker-registration-widget";
 
 interface Presenter {
-  name?: string;
+  display_name?: string;
+  first_name?: string;
+  last_name?: string;
   email?: string;
+  title?: string;
+  bio?: string;
+  presenter_image_url?: string;
+  display_on_landing_page?: boolean;
 }
 
 interface BMConferenceDetail {
@@ -17,6 +23,7 @@ interface BMConferenceDetail {
   duration?: number;
   time_zone?: string;
   conference_address?: string;
+  background_image_url?: string;
   banner_image?: { url?: string };
   presenters?: Presenter[];
   tags?: { name?: string }[];
@@ -39,7 +46,7 @@ async function getConference(id: string): Promise<BMConferenceDetail | null> {
 function formatDateTime(dt?: string, tz?: string) {
   if (!dt) return null;
   const d = new Date(dt);
-  if (isNaN(d.getTime())) return dt;
+  if (Number.isNaN(d.getTime())) return dt;
   const opts: Intl.DateTimeFormatOptions = {
     month: "long",
     day: "numeric",
@@ -76,14 +83,17 @@ export default async function EventDetailPage({
   const startFormatted = formatDateTime(conf.start_time, conf.time_zone);
   const endFormatted = formatDateTime(conf.scheduled_end_time, conf.time_zone);
 
+  // Banner: detail endpoint uses background_image_url; list uses banner_image.url
+  const bannerUrl = conf.background_image_url ?? conf.banner_image?.url;
+
   return (
     <main className="flex-1">
       {/* Hero banner */}
       <div className="relative w-full">
         <div className="relative h-[280px] w-full overflow-hidden lg:h-[360px] bg-[#1247ff]">
-          {conf.banner_image?.url ? (
+          {bannerUrl ? (
             <Image
-              src={conf.banner_image.url}
+              src={bannerUrl}
               alt={conf.title}
               fill
               priority
@@ -167,19 +177,31 @@ export default async function EventDetailPage({
               </div>
             )}
 
-            {/* Presenters */}
             {conf.presenters && conf.presenters.length > 0 && (
               <div>
                 <h2 className="text-xl font-semibold text-[#0f172a] mb-4">Presenters</h2>
-                <div className="flex flex-wrap gap-3">
-                  {conf.presenters.map((p, i) => (
-                    <div key={i} className="flex items-center gap-2 rounded-full border border-[#e5e7eb] bg-white px-4 py-2 text-sm text-[#374151]">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1247ff]/10 text-xs font-bold text-[#1247ff]">
-                        {p.name?.charAt(0) ?? "?"}
+                <div className="flex flex-col gap-4">
+                  {conf.presenters.map((p, i) => {
+                    const fullName = p.display_name?.trim() || [p.first_name, p.last_name].filter(Boolean).join(" ") || p.email || "Unknown";
+                    const initials = fullName.split(" ").map((w: string) => w[0]).slice(0, 2).join("").toUpperCase();
+                    return (
+                      <div key={i} className="flex items-start gap-4 rounded-lg border border-[#e5e7eb] bg-white p-4">
+                        {p.presenter_image_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.presenter_image_url} alt={fullName} className="h-14 w-14 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#1247ff]/10 text-base font-bold text-[#1247ff]">
+                            {initials}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-semibold text-[#0f172a]">{fullName}</p>
+                          {p.title && <p className="text-[13px] text-[#6b7280]">{p.title}</p>}
+                          {p.bio && <p className="mt-1 line-clamp-3 text-[13px] leading-relaxed text-[#374151]">{p.bio}</p>}
+                        </div>
                       </div>
-                      {p.name}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
