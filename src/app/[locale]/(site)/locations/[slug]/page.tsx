@@ -4,7 +4,7 @@ import { draftMode } from "next/headers";
 import { getLocationOffices, getOfficeSlug } from "@/lib/cms";
 import { isLocale } from "@/lib/cms/types";
 import type { OfficeEntry } from "@/lib/cms/types";
-import { stateSlug } from "@/app/[locale]/locations/state/[state]/page";
+import { stateSlug } from "@/app/[locale]/(site)/locations/state/[state]/page";
 
 type RouteParams = { locale: string; slug: string };
 
