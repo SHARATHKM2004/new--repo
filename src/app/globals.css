@@ -1,5 +1,51 @@
 @import "tailwindcss";
 
+/* ── BigMarker widget compact overrides ── */
+[id^="bigmarker-conference-widget-container"] .bigmarker-widget-out-box {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+}
+[id^="bigmarker-conference-widget-container"] .bigmarker-widget-form-title {
+  display: none !important;
+}
+[id^="bigmarker-conference-widget-container"] .bigmarker-widget-form-list {
+  margin-bottom: 8px !important;
+  padding: 0 !important;
+}
+[id^="bigmarker-conference-widget-container"] .bigmarker-widget-form-list-name {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  margin-bottom: 3px !important;
+  line-height: 1.3 !important;
+}
+[id^="bigmarker-conference-widget-container"] .bigmarker-widget-form-list-input input,
+[id^="bigmarker-conference-widget-container"] .bigmarker-widget-form-list-input select,
+[id^="bigmarker-conference-widget-container"] .bigmarker-widget-form-list-input textarea {
+  font-size: 13px !important;
+  padding: 6px 8px !important;
+  height: auto !important;
+  min-height: unset !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  border-radius: 4px !important;
+  line-height: 1.4 !important;
+}
+[id^="bigmarker-conference-widget-container"] input[type="submit"],
+[id^="bigmarker-conference-widget-container"] button[type="submit"] {
+  font-size: 12px !important;
+  padding: 9px 16px !important;
+  height: auto !important;
+  border-radius: 4px !important;
+  width: 100% !important;
+  margin-top: 4px !important;
+  letter-spacing: 0.05em !important;
+}
+[id^="bigmarker-conference-widget-container"] .bigmarker-widget-form-list-box {
+  padding: 0 !important;
+}
+
+
 :root {
   --background: #f6f1e8;
   --foreground: #15313a;

@@ -8,61 +8,6 @@ export function BigMarkerRegistrationWidget({ conferenceId }: { conferenceId: st
 
   return (
     <>
-      {/* Compact overrides for BigMarker inline form */}
-      <style>{`
-        #${containerId} .bigmarker-widget-out-box {
-          max-width: 100% !important;
-          width: 100% !important;
-          height: auto !important;
-        }
-        #${containerId} .bigmarker-widget-form-title {
-          display: none !important;
-        }
-        #${containerId} .bigmarker-widget-form-list {
-          margin-bottom: 8px !important;
-          padding: 0 !important;
-        }
-        #${containerId} .bigmarker-widget-form-list-name {
-          font-size: 12px !important;
-          font-weight: 600 !important;
-          margin-bottom: 3px !important;
-          padding: 0 !important;
-          line-height: 1.3 !important;
-        }
-        #${containerId} .bigmarker-widget-form-list-input input,
-        #${containerId} .bigmarker-widget-form-list-input select,
-        #${containerId} .bigmarker-widget-form-list-input textarea {
-          font-size: 13px !important;
-          padding: 6px 8px !important;
-          height: auto !important;
-          min-height: unset !important;
-          width: 100% !important;
-          box-sizing: border-box !important;
-          border-radius: 4px !important;
-          line-height: 1.4 !important;
-        }
-        #${containerId} input[type="submit"],
-        #${containerId} button[type="submit"],
-        #${containerId} .bigmarker-widget-register-btn,
-        #${containerId} .register-btn {
-          font-size: 12px !important;
-          padding: 9px 16px !important;
-          height: auto !important;
-          border-radius: 4px !important;
-          width: 100% !important;
-          margin-top: 4px !important;
-          letter-spacing: 0.05em !important;
-        }
-        #${containerId} .bigmarker-widget-form-list-box {
-          padding: 0 !important;
-        }
-        #${containerId} .bigmarker-widget-legal,
-        #${containerId} .bm-legal-text {
-          font-size: 10px !important;
-          line-height: 1.4 !important;
-          margin-top: 8px !important;
-        }
-      `}</style>
       <div id={containerId} />
       <Script src={scriptSrc} strategy="afterInteractive" />
     </>
