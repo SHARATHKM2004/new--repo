@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 /* ── BigMarker widget compact overrides ── */
+[id^="bigmarker-conference-widget-container"] {
+  width: 100% !important;
+  max-width: 100% !important;
+}
 [id^="bigmarker-conference-widget-container"] .bigmarker-widget-out-box {
   max-width: 100% !important;
   width: 100% !important;
