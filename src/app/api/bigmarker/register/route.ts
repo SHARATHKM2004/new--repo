@@ -36,18 +36,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid conference ID" }, { status: 400 });
   }
 
-  const bmRes = await fetch("https://web.bigmarker.com/api/v1/conferences/register", {
+  const bmRes = await fetch(`https://web.bigmarker.com/api/v1/conferences/${conferenceId}/members`, {
     method: "POST",
     headers: {
       "API-KEY": apiKey,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      conference_id: conferenceId,
-      first_name: firstName.trim(),
-      last_name: lastName.trim(),
-      email: email.trim().toLowerCase(),
-      custom_fields: {
+      member: {
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        email: email.trim().toLowerCase(),
         job_title: jobTitle?.trim() ?? "",
         organization: organization?.trim() ?? "",
         organization_industry: organizationIndustry?.trim() ?? "",
@@ -61,8 +60,10 @@ export async function POST(req: NextRequest) {
     const message =
       (data as { error?: string; message?: string }).error ??
       (data as { error?: string; message?: string }).message ??
-      "Registration failed. Please try again.";
-    return NextResponse.json({ error: message }, { status: bmRes.status });
+      `BigMarker error ${bmRes.status}`;
+    // Log full response in server logs for diagnosis
+    console.error("[bigmarker/register] error", bmRes.status, JSON.stringify(data));
+    return NextResponse.json({ error: message, _debug: data }, { status: bmRes.status });
   }
 
   return NextResponse.json({ success: true });
