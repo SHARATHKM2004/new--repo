@@ -10,38 +10,57 @@ export function BigMarkerRegistrationWidget({ conferenceId }: { conferenceId: st
     <>
       {/* Compact overrides for BigMarker inline form */}
       <style>{`
-        #${containerId} label,
-        #${containerId} .bm-widget-field-label {
-          font-size: 12px !important;
-          margin-bottom: 2px !important;
-          font-weight: 600 !important;
+        #${containerId} .bigmarker-widget-out-box {
+          max-width: 100% !important;
+          width: 100% !important;
+          height: auto !important;
         }
-        #${containerId} input,
-        #${containerId} select,
-        #${containerId} textarea {
+        #${containerId} .bigmarker-widget-form-title {
+          display: none !important;
+        }
+        #${containerId} .bigmarker-widget-form-list {
+          margin-bottom: 8px !important;
+          padding: 0 !important;
+        }
+        #${containerId} .bigmarker-widget-form-list-name {
           font-size: 12px !important;
+          font-weight: 600 !important;
+          margin-bottom: 3px !important;
+          padding: 0 !important;
+          line-height: 1.3 !important;
+        }
+        #${containerId} .bigmarker-widget-form-list-input input,
+        #${containerId} .bigmarker-widget-form-list-input select,
+        #${containerId} .bigmarker-widget-form-list-input textarea {
+          font-size: 13px !important;
           padding: 6px 8px !important;
           height: auto !important;
           min-height: unset !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
           border-radius: 4px !important;
+          line-height: 1.4 !important;
         }
-        #${containerId} .bm-widget-field,
-        #${containerId} .bm-register-field {
-          margin-bottom: 8px !important;
-        }
-        #${containerId} button,
-        #${containerId} input[type="submit"] {
+        #${containerId} input[type="submit"],
+        #${containerId} button[type="submit"],
+        #${containerId} .bigmarker-widget-register-btn,
+        #${containerId} .register-btn {
           font-size: 12px !important;
-          padding: 8px 16px !important;
+          padding: 9px 16px !important;
           height: auto !important;
           border-radius: 4px !important;
-          margin-top: 6px !important;
+          width: 100% !important;
+          margin-top: 4px !important;
+          letter-spacing: 0.05em !important;
         }
-        #${containerId} .bm-register-legal,
-        #${containerId} .bm-widget-legal {
+        #${containerId} .bigmarker-widget-form-list-box {
+          padding: 0 !important;
+        }
+        #${containerId} .bigmarker-widget-legal,
+        #${containerId} .bm-legal-text {
           font-size: 10px !important;
-          margin-top: 8px !important;
           line-height: 1.4 !important;
+          margin-top: 8px !important;
         }
       `}</style>
       <div id={containerId} />
