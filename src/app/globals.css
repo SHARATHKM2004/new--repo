@@ -43,6 +43,12 @@
 }
 [id^="bigmarker-conference-widget-container"] .bigmarker-widget-form-list-box {
   padding: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+[id^="bigmarker-conference-widget-container"] .bigmarker-widget-out-box {
+  overflow: visible !important;
 }
 
 
