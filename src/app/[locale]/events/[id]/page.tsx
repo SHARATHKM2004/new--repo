@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { BigMarkerRegistrationWidget } from "@/components/cms/bigmarker-registration-widget";
+import { BigMarkerRegistrationForm } from "@/components/cms/bigmarker-registration-form";
 import { EventCountdown } from "@/components/cms/event-countdown";
 
 interface Presenter {
@@ -84,7 +84,6 @@ export default async function EventDetailPage({
   if (!conf) notFound();
 
   const startFormatted = formatDateTime(conf.start_time, conf.time_zone);
-  const endFormatted = formatDateTime(conf.scheduled_end_time, conf.time_zone);
 
   // Banner: detail endpoint uses background_image_url; list uses banner_image.url
   const bannerUrl = conf.background_image_url ?? conf.banner_image?.url;
@@ -286,7 +285,7 @@ export default async function EventDetailPage({
                 <h2 className="text-lg font-semibold text-[#0050ff]">Reserve your spot</h2>
               </div>
               <div className="p-3 pt-0">
-                <BigMarkerRegistrationWidget conferenceId={conf.id} />
+                <BigMarkerRegistrationForm conferenceId={conf.id} />
               </div>
             </div>
           </div>
