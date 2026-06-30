@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { BigMarkerRegistrationWidget } from "@/components/cms/bigmarker-registration-widget";
+import { EventCountdown } from "@/components/cms/event-countdown";
 
 interface Presenter {
   display_name?: string;
@@ -12,11 +13,13 @@ interface Presenter {
   bio?: string;
   presenter_image_url?: string;
   display_on_landing_page?: boolean;
+  can_manage?: boolean;
 }
 
 interface BMConferenceDetail {
   id: string;
   title: string;
+  event_type?: string;
   purpose?: string;
   start_time?: string;
   scheduled_end_time?: string;
@@ -26,7 +29,7 @@ interface BMConferenceDetail {
   background_image_url?: string;
   banner_image?: { url?: string };
   presenters?: Presenter[];
-  tags?: { name?: string }[];
+  tags?: { name?: string; value?: string | null }[];
   privacy?: string;
 }
 
@@ -86,11 +89,30 @@ export default async function EventDetailPage({
   // Banner: detail endpoint uses background_image_url; list uses banner_image.url
   const bannerUrl = conf.background_image_url ?? conf.banner_image?.url;
 
+  // Info bar data
+  const eventTypeLabel = conf.event_type
+    ? conf.event_type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : null;
+  const industryTag = conf.tags?.find((t) => t.name?.toLowerCase() === "industry")?.value;
+  const serviceTag = conf.tags?.find((t) => t.name?.toLowerCase() === "service line")?.value;
+  // Event contact = first presenter with can_manage true, else first presenter
+  const contact =
+    conf.presenters?.find((p) => p.can_manage) ??
+    conf.presenters?.[0] ??
+    null;
+  const contactName =
+    contact?.display_name?.trim() ||
+    [contact?.first_name, contact?.last_name].filter(Boolean).join(" ") ||
+    null;
+
+  // Presenters shown on landing page (display_on_landing_page === true)
+  const visiblePresenters = conf.presenters?.filter((p) => p.display_on_landing_page) ?? [];
+
   return (
     <main className="flex-1">
-      {/* Hero banner */}
+      {/* ── Hero banner ── */}
       <div className="relative w-full">
-        <div className="relative h-[280px] w-full overflow-hidden lg:h-[360px] bg-[#1247ff]">
+        <div className="relative min-h-[300px] w-full overflow-hidden bg-[#1247ff] lg:min-h-[380px]">
           {bannerUrl ? (
             <Image
               src={bannerUrl}
@@ -101,13 +123,17 @@ export default async function EventDetailPage({
               className="object-cover"
             />
           ) : null}
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-0 flex items-center justify-center px-6">
-            <h1 className="text-center text-3xl font-light tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] lg:text-5xl max-w-4xl">
+          <div className="absolute inset-0 bg-black/45" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 text-center">
+            <h1 className="text-3xl font-light tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] lg:text-5xl max-w-4xl">
               {conf.title}
             </h1>
+            {conf.start_time && (
+              <EventCountdown startTime={conf.start_time} />
+            )}
           </div>
         </div>
+
         {/* Breadcrumb */}
         <div className="w-full bg-[#5b6471]">
           <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-6 py-4 text-sm text-white lg:px-10">
@@ -119,85 +145,131 @@ export default async function EventDetailPage({
               Events
             </Link>
             <span className="text-white/60">|</span>
-            <span className="text-white line-clamp-1">{conf.title}</span>
+            <span className="line-clamp-1 text-white">{conf.title}</span>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="mx-auto w-full max-w-[1100px] px-6 py-12 lg:px-10 lg:py-16">
-        <div className="grid gap-12 lg:grid-cols-[1fr_380px]">
-
-          {/* Left — details */}
-          <div className="space-y-8">
-            {/* Date / time */}
-            {(startFormatted || conf.duration) && (
-              <div className="rounded-lg border border-[#e5e7eb] bg-[#f9fafb] p-6 space-y-3">
-                {startFormatted && (
-                  <div className="flex items-start gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="mt-0.5 h-5 w-5 shrink-0 text-[#1247ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
-                    </svg>
-                    <div>
-                      <p className="text-[13px] font-semibold uppercase tracking-wide text-[#6b7280]">Start</p>
-                      <p className="text-[15px] text-[#0f172a]">{startFormatted}</p>
-                    </div>
-                  </div>
-                )}
-                {endFormatted && (
-                  <div className="flex items-start gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="mt-0.5 h-5 w-5 shrink-0 text-[#1247ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div>
-                      <p className="text-[13px] font-semibold uppercase tracking-wide text-[#6b7280]">End</p>
-                      <p className="text-[15px] text-[#0f172a]">{endFormatted}</p>
-                    </div>
-                  </div>
-                )}
-                {conf.duration && (
-                  <div className="flex items-start gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="mt-0.5 h-5 w-5 shrink-0 text-[#1247ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div>
-                      <p className="text-[13px] font-semibold uppercase tracking-wide text-[#6b7280]">Duration</p>
-                      <p className="text-[15px] text-[#0f172a]">{conf.duration} minutes</p>
-                    </div>
-                  </div>
-                )}
-              </div>
+      {/* ── Gray metadata bar ── */}
+      <div className="w-full border-b border-[#e5e7eb] bg-[#f3f4f6]">
+        <div className="mx-auto grid max-w-[1100px] grid-cols-1 gap-6 px-6 py-6 lg:grid-cols-2 lg:px-10">
+          {/* Left: event type / industry / service */}
+          <div className="space-y-2 text-sm text-[#374151]">
+            {eventTypeLabel && (
+              <p>
+                <span className="font-semibold text-[#0f172a]">Type: </span>
+                {eventTypeLabel}
+              </p>
             )}
+            {industryTag && industryTag !== "N/A" && (
+              <p>
+                <span className="font-semibold text-[#0f172a]">Industry: </span>
+                {industryTag}
+              </p>
+            )}
+            {serviceTag && serviceTag !== "N/A" && (
+              <p>
+                <span className="font-semibold text-[#0f172a]">Service: </span>
+                {serviceTag}
+              </p>
+            )}
+            {startFormatted && (
+              <p>
+                <span className="font-semibold text-[#0f172a]">Date: </span>
+                {startFormatted}
+              </p>
+            )}
+            {conf.duration && (
+              <p>
+                <span className="font-semibold text-[#0f172a]">Duration: </span>
+                {conf.duration} minutes
+              </p>
+            )}
+          </div>
 
+          {/* Right: event contact */}
+          {contactName && (
+            <div className="space-y-1 text-sm text-[#374151]">
+              <p className="font-semibold text-[#0f172a]">Event Contact:</p>
+              <p>
+                <span className="font-medium">Name: </span>
+                {contactName}
+              </p>
+              {contact?.email && (
+                <p>
+                  <span className="font-medium">Email: </span>
+                  <a
+                    href={`mailto:${contact.email}`}
+                    className="text-[#1247ff] hover:underline"
+                  >
+                    {contact.email}
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Main 2-col content ── */}
+      <div className="mx-auto w-full max-w-[1100px] px-6 py-12 lg:px-10 lg:py-14">
+        <div className="grid gap-12 lg:grid-cols-[1fr_360px]">
+
+          {/* Left — description + presenters */}
+          <div className="space-y-10">
             {/* Purpose / description */}
-            {conf.purpose && (
-              <div>
-                <h2 className="text-xl font-semibold text-[#0f172a] mb-3">About this event</h2>
-                <p className="text-[15px] leading-7 text-[#374151] whitespace-pre-line">{conf.purpose}</p>
+            {conf.purpose ? (
+              <div className="prose prose-slate max-w-none text-[15px] leading-7 text-[#374151] whitespace-pre-line">
+                {conf.purpose}
               </div>
+            ) : (
+              <p className="text-[15px] text-[#6b7280] italic">No description available for this event.</p>
             )}
 
-            {conf.presenters && conf.presenters.length > 0 && (
+            {/* Presenters */}
+            {visiblePresenters.length > 0 && (
               <div>
-                <h2 className="text-xl font-semibold text-[#0f172a] mb-4">Presenters</h2>
+                <h2 className="mb-5 text-xl font-semibold text-[#0f172a]">Presenters</h2>
                 <div className="flex flex-col gap-4">
-                  {conf.presenters.map((p, i) => {
-                    const fullName = p.display_name?.trim() || [p.first_name, p.last_name].filter(Boolean).join(" ") || p.email || "Unknown";
-                    const initials = fullName.split(" ").map((w: string) => w[0]).slice(0, 2).join("").toUpperCase();
+                  {visiblePresenters.map((p, i) => {
+                    const fullName =
+                      p.display_name?.trim() ||
+                      [p.first_name, p.last_name].filter(Boolean).join(" ") ||
+                      p.email ||
+                      "Unknown";
+                    const initials = fullName
+                      .split(" ")
+                      .map((w: string) => w[0])
+                      .slice(0, 2)
+                      .join("")
+                      .toUpperCase();
                     return (
-                      <div key={i} className="flex items-start gap-4 rounded-lg border border-[#e5e7eb] bg-white p-4">
+                      <div
+                        key={i}
+                        className="flex items-start gap-4 rounded-lg border border-[#e5e7eb] bg-white p-5"
+                      >
                         {p.presenter_image_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={p.presenter_image_url} alt={fullName} className="h-14 w-14 rounded-full object-cover shrink-0" />
+                          <img
+                            src={p.presenter_image_url}
+                            alt={fullName}
+                            className="h-16 w-16 shrink-0 rounded-full object-cover"
+                          />
                         ) : (
-                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#1247ff]/10 text-base font-bold text-[#1247ff]">
+                          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#1247ff]/10 text-base font-bold text-[#1247ff]">
                             {initials}
                           </div>
                         )}
                         <div className="min-w-0">
                           <p className="font-semibold text-[#0f172a]">{fullName}</p>
-                          {p.title && <p className="text-[13px] text-[#6b7280]">{p.title}</p>}
-                          {p.bio && <p className="mt-1 line-clamp-3 text-[13px] leading-relaxed text-[#374151]">{p.bio}</p>}
+                          {p.title && (
+                            <p className="text-[13px] text-[#6b7280]">{p.title}</p>
+                          )}
+                          {p.bio && (
+                            <p className="mt-2 text-[13px] leading-relaxed text-[#374151]">
+                              {p.bio}
+                            </p>
+                          )}
                         </div>
                       </div>
                     );
@@ -205,24 +277,17 @@ export default async function EventDetailPage({
                 </div>
               </div>
             )}
-
-            {/* Tags */}
-            {conf.tags && conf.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {conf.tags.map((t, i) => (
-                  <span key={i} className="rounded-full bg-[#f3f4f6] px-3 py-1 text-[12px] text-[#374151]">
-                    {t.name}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* Right — registration widget */}
-          <div className="lg:sticky lg:top-24 h-fit">
-            <div className="rounded-lg border border-[#e5e7eb] bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-[#0f172a]">Register for this event</h2>
-              <BigMarkerRegistrationWidget conferenceId={conf.id} />
+          {/* Right — sticky registration widget */}
+          <div className="lg:sticky lg:top-8 h-fit">
+            <div className="rounded-lg border border-[#e5e7eb] bg-white shadow-sm overflow-hidden">
+              <div className="bg-[#1247ff] px-6 py-4">
+                <h2 className="text-lg font-semibold text-white">Reserve your spot</h2>
+              </div>
+              <div className="p-4">
+                <BigMarkerRegistrationWidget conferenceId={conf.id} />
+              </div>
             </div>
           </div>
 
