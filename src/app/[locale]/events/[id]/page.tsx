@@ -152,7 +152,7 @@ export default async function EventDetailPage({
 
       {/* ── Gray metadata bar ── */}
       <div className="w-full border-b border-[#e5e7eb] bg-[#f3f4f6]">
-        <div className="mx-auto grid max-w-[1100px] grid-cols-1 gap-6 px-6 py-6 lg:grid-cols-2 lg:px-10">
+        <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-6 px-6 py-6 lg:grid-cols-2 lg:px-10">
           {/* Left: event type / industry / service */}
           <div className="space-y-2 text-sm text-[#374151]">
             {eventTypeLabel && (
@@ -212,7 +212,7 @@ export default async function EventDetailPage({
       </div>
 
       {/* ── Main 2-col content ── */}
-      <div className="mx-auto w-full max-w-[1100px] px-6 py-12 lg:px-10 lg:py-14">
+      <div className="mx-auto w-full max-w-[1280px] px-6 py-12 lg:px-10 lg:py-14">
         <div className="grid gap-12 lg:grid-cols-[1fr_400px]">
 
           {/* Left — description + presenters */}
