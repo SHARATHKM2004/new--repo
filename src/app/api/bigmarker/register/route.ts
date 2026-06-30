@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.BIGMARKER_API_KEY;
@@ -23,7 +23,6 @@ export async function POST(req: NextRequest) {
     organizationIndustry,
   } = body as Record<string, string>;
 
-  // Server-side validation
   if (!conferenceId || !firstName?.trim() || !lastName?.trim() || !email?.trim()) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
@@ -31,27 +30,48 @@ export async function POST(req: NextRequest) {
   if (!emailRegex.test(email.trim())) {
     return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
   }
-  // Reject obviously malformed conference IDs (alphanumeric + hyphens only)
   if (!/^[a-zA-Z0-9_-]+$/.test(conferenceId)) {
     return NextResponse.json({ error: "Invalid conference ID" }, { status: 400 });
   }
 
-  const bmRes = await fetch(`https://web.bigmarker.com/api/v1/conferences/${conferenceId}/members`, {
-    method: "POST",
+  let customFields: Record<string, string> = {};
+  try {
+    const cfRes = await fetch(
+      `https://web.bigmarker.com/api/v1/conferences/custom_fields/${conferenceId}`,
+      { headers: { "API-KEY": apiKey } }
+    );
+    if (cfRes.ok) {
+      const fields = (await cfRes.json()) as { id: string; field_name?: string; api_name?: string }[];
+      for (const field of fields) {
+        const name = (field.field_name ?? field.api_name ?? "").toLowerCase();
+        if (name.includes("job") || (name.includes("title") && !name.includes("webinar"))) {
+          customFields[field.id] = jobTitle?.trim() ?? "";
+        } else if (name.includes("organization") && !name.includes("industry")) {
+          customFields[field.id] = organization?.trim() ?? "";
+        } else if (name.includes("industry")) {
+          customFields[field.id] = organizationIndustry?.trim() ?? "";
+        }
+      }
+    }
+  } catch {
+    customFields = {};
+  }
+
+  const params = new URLSearchParams({
+    id: conferenceId,
+    email: email.trim().toLowerCase(),
+    first_name: firstName.trim(),
+    last_name: lastName.trim(),
+    custom_fields: JSON.stringify(customFields),
+  });
+
+  const bmRes = await fetch("https://web.bigmarker.com/api/v1/conferences/register", {
+    method: "PUT",
     headers: {
       "API-KEY": apiKey,
-      "Content-Type": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: JSON.stringify({
-      member: {
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        email: email.trim().toLowerCase(),
-        job_title: jobTitle?.trim() ?? "",
-        organization: organization?.trim() ?? "",
-        organization_industry: organizationIndustry?.trim() ?? "",
-      },
-    }),
+    body: params.toString(),
   });
 
   const data = await bmRes.json().catch(() => ({}));
@@ -60,10 +80,8 @@ export async function POST(req: NextRequest) {
     const message =
       (data as { error?: string; message?: string }).error ??
       (data as { error?: string; message?: string }).message ??
-      `BigMarker error ${bmRes.status}`;
-    // Log full response in server logs for diagnosis
-    console.error("[bigmarker/register] error", bmRes.status, JSON.stringify(data));
-    return NextResponse.json({ error: message, _debug: data }, { status: bmRes.status });
+      "Registration failed. Please try again.";
+    return NextResponse.json({ error: message }, { status: bmRes.status });
   }
 
   return NextResponse.json({ success: true });
