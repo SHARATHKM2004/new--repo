@@ -213,7 +213,7 @@ export default async function EventDetailPage({
 
       {/* ── Main 2-col content ── */}
       <div className="mx-auto w-full max-w-[1100px] px-6 py-12 lg:px-10 lg:py-14">
-        <div className="grid gap-12 lg:grid-cols-[1fr_360px]">
+        <div className="grid gap-12 lg:grid-cols-[1fr_290px]">
 
           {/* Left — description + presenters */}
           <div className="space-y-10">
@@ -282,10 +282,10 @@ export default async function EventDetailPage({
           {/* Right — sticky registration widget */}
           <div className="lg:sticky lg:top-8 h-fit">
             <div className="rounded-lg border border-[#e5e7eb] bg-white shadow-sm overflow-hidden">
-              <div className="bg-[#1247ff] px-6 py-4">
-                <h2 className="text-lg font-semibold text-white">Reserve your spot</h2>
+              <div className="bg-[#1247ff] px-5 py-3">
+                <h2 className="text-base font-semibold text-white">Reserve your spot</h2>
               </div>
-              <div className="p-4">
+              <div className="p-3">
                 <BigMarkerRegistrationWidget conferenceId={conf.id} />
               </div>
             </div>
