@@ -279,8 +279,8 @@ export default async function EventDetailPage({
             )}
           </div>
 
-          {/* Right — sticky registration widget */}
-          <div className="lg:sticky lg:top-8 h-fit">
+          {/* Right — registration widget */}
+          <div className="h-fit">
             <div className="rounded-lg border border-[#e5e7eb] bg-white shadow-sm overflow-hidden">
               <div className="px-5 pt-4 pb-1">
                 <h2 className="text-lg font-semibold text-[#0050ff]">Reserve your spot</h2>
