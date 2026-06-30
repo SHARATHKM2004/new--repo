@@ -213,7 +213,7 @@ export default async function EventDetailPage({
 
       {/* ── Main 2-col content ── */}
       <div className="mx-auto w-full max-w-[1100px] px-6 py-12 lg:px-10 lg:py-14">
-        <div className="grid gap-12 lg:grid-cols-[1fr_290px]">
+        <div className="grid gap-12 lg:grid-cols-[1fr_400px]">
 
           {/* Left — description + presenters */}
           <div className="space-y-10">
