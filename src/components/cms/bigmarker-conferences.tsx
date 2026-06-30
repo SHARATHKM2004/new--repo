@@ -10,6 +10,8 @@ interface BMConference {
   purpose?: string;
   start_time?: string;
   end_time?: string;
+  background_image_url?: string;
+  fb_open_graph_image_url?: string;
   banner_image?: { url?: string };
   channel?: { name?: string };
   conference_type?: string;
@@ -40,7 +42,7 @@ function formatDateLine(start?: string, end?: string) {
 }
 
 function ConferenceCard({ conf, locale }: { conf: BMConference; locale: string }) {
-  const imageUrl = conf.banner_image?.url;
+  const imageUrl = conf.background_image_url ?? conf.banner_image?.url ?? conf.fb_open_graph_image_url;
   const dateLine = formatDateLine(conf.start_time, conf.end_time);
   const typeLabel = conf.conference_type ?? "Webinar";
   const costLabel = conf.cost ? `Cost $${conf.cost}` : "Cost Free";
